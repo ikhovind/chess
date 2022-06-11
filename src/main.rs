@@ -94,5 +94,5 @@ fn main() {
         _queens,
         _kings
     );
-    board.possible_pw( game::FILE_C);
+    board.possible_p( game::FILE_C, 1);
 }
