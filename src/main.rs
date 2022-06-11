@@ -1,5 +1,6 @@
 pub mod game;
 
+
 use std::env;
 
 fn print_u64_bitboard(bitboard : u64) {
@@ -93,5 +94,5 @@ fn main() {
         _queens,
         _kings
     );
-    board.possible_pw( String::from(""));
+    board.possible_pw( game::FILE_C);
 }

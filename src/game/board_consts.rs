@@ -1,6 +1,12 @@
 pub static  FILE_A:u64 = 72340172838076673;
-static file_h:i64 = (-9187201950435737472 );
-pub static  FILE_H:u64 = file_h as u64;
+pub static  FILE_B:u64 = 144680345676153346;
+pub static  FILE_C:u64 = 289360691352306692;
+pub static  FILE_D:u64 = 578721382704613384;
+pub static  FILE_E:u64 = 1157442765409226768;
+pub static  FILE_F:u64 = 2314885530818453536;
+pub static  FILE_G:u64 = 4629771061636907072;
+pub static  FILE_H:u64 = 9259542123273814144;
+
 pub static  FILE_AB:u64 = 217020518514230019;
 static  file_gh:i64 = -4557430888798830400;
 pub static  FILE_GH:u64 = file_gh as u64;
