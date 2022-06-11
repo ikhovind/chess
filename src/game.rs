@@ -84,7 +84,7 @@ impl Board {
         return Board {pawns: _pawns, knights: _knights, bishops: _bishops, rooks: _rooks, queens: _queens, kings: _kings, black_pieces: black, white_pieces: (!(empty | black)), empty}
     }
 
-    pub fn possible_p(&mut self, last_double_pawn: u64, white: usize) -> Vec<Move> {
+    pub fn possible_p(&mut self, last_move: Move, white: usize) -> Vec<Move> {
         let mut list: Vec<Move> = Vec::new();
         let opposing_pieces = if white == 1 { self.black_pieces } else { self.white_pieces };
         let mut pawn_moves = (self.pawns[white] << 9) & (opposing_pieces) & (!RANK_8) & (!FILE_A); // capture left
@@ -145,7 +145,7 @@ impl Board {
                 //list.push_str(&*format!("{}{}{}{}{}{}{}{}",(i%8)+(i%8),"QP",(i%8)+(i%8),"RP",(i%8)+(i%8),"BP",(i%8)+(i%8),"NP"));
             }
         }
-        pawn_moves = ((self.pawns[white] << 9) & (opposing_pieces << 8) & (!RANK_8) & (!FILE_H)) & last_double_pawn;  // capture right
+        pawn_moves = ((self.pawns[white] << 9) & (opposing_pieces << 8) & (!RANK_8) & (!FILE_H)) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 };  // capture right
         for i in 0..64 {
             if ((pawn_moves >> i) & 1) == 1 {
                 list.push(Move::new_move(1,1, false));
@@ -153,7 +153,8 @@ impl Board {
             }
         }
 
-        pawn_moves = ((self.pawns[white] << 7) & (opposing_pieces << 8) & (!RANK_8) & (!FILE_A)) & last_double_pawn; // capture left
+
+        pawn_moves = ((self.pawns[white] << 7) & (opposing_pieces << 8) & (!RANK_8) & (!FILE_A)) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 }; // capture left
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_move(1,1, false));

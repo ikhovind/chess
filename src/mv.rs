@@ -1,10 +1,13 @@
 pub use crate::game::board_consts::{FILE_A, FILE_H, RANK_4, RANK_8, FILE_G, FILE_C};
+#[derive(Clone, Copy)]
 pub struct Move {
     //smallest 6 bits are to square, bit 7 is promotion, bit 8 is castle, both are ep
     from: u8,
     // bit 7 and 8 are type of promotion / type of castle
     to: u8
 /*
+    00 11 - double push pawn
+
     10 10 - Takes
     11 01 - EP
 
@@ -37,6 +40,13 @@ impl Move {
                 | (if is_capture {0b10000000} else { 0 })}
     }
 
+    pub fn new_double_push(_from: u8, _to: u8) -> Move {
+        return Move {
+            from: (_from & BASIS),
+            to: (_to & BASIS) | 0b11000000
+        }
+    }
+
     pub fn new_promotion(_from: u8, _to: u8, is_capture: bool, promote_to: u8) -> Move {
 
         return Move {from: (_from & BASIS)
@@ -58,5 +68,13 @@ impl Move {
             from: (_from & BASIS) | (0b10000000),
             to: (_to & BASIS) | if _to == 62 || _to == 6 { 0b00000000} else { 0b01000000 }
         }
+    }
+
+    pub fn get_to_square(self) -> u8 {
+        return self.to & 0b00111111;
+    }
+
+    pub fn last_move_was_double_push(m: Move) -> bool {
+        return m.to & 0b11000000 == 0b11000000;
     }
 }
