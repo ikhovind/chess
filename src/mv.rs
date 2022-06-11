@@ -1,5 +1,5 @@
 pub use crate::game::board_consts::{FILE_A, FILE_H, RANK_4, RANK_8, FILE_G, FILE_C};
-struct Move {
+pub struct Move {
     //smallest 6 bits are to square, bit 7 is promotion, bit 8 is castle, both are ep
     from: u8,
     // bit 7 and 8 are type of promotion / type of castle
@@ -22,7 +22,12 @@ struct Move {
     10 01 - long castle
 */
 }
-static BASIS: u8 = 0b00111111;
+pub static BASIS: u8 = 0b00111111;
+pub static QUEEN: u8 = 0b00000000;
+pub static ROOK: u8 = 0b01000000;
+pub static BISHOP: u8 = 0b10000000;
+pub static KNIGHT: u8 = 0b11000000;
+
 
 impl Move {
     pub fn new_move(_from: u8, _to: u8, is_capture: bool) -> Move {
