@@ -199,7 +199,7 @@ impl Board {
         let bishops = self.bishops[index];
         for i in 0u8..64u8 {
             if 2_u64.pow(i as u32) & bishops != 0 {
-                let moves = self.d_and_anti_d_moves(i as usize) & !(own_pieces);
+                let moves = self.d_and_anti_d_moves(i as usize, white) & !(own_pieces);
                 for i2 in 0u8..64u8 {
                     if 2u64.pow(i2 as u32) & moves != 0 {
                         list.push(
@@ -225,7 +225,7 @@ impl Board {
         let rooks = self.rooks[index];
         for i in 0u8..64u8 {
             if 2_u64.pow(i as u32) & rooks != 0 {
-                let moves = self.h_and_vmoves(i as usize) & !(own_pieces);
+                let moves = self.h_and_vmoves(i as usize, white) & !(own_pieces);
                 for i2 in 0u8..64u8 {
                     if 2u64.pow(i2 as u32) & moves != 0 {
                         list.push(
@@ -251,7 +251,7 @@ impl Board {
         let queens = self.queens[index];
         for i in 0u8..64u8 {
             if 2_u64.pow(i as u32) & queens != 0 {
-                let moves = (self.d_and_anti_d_moves(i as usize) | self.h_and_vmoves(i as usize)) & !(own_pieces);
+                let moves = (self.d_and_anti_d_moves(i as usize, white) | self.h_and_vmoves(i as usize, white)) & !(own_pieces);
                 for i2 in 0u8..64u8 {
                     if 2u64.pow(i2 as u32) & moves != 0 {
                         list.push(
@@ -496,7 +496,7 @@ impl Board {
         let bishops = self.bishops[index];
         for i in 0u8..64u8 {
             if 2_u64.pow(i as u32) & bishops != 0 {
-                moves |= self.d_and_anti_d_moves(i as usize);
+                moves |= self.d_and_anti_d_moves(i as usize, white);
             }
         }
         return moves;
@@ -511,7 +511,7 @@ impl Board {
         let rooks = self.rooks[index];
         for i in 0u8..64u8 {
             if 2_u64.pow(i as u32) & rooks != 0 {
-                moves |= self.h_and_vmoves(i as usize);
+                moves |= self.h_and_vmoves(i as usize, white);
             }
         }
         return moves;
@@ -526,7 +526,7 @@ impl Board {
         let queens = self.queens[index];
         for i in 0u8..64u8 {
             if 2_u64.pow(i as u32) & queens != 0 {
-                moves |= (self.d_and_anti_d_moves(i as usize) | self.h_and_vmoves(i as usize));
+                moves |= (self.d_and_anti_d_moves(i as usize, white) | self.h_and_vmoves(i as usize, white));
             }
         }
         return moves;
@@ -535,17 +535,19 @@ impl Board {
     pub fn watched(&self, white: bool) -> u64 {
         return self.watched_by_b(white) | self.watched_by_k(white) | self.watched_by_n(white) | self.watched_by_q(white) | self.watched_by_r(white) | self.watched_by_p(white);
     }
-    pub fn h_and_vmoves(&self, s: usize) -> u64 {
+    pub fn h_and_vmoves(&self, s: usize, white: bool) -> u64 {
         let binary_s:u64 = 1<<s;
-        let possibilities_horizontal: u64 = ((self.white_pieces | self.black_pieces) - 2 * binary_s) ^ ((self.white_pieces | self.black_pieces).reverse_bits() - 2 * binary_s.reverse_bits()).reverse_bits();
-        let possibilities_vertical: u64 = (((self.white_pieces | self.black_pieces) & FILE_MASKS[s % 8]) - (2 * binary_s)) ^ (((self.white_pieces | self.black_pieces)& FILE_MASKS[s % 8]).reverse_bits() - (2 * binary_s.reverse_bits())).reverse_bits();
+        let king = if white { self.kings[0] } else { self.kings[1] };
+        let possibilities_horizontal: u64 = (((self.white_pieces | self.black_pieces) - king) - 2 * binary_s) ^ (((self.white_pieces | self.black_pieces) - king).reverse_bits() - 2 * binary_s.reverse_bits()).reverse_bits();
+        let possibilities_vertical: u64 = ((((self.white_pieces | self.black_pieces) - king) & FILE_MASKS[s % 8]) - (2 * binary_s)) ^ ((((self.white_pieces | self.black_pieces) - king)& FILE_MASKS[s % 8]).reverse_bits() - (2 * binary_s.reverse_bits())).reverse_bits();
         return (possibilities_horizontal & RANK_MASKS[s / 8]) | (possibilities_vertical & FILE_MASKS[s % 8]);
     }
 
-    pub fn d_and_anti_d_moves(&self, s: usize) -> u64 {
+    pub fn d_and_anti_d_moves(&self, s: usize, white: bool) -> u64 {
         let binary_s:u64 = 1 << s;
-        let possibilities_diagonal: u64 = (((self.white_pieces | self.black_pieces)&DIAGONAL_MASKS[(s / 8) + (s % 8)]) - (2 * binary_s)) ^ (((self.white_pieces | self.black_pieces)&DIAGONAL_MASKS[(s / 8) + (s % 8)]).reverse_bits() - (2 * (binary_s).reverse_bits())).reverse_bits();
-        let possibilities_anti_diagonal: u64 = (((self.white_pieces | self.black_pieces)&ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]) - (2 * binary_s)) ^ (((self.white_pieces | self.black_pieces)&ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]).reverse_bits() - (2 * (binary_s).reverse_bits())).reverse_bits();
+        let king = if white { self.kings[0] } else { self.kings[1] };
+        let possibilities_diagonal: u64 = ((((self.white_pieces | self.black_pieces) - king)&DIAGONAL_MASKS[(s / 8) + (s % 8)]) - (2 * binary_s)) ^ ((((self.white_pieces | self.black_pieces) - king)&DIAGONAL_MASKS[(s / 8) + (s % 8)]).reverse_bits() - (2 * (binary_s).reverse_bits())).reverse_bits();
+        let possibilities_anti_diagonal: u64 = ((((self.white_pieces | self.black_pieces) - king)&ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]) - (2 * binary_s)) ^ ((((self.white_pieces | self.black_pieces) - king)&ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]).reverse_bits() - (2 * (binary_s).reverse_bits())).reverse_bits();
         return (possibilities_diagonal &DIAGONAL_MASKS[(s / 8) + (s % 8)]) | (possibilities_anti_diagonal &ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]);
     }
 }
