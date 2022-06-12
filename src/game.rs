@@ -1,4 +1,4 @@
-pub use crate::game::board_consts::{RANK_4, RANK_8, FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
+pub use crate::game::board_consts::{FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
 use crate::{mv, print_u64_bitboard};
 use crate::game::board_consts::RANK_MASKS;
 use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
@@ -113,7 +113,7 @@ impl Board {
     pub fn possible_p(&mut self, last_move: Move, white: usize) -> Vec<Move> {
         let mut list: Vec<Move> = Vec::new();
         let opposing_pieces = if white == 1 { self.black_pieces } else { self.white_pieces };
-        let mut pawn_moves = (self.pawns[white] << 9) & (opposing_pieces) & (!RANK_8) & (!FILE_MASKS[0]); // capture right
+        let mut pawn_moves = (self.pawns[white] << 9) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[0]); // capture right
 
         for i in 0..64 {
             if ((pawn_moves >> i) & 1) == 1 {
@@ -121,26 +121,26 @@ impl Board {
             }
         }
 
-        pawn_moves = (self.pawns[white] << 7) & (opposing_pieces) & (!RANK_8) & (!FILE_MASKS[7]); // capture left
+        pawn_moves = (self.pawns[white] << 7) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[7]); // capture left
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_move(i-7,i, true));
             }
         }
-        pawn_moves=(self.pawns[white] << 8)&self.empty&!RANK_8;//move 1 forward
+        pawn_moves=(self.pawns[white] << 8)&self.empty&!RANK_MASKS[7];//move 1 forward
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_move(i-8,i, false));
             }
         }
-        pawn_moves=((self.pawns[white] << 16) & (self.empty & (self.empty << 8))) & RANK_4;//move 2 forward
+        pawn_moves=((self.pawns[white] << 16) & (self.empty & (self.empty << 8))) & RANK_MASKS[3];//move 2 forward
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_move(i - 16,i, false));
             }
         }
         //y1,y2,Promotion Type,"P"
-        pawn_moves=(self.pawns[white] << 7)&opposing_pieces&RANK_8&!FILE_MASKS[0];//pawn promotion by capture left
+        pawn_moves=(self.pawns[white] << 7)&opposing_pieces&RANK_MASKS[7]&!FILE_MASKS[0];//pawn promotion by capture left
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_promotion(i - 7,i, true, QUEEN));
@@ -150,7 +150,7 @@ impl Board {
             }
         }
 
-        pawn_moves=(self.pawns[white] << 9)&opposing_pieces&RANK_8&!FILE_MASKS[7];//pawn promotion by capture right
+        pawn_moves=(self.pawns[white] << 9)&opposing_pieces&RANK_MASKS[7]&!FILE_MASKS[7];//pawn promotion by capture right
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_promotion(i - 9,i, true, QUEEN));
@@ -160,7 +160,7 @@ impl Board {
             }
         }
 
-        pawn_moves=(self.pawns[white] << 8)&self.empty&RANK_8;//pawn promotion by move 1 forward
+        pawn_moves=(self.pawns[white] << 8)&self.empty&RANK_MASKS[7];//pawn promotion by move 1 forward
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_promotion(i - 8,i, false, QUEEN));
@@ -170,14 +170,14 @@ impl Board {
             }
         }
         // en passant
-        pawn_moves = ((self.pawns[white] << 9) & (opposing_pieces << 8) & (!RANK_8) & (!FILE_MASKS[7])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 };  // capture right
+        pawn_moves = ((self.pawns[white] << 9) & (opposing_pieces << 8) & (!RANK_MASKS[7]) & (!FILE_MASKS[7])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 };  // capture right
         for i in 0..64 {
             if ((pawn_moves >> i) & 1) == 1 {
                 list.push(Move::new_ep(i - 9, i));
             }
         }
 
-        pawn_moves = ((self.pawns[white] << 7) & (opposing_pieces << 8) & (!RANK_8) & (!FILE_MASKS[0])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 }; // capture left
+        pawn_moves = ((self.pawns[white] << 7) & (opposing_pieces << 8) & (!RANK_MASKS[7]) & (!FILE_MASKS[0])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 }; // capture left
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_ep(i - 7, i));
@@ -481,8 +481,8 @@ impl Board {
 
     pub fn watched_by_p(&self, white: bool) -> u64 {
         let index = if white { 1 } else { 0 };
-        let mut pawn_moves = (self.pawns[index] << 9) & (!RANK_8) & (!FILE_MASKS[0]); // capture right
-        pawn_moves = pawn_moves | ((self.pawns[index] << 7) & (!RANK_8) & (!FILE_MASKS[7])); // capture left
+        let mut pawn_moves = (self.pawns[index] << 9) & (!RANK_MASKS[7]) & (!FILE_MASKS[0]); // capture right
+        pawn_moves = pawn_moves | ((self.pawns[index] << 7) & (!RANK_MASKS[7]) & (!FILE_MASKS[7])); // capture left
 
         return pawn_moves;
     }
