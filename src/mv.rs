@@ -1,4 +1,4 @@
-pub use crate::game::board_consts::{FILE_A, FILE_H, RANK_4, RANK_8, FILE_G, FILE_C};
+pub use crate::game::board_consts::{RANK_4, RANK_8, FILE_MASKS};
 #[derive(Clone, Copy)]
 pub struct Move {
     //smallest 6 bits are to square, bit 7 is promotion, bit 8 is castle, both are ep

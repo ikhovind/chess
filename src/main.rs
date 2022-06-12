@@ -2,6 +2,7 @@ pub mod game;
 mod mv;
 
 use std::env;
+use crate::game::Board;
 use crate::mv::Move;
 
 fn print_u64_bitboard(bitboard : u64) {
@@ -25,15 +26,11 @@ fn print_u64_bitboard(bitboard : u64) {
         }
     }
 }
+
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let mut board = game::Board::from_fen(
-        String::from("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR")
-    );
-
-
+    let board = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/1Q1B2R1/8/PPPPPPPP/RNB1KBN1"));
     let b = Move::new_double_push(51, 35);
     let b = Move::new_move(51, 35, false);
-    let a = board.possible_p( b, 1);
+    let a = board.possible_q( true);
     println!("{}", a.len());
 }
