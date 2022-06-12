@@ -16,6 +16,10 @@ pub struct Board {
     black_pieces: u64,
     white_pieces: u64,
     empty: u64,
+    white_long_c: bool,
+    white_short_c: bool,
+    black_long_c: bool,
+    black_short_c: bool,
 }
 
 impl Board {
@@ -82,7 +86,21 @@ impl Board {
         }
         let empty = !_pawns[0] & !_pawns[1] & !_knights[0] & !_knights[1] & !_bishops[0] & !_bishops[1] & !_rooks[0] & !_rooks[1] & !_queens[0] & !_queens[1] & !_kings[0] & !_kings[1];
         let black = _pawns[0]  | _knights[0] | _bishops[0] | _rooks[0]  | _queens[0] | _kings[0];
-        return Board {pawns: _pawns, knights: _knights, bishops: _bishops, rooks: _rooks, queens: _queens, kings: _kings, black_pieces: black, white_pieces: (!(empty | black)), empty}
+        return Board {
+            pawns: _pawns,
+            knights: _knights,
+            bishops: _bishops,
+            rooks: _rooks,
+            queens: _queens,
+            kings: _kings,
+            black_pieces: black,
+            white_pieces: (!(empty | black)),
+            empty,
+            white_long_c: true,
+            white_short_c: true,
+            black_long_c: true,
+            black_short_c: true,
+        }
     }
 
     pub fn possible_p(&mut self, last_move: Move, white: usize) -> Vec<Move> {
@@ -241,23 +259,45 @@ impl Board {
 
     /* LookupTables is a structure which contains all precomputed lookup tables */
     pub fn possible_k(&self, white: bool) -> Vec<Move> {
-        /* we can ignore the rank clipping since the overflow/underflow with
-            respect to rank simply vanishes. We only care about the file
-            overflow/underflow. */
         let mut opposing_pieces: u64 = self.white_pieces;
         let mut own_pieces = self.black_pieces;
         let mut index = 0;
+        let mut short_castle= self.black_short_c;
+        let mut long_castle = self.black_long_c;
+        let mut short_castle_sq = vec![
+            1 << 60,
+            1 << 61,
+            1 << 62,
+        ];
+        let mut long_castle_sq = vec![
+            1 << 58,
+            1 << 59,
+            1 << 60,
+        ];
         if white {
             opposing_pieces = self.black_pieces;
             own_pieces = self.white_pieces;
             index = 1;
+            short_castle = self.white_short_c;
+            long_castle = self.white_long_c;
+
+            long_castle_sq = vec![
+                1 << 1,
+                1 << 2,
+                1 << 3,
+                1 << 4
+            ];
+            short_castle_sq = vec![
+                1 << 4,
+                1 << 5,
+                1 << 6,
+            ];
         }
         let mut list: Vec<Move> = Vec::new();
         let kings = self.kings[index];
 
         for i in 0u8..64u8 {
             if 2_u64.pow(i as u32) & kings != 0 {
-                println!("king loc {}", i);
                 let king_loc = 1 << i;
                 let king_clip_file_h = king_loc & !FILE_MASKS[7];
                 let king_clip_file_a = king_loc & !FILE_MASKS[0];
@@ -277,6 +317,14 @@ impl Board {
                 let moves = (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
                     spot_7 | spot_8) & !own_pieces;
 
+                if long_castle && !long_castle_sq.iter().any(|&x| (x & ((self.white_pieces - self.kings[1]) | (self.black_pieces - self.kings[0])) != 0)) {
+                    list.push(Move::new_castle(if white { 4 } else { 60 }, if white { 2 } else { 58 }));
+                }
+
+                if short_castle && !short_castle_sq.iter().any(|&x| (x & ((self.white_pieces - self.kings[1]) | (self.black_pieces - self.kings[0])) != 0)) {
+                    list.push(Move::new_castle(if white { 4 } else { 60 }, if white {6} else { 62 }));
+                }
+
                 /* compute only the places where the king can move and attack. The caller
                     will interpret this as a white or black king. */
                 for i2 in 0u8..64u8 {
@@ -291,11 +339,7 @@ impl Board {
         return list;
     }
 
-
     pub fn possible_n(&self, white: bool) -> Vec<Move> {
-    /* we can ignore the rank clipping since the overflow/underflow with
-        respect to rank simply vanishes. We only care about the file
-        overflow/underflow which is much more work for a knight. */
         let mut opposing_pieces: u64 = self.white_pieces;
         let mut own_pieces = self.black_pieces;
         let mut index = 0;
@@ -356,6 +400,134 @@ impl Board {
         return list;
     }
 
+    pub fn watched_by_k(&self, white: bool) -> u64 {
+        let mut index = 0;
+        if white {
+            index = 1;
+        }
+        let mut moves = 0;
+        let kings = self.kings[index];
+
+        for i in 0u8..64u8 {
+            if 2_u64.pow(i as u32) & kings != 0 {
+                let king_loc = 1 << i;
+                let king_clip_file_h = king_loc & !FILE_MASKS[7];
+                let king_clip_file_a = king_loc & !FILE_MASKS[0];
+
+                /* remember the representation of the board in relation to the bitindex
+                    when looking at these shifts.... */
+                let spot_1 = king_clip_file_h << 7;
+                let spot_2 = king_loc << 8;
+                let spot_3 = king_clip_file_h << 9;
+                let spot_4 = king_clip_file_h << 1;
+
+                let spot_5 = king_clip_file_a >> 7;
+                let spot_6 = king_loc >> 8;
+                let spot_7 = king_clip_file_a >> 9;
+                let spot_8 = king_clip_file_a >> 1;
+
+                moves = moves | spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
+                    spot_7 | spot_8;
+            }
+        }
+        return moves;
+    }
+
+    pub fn watched_by_n(&self, white:bool) -> u64 {
+        let mut index = 0;
+        if white {
+            index = 1;
+        }
+        let mut moves = 0;
+        let knights = self.knights[index];
+        for i in 0u8..64u8 {
+            if 2_u64.pow(i as u32) & knights != 0 {
+                let spot_1_clip = !(FILE_MASKS[0] & FILE_MASKS[1]);
+                let spot_2_clip = !FILE_MASKS[0];
+                let spot_3_clip = !FILE_MASKS[7];
+                let spot_4_clip = !(FILE_MASKS[7] & FILE_MASKS[6]);
+
+                let spot_5_clip = !(FILE_MASKS[7] & FILE_MASKS[6]);
+                let spot_6_clip = !FILE_MASKS[7];
+                let spot_7_clip = !FILE_MASKS[0];
+                let spot_8_clip = !(FILE_MASKS[0] & FILE_MASKS[1]);
+
+                /* The clipping masks we just created will be used to ensure that no
+            under or overflow positions are computed when calculating the
+            possible moves of the knight in certain files. */
+
+                let spot_1 = ((1 << i) as u64 & spot_1_clip) << 6;
+                let spot_2 = ((1 << i) as u64 & spot_2_clip) << 15;
+                let spot_3 = ((1 << i) as u64 & spot_3_clip) << 17;
+                let spot_4 = ((1 << i) as u64 & spot_4_clip) << 10;
+
+                let spot_5 = ((1 << i) as u64 & spot_5_clip) >> 6;
+                let spot_6 = ((1 << i) as u64 & spot_6_clip) >> 15;
+                let spot_7 = ((1 << i) as u64 & spot_7_clip) >> 17;
+                let spot_8 = ((1 << i) as u64 & spot_8_clip) >> 10;
+
+                moves = moves | spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
+            }
+        }
+        return moves;
+    }
+
+    pub fn watched_by_p(&self, white: bool) -> u64 {
+        let index = if white { 1 } else { 0 };
+        let mut pawn_moves = (self.pawns[index] << 9) & (!RANK_8) & (!FILE_MASKS[0]); // capture right
+        pawn_moves = pawn_moves | ((self.pawns[index] << 7) & (!RANK_8) & (!FILE_MASKS[7])); // capture left
+
+        return pawn_moves;
+    }
+
+    pub fn watched_by_b(&self, white: bool) -> u64 {
+        let mut index = 0;
+        let mut moves = 0;
+        if white {
+            index = 1;
+        }
+        let bishops = self.bishops[index];
+        for i in 0u8..64u8 {
+            if 2_u64.pow(i as u32) & bishops != 0 {
+                moves |= self.d_and_anti_d_moves(i as usize);
+            }
+        }
+        return moves;
+    }
+
+    pub fn watched_by_r(&self, white: bool) -> u64 {
+        let mut index = 0;
+        let mut moves = 0;
+        if white {
+            index = 1;
+        }
+        let rooks = self.rooks[index];
+        for i in 0u8..64u8 {
+            if 2_u64.pow(i as u32) & rooks != 0 {
+                moves |= self.h_and_vmoves(i as usize);
+            }
+        }
+        return moves;
+    }
+
+    pub fn watched_by_q(&self, white: bool) -> u64 {
+        let mut index = 0;
+        let mut moves = 0;
+        if white {
+            index = 1;
+        }
+        let queens = self.queens[index];
+        for i in 0u8..64u8 {
+            if 2_u64.pow(i as u32) & queens != 0 {
+                moves |= (self.d_and_anti_d_moves(i as usize) | self.h_and_vmoves(i as usize));
+            }
+        }
+        return moves;
+    }
+
+    pub fn watched(&self, white: bool) -> u64 {
+        return self.watched_by_b(white) | self.watched_by_k(white) | self.watched_by_n(white) | self.watched_by_q(white) | self.watched_by_r(white) | self.watched_by_p(white);
+    }
     pub fn h_and_vmoves(&self, s: usize) -> u64 {
         let binary_s:u64 = 1<<s;
         let possibilities_horizontal: u64 = ((self.white_pieces | self.black_pieces) - 2 * binary_s) ^ ((self.white_pieces | self.black_pieces).reverse_bits() - 2 * binary_s.reverse_bits()).reverse_bits();
