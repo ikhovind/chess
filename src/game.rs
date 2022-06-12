@@ -20,6 +20,8 @@ pub struct Board {
     white_short_c: bool,
     black_long_c: bool,
     black_short_c: bool,
+    watched_squares_white: u64,
+    watched_squares_black: u64,
 }
 
 impl Board {
@@ -86,7 +88,7 @@ impl Board {
         }
         let empty = !_pawns[0] & !_pawns[1] & !_knights[0] & !_knights[1] & !_bishops[0] & !_bishops[1] & !_rooks[0] & !_rooks[1] & !_queens[0] & !_queens[1] & !_kings[0] & !_kings[1];
         let black = _pawns[0]  | _knights[0] | _bishops[0] | _rooks[0]  | _queens[0] | _kings[0];
-        return Board {
+        let mut b = Board {
             pawns: _pawns,
             knights: _knights,
             bishops: _bishops,
@@ -100,7 +102,12 @@ impl Board {
             white_short_c: true,
             black_long_c: true,
             black_short_c: true,
-        }
+            watched_squares_black: 0,
+            watched_squares_white: 0,
+        };
+        b.watched_squares_black = b.watched(false);
+        b.watched_squares_white = b.watched(true);
+        return b;
     }
 
     pub fn possible_p(&mut self, last_move: Move, white: usize) -> Vec<Move> {
@@ -257,9 +264,9 @@ impl Board {
         return list;
     }
 
-    /* LookupTables is a structure which contains all precomputed lookup tables */
     pub fn possible_k(&self, white: bool) -> Vec<Move> {
         let mut opposing_pieces: u64 = self.white_pieces;
+        let mut opponent_watching: u64 = self.watched_squares_white;
         let mut own_pieces = self.black_pieces;
         let mut index = 0;
         let mut short_castle= self.black_short_c;
@@ -276,6 +283,7 @@ impl Board {
         ];
         if white {
             opposing_pieces = self.black_pieces;
+            opponent_watching = self.watched_squares_black;
             own_pieces = self.white_pieces;
             index = 1;
             short_castle = self.white_short_c;
@@ -315,7 +323,7 @@ impl Board {
                 let spot_8 = king_clip_file_a >> 1;
 
                 let moves = (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
-                    spot_7 | spot_8) & !own_pieces;
+                    spot_7 | spot_8) & !own_pieces & !opponent_watching;
 
                 if long_castle && !long_castle_sq.iter().any(|&x| (x & ((self.white_pieces - self.kings[1]) | (self.black_pieces - self.kings[0])) != 0)) {
                     list.push(Move::new_castle(if white { 4 } else { 60 }, if white { 2 } else { 58 }));
@@ -367,20 +375,19 @@ impl Board {
             under or overflow positions are computed when calculating the
             possible moves of the knight in certain files. */
 
-                let spot_1 = ((1 << i) as u64 & spot_1_clip) << 6;
-                let spot_2 = ((1 << i) as u64 & spot_2_clip) << 15;
-                let spot_3 = ((1 << i) as u64 & spot_3_clip) << 17;
-                let spot_4 = ((1 << i) as u64 & spot_4_clip) << 10;
+                let spot_1 = ((1 << i)  & spot_1_clip) << 6;
+                let spot_2 = ((1 << i) & spot_2_clip) << 15;
+                let spot_3 = ((1 << i) & spot_3_clip) << 17;
+                let spot_4 = ((1 << i)  & spot_4_clip) << 10;
 
-                let spot_5 = ((1 << i) as u64 & spot_5_clip) >> 6;
-                let spot_6 = ((1 << i) as u64 & spot_6_clip) >> 15;
-                let spot_7 = ((1 << i) as u64 & spot_7_clip) >> 17;
-                let spot_8 = ((1 << i) as u64 & spot_8_clip) >> 10;
+                let spot_5 = ((1 << i)  & spot_5_clip) >> 6;
+                let spot_6 = ((1 << i) & spot_6_clip) >> 15;
+                let spot_7 = ((1 << i) & spot_7_clip) >> 17;
+                let spot_8 = ((1 << i) & spot_8_clip) >> 10;
 
                 let moves =
                     (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8)
                         & !own_pieces;
-                print_u64_bitboard(moves);
                 for i2 in 0u8..64u8 {
                     if 2u64.pow(i2 as u32) & moves != 0 {
                         list.push(
@@ -441,30 +448,30 @@ impl Board {
         let mut moves = 0;
         let knights = self.knights[index];
         for i in 0u8..64u8 {
-            if 2_u64.pow(i as u32) & knights != 0 {
-                let spot_1_clip = !(FILE_MASKS[0] & FILE_MASKS[1]);
+            if (1 << i) & knights != 0 {
+                let spot_1_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
                 let spot_2_clip = !FILE_MASKS[0];
                 let spot_3_clip = !FILE_MASKS[7];
-                let spot_4_clip = !(FILE_MASKS[7] & FILE_MASKS[6]);
+                let spot_4_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
 
-                let spot_5_clip = !(FILE_MASKS[7] & FILE_MASKS[6]);
+                let spot_5_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
                 let spot_6_clip = !FILE_MASKS[7];
                 let spot_7_clip = !FILE_MASKS[0];
-                let spot_8_clip = !(FILE_MASKS[0] & FILE_MASKS[1]);
+                let spot_8_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
 
                 /* The clipping masks we just created will be used to ensure that no
             under or overflow positions are computed when calculating the
             possible moves of the knight in certain files. */
 
-                let spot_1 = ((1 << i) as u64 & spot_1_clip) << 6;
-                let spot_2 = ((1 << i) as u64 & spot_2_clip) << 15;
-                let spot_3 = ((1 << i) as u64 & spot_3_clip) << 17;
-                let spot_4 = ((1 << i) as u64 & spot_4_clip) << 10;
+                let spot_1 = ((1 << i) & spot_1_clip) << 6;
+                let spot_2 = ((1 << i) & spot_2_clip) << 15;
+                let spot_3 = ((1 << i) & spot_3_clip) << 17;
+                let spot_4 = ((1 << i) & spot_4_clip) << 10;
 
-                let spot_5 = ((1 << i) as u64 & spot_5_clip) >> 6;
-                let spot_6 = ((1 << i) as u64 & spot_6_clip) >> 15;
-                let spot_7 = ((1 << i) as u64 & spot_7_clip) >> 17;
-                let spot_8 = ((1 << i) as u64 & spot_8_clip) >> 10;
+                let spot_5 = ((1 << i) & spot_5_clip) >> 6;
+                let spot_6 = ((1 << i) & spot_6_clip) >> 15;
+                let spot_7 = ((1 << i) & spot_7_clip) >> 17;
+                let spot_8 = ((1 << i) & spot_8_clip) >> 10;
 
                 moves = moves | spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
             }

@@ -28,7 +28,7 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let board = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/5N2/1NBQ2B1/PPPPPPPP/R3K2R"));
+    let board = Board::from_fen(String::from("rnb1kbnr/ppp1pppp/8/8/3q4/3Q4/PP2PPPP/RNB1KBNR"));
     let a = board.possible_k( true);
     println!("{}", a.len());
 }

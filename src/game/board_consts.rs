@@ -21,21 +21,8 @@ pub const RANK_MASKS: [u64; 8] =
         71776119061217280,
         18374686479671623680,
     ];
-pub static  FIE_AB:u64 = 217020518514230019;
-static  fie_gh:i64 = -4557430888798830400;
-pub static  FIE_GH:u64 = fie_gh as u64;
-static  rank_1:i64 = -72057594037927936;
-pub static  RANK_1:u64 = rank_1 as u64;
-pub static  RANK_4:u64 = 4278190080;
-pub static  RANK_5:u64 = 4278190080;
-pub static  RANK_8:u64 = 18374686479671623680;
 pub static  CENTRE:u64 = 103481868288;
 pub static  EXTENDED_CENTRE:u64 = 66229406269440;
-static  king_side:i64 = -1085102592571150096;
-pub static  KING_SIDE:u64 = king_side as u64;
-pub static  QUEEN_SIDE:u64 = 1085102592571150095;
-pub static  KING_B7:u64 = 460039;
-pub static  KNIGHT_C6:u64 = 43234889994;
 
 pub const DIAGONAL_MASKS: [u64; 15] =/*from top eft to bottom right*/
 [
