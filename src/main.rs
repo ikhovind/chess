@@ -1,9 +1,11 @@
 pub mod game;
 mod mv;
+mod pieces;
 
 use std::env;
 use crate::game::Board;
 use crate::mv::Move;
+use crate::pieces::king;
 
 fn print_u64_bitboard(bitboard : u64) {
     println!();
@@ -30,6 +32,6 @@ fn print_u64_bitboard(bitboard : u64) {
 fn main() {
     let board = Board::from_fen(String::from("rnb1kbnr/pppppppp/8/8/7q/4PP2/PPP1PKPP/RNBQ1BNR"));
     print_u64_bitboard(board.watched(false));
-    let a = board.possible_k( true);
+    let a = king::possible_k( &board, true);
     println!("{}", a.len());
 }
