@@ -1,5 +1,5 @@
 use crate::game::FILE_MASKS;
-use crate::{Board, Move};
+use crate::{Board, Move, print_u64_bitboard};
 use crate::mv::{BISHOP, KNIGHT, QUEEN, RANK_MASKS, ROOK};
 
 pub fn possible_p(b: &Board, last_move: Move, white: usize) -> Vec<Move> {
@@ -84,4 +84,25 @@ pub fn watched_by_p(b: &Board, white: bool) -> u64 {
     pawn_moves = pawn_moves | ((b.pawns[index] << 7) & (!RANK_MASKS[7]) & (!FILE_MASKS[7])); // capture left
 
     return pawn_moves;
+}
+
+pub mod pawn2 {
+    use crate::game::FILE_MASKS;
+
+    pub fn attacked_from_square(square: u8, white: bool) -> u64 {
+        let index = if white { 1 } else { 0 };
+        let s = 1 << square;
+        let mut pawn_moves;
+        if white {
+            pawn_moves = (s << 9)  & (!FILE_MASKS[0]); // capture right
+            pawn_moves = pawn_moves | ((s << 7) &  (!FILE_MASKS[7])); // capture left
+        }
+        else {
+            pawn_moves = (s >> 9) & (!FILE_MASKS[7]); // capture right
+            pawn_moves = pawn_moves | ((s >> 7) & (!FILE_MASKS[7])); // capture left
+        }
+
+        return pawn_moves;
+    }
+
 }

@@ -6,6 +6,7 @@ use std::env;
 use crate::game::Board;
 use crate::mv::Move;
 use crate::pieces::king;
+use crate::pieces::pawn::{attacked_from_square, pawn2, watched_by_p};
 
 fn print_u64_bitboard(bitboard : u64) {
     println!();
@@ -30,8 +31,6 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let board = Board::from_fen(String::from("rnb1kbnr/pppppppp/8/8/7q/4PP2/PPP1PKPP/RNBQ1BNR"));
-    print_u64_bitboard(board.watched(false));
-    let a = king::possible_k( &board, true);
-    println!("{}", a.len());
+    let board = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
+    print_u64_bitboard(pawn2::attacked_from_square(48, false));
 }

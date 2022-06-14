@@ -1,5 +1,9 @@
 use crate::{Board, Move};
 use crate::game::FILE_MASKS;
+use crate::pieces::bishop::watched_by_b;
+use crate::pieces::pawn::watched_by_p;
+use crate::pieces::queen::watched_by_q;
+use crate::pieces::rook::watched_by_r;
 
 pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     let mut opposing_pieces: u64 = b.white_pieces;
@@ -99,4 +103,36 @@ pub fn watched_by_n(b: &Board, white:bool) -> u64 {
         }
     }
     return moves;
+}
+
+pub fn attacked_from(square: u8) -> u64 {
+    let mut index = 0;
+    let s: u64 = 1 << square;
+
+    let mut moves = 0;
+    let spot_1_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
+    let spot_2_clip = !FILE_MASKS[0];
+    let spot_3_clip = !FILE_MASKS[7];
+    let spot_4_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
+
+    let spot_5_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
+    let spot_6_clip = !FILE_MASKS[7];
+    let spot_7_clip = !FILE_MASKS[0];
+    let spot_8_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
+
+    /* The clipping masks we just created will be used to ensure that no
+under or overflow positions are computed when calculating the
+possible moves of the knight in certain files. */
+
+    let spot_1 = ((1 << s) & spot_1_clip) << 6;
+    let spot_2 = ((1 << s) & spot_2_clip) << 15;
+    let spot_3 = ((1 << s) & spot_3_clip) << 17;
+    let spot_4 = ((1 << s) & spot_4_clip) << 10;
+
+    let spot_5 = ((1 << s) & spot_5_clip) >> 6;
+    let spot_6 = ((1 << s) & spot_6_clip) >> 15;
+    let spot_7 = ((1 << s) & spot_7_clip) >> 17;
+    let spot_8 = ((1 << s) & spot_8_clip) >> 10;
+
+    return spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
 }

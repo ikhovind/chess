@@ -113,7 +113,13 @@ impl Board {
 
 
     pub fn watched(&self, white: bool) -> u64 {
-        return bishop::watched_by_b(&self, white) | king::watched_by_k(&self, white) | knight::watched_by_n(&self, white) | queen::watched_by_q(&self, white) | rook::watched_by_r(&self, white) | pawn::watched_by_p(&self, white);
+        return
+            bishop::watched_by_b(&self, white)
+            | king::watched_by_k(&self, white)
+            | knight::watched_by_n(&self, white)
+            | queen::watched_by_q(&self, white)
+            | rook::watched_by_r(&self, white)
+            | pawn::watched_by_p(&self, white);
     }
 
     pub fn h_and_vmoves(&self, s: usize, white: bool) -> u64 {

@@ -1,5 +1,8 @@
 use crate::{Board, Move};
 use crate::game::FILE_MASKS;
+use crate::pieces::bishop::watched_by_b;
+use crate::pieces::knight::watched_by_n;
+use crate::pieces::rook::watched_by_r;
 
 pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
     let mut opposing_pieces: u64 = b.white_pieces;
@@ -116,3 +119,4 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
     }
     return moves;
 }
+
