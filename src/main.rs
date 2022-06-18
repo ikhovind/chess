@@ -5,8 +5,6 @@ mod pieces;
 use std::env;
 use crate::game::Board;
 use crate::mv::Move;
-use crate::pieces::king;
-use crate::pieces::pawn::{attacked_from_square, pawn2, watched_by_p};
 
 fn print_u64_bitboard(bitboard : u64) {
     println!();
@@ -31,6 +29,6 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let board = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
-    print_u64_bitboard(pawn2::attacked_from_square(48, false));
+    let b = Board::from_fen(String::from("2p5/3K4/8/4n3/8/8/8/8"));
+    print_u64_bitboard(pieces::king::get_attackers(&b, true));
 }

@@ -1,4 +1,5 @@
-use crate::{Board, Move};
+use std::ops::Index;
+use crate::{Board, Move, pieces, print_u64_bitboard};
 use crate::game::FILE_MASKS;
 use crate::pieces::bishop::watched_by_b;
 use crate::pieces::knight::watched_by_n;
@@ -73,8 +74,6 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
                 list.push(Move::new_castle(if white { 4 } else { 60 }, if white {6} else { 62 }));
             }
 
-            /* compute only the places where the king can move and attack. The caller
-                will interpret this as a white or black king. */
             for i2 in 0u8..64u8 {
                 if 2u64.pow(i2 as u32) & moves != 0 {
                     list.push(
@@ -120,3 +119,21 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
     return moves;
 }
 
+pub fn get_attackers(b: &Board, white: bool) -> u64 {
+    let index = if white { 1 } else { 0 };
+    let king_square: u8 = (63 - b.kings[index].leading_zeros()) as u8;
+    let attackers =
+        pieces::knight::attacked_from(king_square) & b.knights[1 - index]
+        | pieces::bishop::attacked_from_square(b, king_square, !white) & b.bishops[1 - index]
+        | pieces::pawn::attacked_from_square(king_square, !white) & b.pawns[1 - index]
+        | pieces::queen::attacked_from_square(b, king_square, !white) & b.pawns[1 - index]
+        | pieces::rook::attacked_from_square(b, king_square, !white) & b.pawns[1 - index];
+
+    return attackers;
+}
+
+pub fn is_double_check(attackers: u64) -> bool {
+    println!("leading zeros num: {}", attackers.leading_zeros());
+    println!("trailing zeros num: {}", attackers.trailing_zeros());
+    return attackers.leading_zeros() + attackers.trailing_zeros() + 1 < 63;
+}

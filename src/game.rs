@@ -23,6 +23,7 @@ pub struct Board {
     pub(crate) black_short_c: bool,
     pub(crate) watched_squares_white: u64,
     pub(crate) watched_squares_black: u64,
+    pub(crate) check: bool,
 }
 
 impl Board {
@@ -105,6 +106,7 @@ impl Board {
             black_short_c: true,
             watched_squares_black: 0,
             watched_squares_white: 0,
+            check: false
         };
         b.watched_squares_black = b.watched(false);
         b.watched_squares_white = b.watched(true);

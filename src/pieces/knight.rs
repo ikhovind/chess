@@ -1,4 +1,4 @@
-use crate::{Board, Move};
+use crate::{Board, Move, print_u64_bitboard};
 use crate::game::FILE_MASKS;
 use crate::pieces::bishop::watched_by_b;
 use crate::pieces::pawn::watched_by_p;
@@ -106,10 +106,6 @@ pub fn watched_by_n(b: &Board, white:bool) -> u64 {
 }
 
 pub fn attacked_from(square: u8) -> u64 {
-    let mut index = 0;
-    let s: u64 = 1 << square;
-
-    let mut moves = 0;
     let spot_1_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
     let spot_2_clip = !FILE_MASKS[0];
     let spot_3_clip = !FILE_MASKS[7];
@@ -124,15 +120,15 @@ pub fn attacked_from(square: u8) -> u64 {
 under or overflow positions are computed when calculating the
 possible moves of the knight in certain files. */
 
-    let spot_1 = ((1 << s) & spot_1_clip) << 6;
-    let spot_2 = ((1 << s) & spot_2_clip) << 15;
-    let spot_3 = ((1 << s) & spot_3_clip) << 17;
-    let spot_4 = ((1 << s) & spot_4_clip) << 10;
+    let spot_1 = ((1u64 << square) & spot_1_clip) << 6;
+    let spot_2 = ((1u64 << square) & spot_2_clip) << 15;
+    let spot_3 = ((1u64 << square) & spot_3_clip) << 17;
+    let spot_4 = ((1u64 << square) & spot_4_clip) << 10;
 
-    let spot_5 = ((1 << s) & spot_5_clip) >> 6;
-    let spot_6 = ((1 << s) & spot_6_clip) >> 15;
-    let spot_7 = ((1 << s) & spot_7_clip) >> 17;
-    let spot_8 = ((1 << s) & spot_8_clip) >> 10;
+    let spot_5 = ((1u64 << square) & spot_5_clip) >> 6;
+    let spot_6 = ((1u64 << square) & spot_6_clip) >> 15;
+    let spot_7 = ((1u64 << square) & spot_7_clip) >> 17;
+    let spot_8 = ((1u64 << square) & spot_8_clip) >> 10;
 
     return spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
 }

@@ -4,3 +4,5 @@ pub mod bishop;
 pub mod rook;
 pub mod knight;
 pub mod queen;
+pub mod common_moves;
+pub mod tests;

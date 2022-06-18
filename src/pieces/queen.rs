@@ -1,4 +1,5 @@
 use crate::{Board, Move};
+use crate::pieces::common_moves;
 
 pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
     let mut opposing_pieces: u64 = b.white_pieces;
@@ -38,5 +39,14 @@ pub fn watched_by_q(b: &Board, white: bool) -> u64 {
             moves |= (b.d_and_anti_d_moves(i as usize, white) | b.h_and_vmoves(i as usize, white));
         }
     }
+    return moves;
+}
+
+pub fn attacked_from_square(b: &Board, square: u8, white: bool) -> u64 {
+    let index = if white { 1 } else { 0 };
+    let own = if white { b.white_pieces } else { b.black_pieces };
+    let moves = common_moves::h_and_vmoves(square, own - b.kings[index], own)
+        | common_moves::d_and_anti_d_moves(square, own - b.kings[index], own);
+
     return moves;
 }
