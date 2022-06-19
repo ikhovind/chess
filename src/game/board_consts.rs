@@ -39,9 +39,21 @@ pub const ANTI_DIAGONAL_MASKS: [u64; 15] =
 0x804020100000000, 0x402010000000000, 0x201000000000000, 0x100000000000000
 ];
 
+pub const WHITE_SHORT_CASTLE_KING: u64 = 1 << 6;
+pub const WHITE_SHORT_CASTLE_ROOK: u64 = 1 << 5;
+pub const WHITE_LONG_CASTLE_KING: u64 = 1 << 2;
+pub const WHITE_LONG_CASTLE_ROOK: u64 = 1 << 3;
+
+pub const BLACK_SHORT_CASTLE_KING: u64 = 1 << 62;
+pub const BLACK_SHORT_CASTLE_ROOK: u64 = 1 << 61;
+pub const BLACK_LONG_CASTLE_KING: u64 = 1 << 60;
+pub const BLACK_LONG_CASTLE_ROOK: u64 = 1 << 59;
+
 pub const TO_MASK: u8     = 0b00110000;
 pub const FROM_MASK: u8     = 0b11000000;
+pub const MOVE_MASK: u8 = 0b00111111;
 
+pub const NORMAL_MOVE: u8 = 0;
 pub const DOUBLE_PAWN: u8 = 0b00010000;
 pub const TAKES: u8       = 0b00100000;
 pub const EN_PASSANT: u8 =  0b00110000; // - EP
@@ -59,4 +71,10 @@ pub const TAKE_PROM_N: u8 = 0b10110000; // - TAKES into Knight
 pub const SHORT_CASTLE: u8= 0b11000000; // - short castle
 pub const LONG_CASTLE: u8 = 0b11010000; // - long castle
 
+pub const P_INDEX: u8 = 0;
+pub const N_INDEX: u8 = 2;
+pub const B_INDEX: u8 = 4;
+pub const R_INDEX: u8 = 6;
+pub const Q_INDEX: u8 = 8;
+pub const K_INDEX: u8 = 10;
 
