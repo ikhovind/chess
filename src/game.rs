@@ -7,6 +7,7 @@ use crate::pieces::bishop;
 
 //[black, white]
 //[black short, black long, white short, white long]
+#[derive(Eq, PartialEq, Debug)]
 pub struct Board {
     pub(crate) pieces: [u64; 12],
     pub(crate) black_pieces: u64,
@@ -126,7 +127,7 @@ impl Board {
             NORMAL_MOVE => {
                 self.check_castling_rights_after(color, from_sq, to_sq);
                 for i in (color as usize..self.pieces.len()).step_by(2) {
-                    if self.pieces[i] & to_sq != 0 {
+                    if self.pieces[i] & from_sq != 0 {
                         self.pieces[i] += to_sq;
                         self.pieces[i] -= from_sq;
                         break;
@@ -260,9 +261,12 @@ impl Board {
 
     fn update_metadata(&mut self) {
         self.black_pieces = 0;
+        self.white_pieces = 0;
+
         for i in (0usize..self.pieces.len()).step_by(2) {
             self.black_pieces |= self.pieces[i];
         }
+
         for i in (1usize..self.pieces.len()).step_by(2) {
             self.white_pieces |= self.pieces[i];
         }
