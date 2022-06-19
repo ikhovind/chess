@@ -1,4 +1,4 @@
-use crate::{Board, Move};
+use crate::{Board, Move, print_u64_bitboard};
 use crate::pieces::common_moves;
 use crate::consts::board_consts::*;
 
@@ -7,7 +7,7 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     let own = if white { b.white_pieces } else { b.black_pieces };
     let opp = if white { b.black_pieces - b.pieces[K_INDEX as usize] } else { b.white_pieces - b.pieces[(K_INDEX + 1) as usize] };
     let mut list: Vec<Move> = Vec::new();
-    let rooks = b.pieces[R_INDEX as usize];
+    let rooks = b.pieces[R_INDEX as usize + index];
 
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & rooks != 0 {

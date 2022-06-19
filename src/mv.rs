@@ -1,6 +1,6 @@
 pub use crate::consts::board_consts::{RANK_MASKS, FILE_MASKS};
 pub use crate::consts::board_consts::*;
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Move {
     //smallest 6 bits are to square, bit 7 is promotion, bit 8 is castle, both are ep
     pub from: u8,

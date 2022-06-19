@@ -5,7 +5,7 @@ mod consts;
 mod tests;
 
 use crate::game::Board;
-use crate::mv::Move;
+use crate::mv::{Move, R_INDEX};
 
 fn print_u64_bitboard(bitboard : u64) {
     println!();
@@ -30,6 +30,25 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let b = Board::from_fen(String::from("2p5/3K4/8/4n3/8/8/8/8"));
-    print_u64_bitboard(pieces::king::get_attackers(&b, true));
+    let b = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
+
+    println!("{}", get_all_moves(0, &b).len());
+}
+
+fn get_all_moves(depth: u32, b: &Board) -> Vec<Move> {
+    println!("rook {}", pieces::rook::possible_r(b, b.white_turn).len());
+    //println!("{:?}", pieces::rook::possible_r(b, b.white_turn));
+    println!("knight {}", pieces::knight::possible_n(b, b.white_turn).len());
+    println!("bishop {}", pieces::bishop::possible_b(b, b.white_turn).len());
+    println!("queen {}",  pieces::queen::possible_q(b, b.white_turn).len());
+    println!("king {}",   pieces::king::possible_k(b, b.white_turn).len());
+    println!("pawn {}",   pieces::pawn::possible_p(b, b.white_turn).len());
+
+    let mut rook = pieces::rook::possible_r(b, b.white_turn);
+    rook.append(&mut pieces::knight::possible_n(b, b.white_turn));
+    rook.append(&mut pieces::bishop::possible_b(b, b.white_turn));
+    rook.append(&mut pieces::queen::possible_q(b, b.white_turn));
+    rook.append(&mut pieces::king::possible_k(b, b.white_turn));
+    rook.append(&mut pieces::pawn::possible_p(b, b.white_turn));
+    return rook;
 }

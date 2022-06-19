@@ -7,7 +7,7 @@ use crate::pieces::bishop;
 
 //[black, white]
 //[black short, black long, white short, white long]
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Debug)]
 pub struct Board {
     pub(crate) pieces: [u64; 12],
     pub(crate) black_pieces: u64,
@@ -22,6 +22,7 @@ pub struct Board {
     pub(crate) watched_squares_black: u64,
     pub(crate) check: bool,
     pub(crate) white_turn: bool,
+    pub(crate) last_move: Move,
 }
 
 impl Board {
@@ -102,6 +103,7 @@ impl Board {
             watched_squares_white: 0,
             check: false,
             white_turn: true,
+            last_move: Move::new_move(0,0, false),
         };
         b.watched_squares_black = b.watched(false);
         b.watched_squares_white = b.watched(true);
@@ -243,7 +245,7 @@ impl Board {
                 eprintln!("illegal move??: {}", mv_type);
             }
         }
-        self.update_metadata();
+        self.update_metadata(mv);
     }
 
     fn check_castling_rights_after(&mut self, color: u8, from_sq: u64, to_sq: u64) {
@@ -259,7 +261,7 @@ impl Board {
         }
     }
 
-    fn update_metadata(&mut self) {
+    fn update_metadata(&mut self, mv: Move) {
         self.black_pieces = 0;
         self.white_pieces = 0;
 
@@ -284,5 +286,13 @@ impl Board {
             };
         self.check = self.pieces[(K_INDEX + attacked_king) as usize] & watch != 0;
         self.white_turn = !self.white_turn;
+        self.last_move = mv;
+    }
+}
+
+impl PartialEq for Board {
+    fn eq(&self, other: &Self) -> bool {
+        self.pieces == other.pieces
+        || self.white_turn == other.white_turn
     }
 }

@@ -20,26 +20,26 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     let knights = b.pieces[(N_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & knights != 0 {
-            let spot_1_clip = !(FILE_MASKS[0] & FILE_MASKS[1]);
+            let spot_1_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
             let spot_2_clip = !FILE_MASKS[0];
             let spot_3_clip = !FILE_MASKS[7];
-            let spot_4_clip = !(FILE_MASKS[7] & FILE_MASKS[6]);
+            let spot_4_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
 
-            let spot_5_clip = !(FILE_MASKS[7] & FILE_MASKS[6]);
+            let spot_5_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
             let spot_6_clip = !FILE_MASKS[7];
             let spot_7_clip = !FILE_MASKS[0];
-            let spot_8_clip = !(FILE_MASKS[0] & FILE_MASKS[1]);
+            let spot_8_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
 
             /* The clipping masks we just created will be used to ensure that no
         under or overflow positions are computed when calculating the
         possible moves of the knight in certain files. */
 
-            let spot_1 = ((1 << i)  & spot_1_clip) << 6;
+            let spot_1 = ((1 << i) & spot_1_clip) << 6;
             let spot_2 = ((1 << i) & spot_2_clip) << 15;
             let spot_3 = ((1 << i) & spot_3_clip) << 17;
-            let spot_4 = ((1 << i)  & spot_4_clip) << 10;
+            let spot_4 = ((1 << i) & spot_4_clip) << 10;
 
-            let spot_5 = ((1 << i)  & spot_5_clip) >> 6;
+            let spot_5 = ((1 << i) & spot_5_clip) >> 6;
             let spot_6 = ((1 << i) & spot_6_clip) >> 15;
             let spot_7 = ((1 << i) & spot_7_clip) >> 17;
             let spot_8 = ((1 << i) & spot_8_clip) >> 10;
