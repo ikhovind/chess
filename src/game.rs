@@ -1,21 +1,14 @@
-pub use crate::game::board_consts::{FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
-pub use crate::game::board_consts::*;
+pub use crate::consts::board_consts::{FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
+pub use crate::consts::board_consts::*;
 use crate::{print_u64_bitboard};
 use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
 use crate::pieces::*;
 use crate::pieces::bishop;
-pub(crate) mod board_consts;
 
 //[black, white]
 //[black short, black long, white short, white long]
 pub struct Board {
     pub(crate) pieces: [u64; 12],
-    pub(crate) pawns: [u64; 2],
-    pub(crate) knights: [u64; 2],
-    pub(crate) bishops: [u64; 2],
-    pub(crate) rooks: [u64; 2],
-    pub(crate) queens: [u64; 2],
-    pub(crate) kings: [u64; 2],
     pub(crate) black_pieces: u64,
     pub(crate) white_pieces: u64,
     pub(crate) empty: u64,
@@ -96,12 +89,6 @@ impl Board {
         let black = _pawns[0]  | _knights[0] | _bishops[0] | _rooks[0]  | _queens[0] | _kings[0];
         let mut b = Board {
             pieces: [_pawns[0],_pawns[1],_knights[0],_knights[1],_bishops[0],_bishops[1],_rooks[0],_rooks[1],_queens[0] ,_queens[1] ,_kings[0] , _kings[1]],
-            pawns: _pawns,
-            knights: _knights,
-            bishops: _bishops,
-            rooks: _rooks,
-            queens: _queens,
-            kings: _kings,
             black_pieces: black,
             white_pieces: (!(empty | black)),
             empty,

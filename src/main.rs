@@ -1,6 +1,8 @@
 pub mod game;
 mod mv;
 mod pieces;
+mod consts;
+mod tests;
 
 use crate::game::Board;
 use crate::mv::Move;

@@ -4,6 +4,7 @@ use crate::pieces::bishop::watched_by_b;
 use crate::pieces::pawn::watched_by_p;
 use crate::pieces::queen::watched_by_q;
 use crate::pieces::rook::watched_by_r;
+use crate::consts::board_consts::*;
 
 pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     let mut opposing_pieces: u64 = b.white_pieces;
@@ -16,7 +17,7 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     }
     let mut list: Vec<Move> = Vec::new();
 
-    let knights = b.knights[index];
+    let knights = b.pieces[(N_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & knights != 0 {
             let spot_1_clip = !(FILE_MASKS[0] & FILE_MASKS[1]);
@@ -72,7 +73,7 @@ pub fn watched_by_n(b: &Board, white:bool) -> u64 {
         index = 1;
     }
     let mut moves = 0;
-    let knights = b.knights[index];
+    let knights = b.pieces[(N_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if (1 << i) & knights != 0 {
             let spot_1_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
