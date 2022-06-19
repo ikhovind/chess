@@ -7,7 +7,7 @@ use crate::pieces::bishop;
 
 //[black, white]
 //[black short, black long, white short, white long]
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Board {
     pub(crate) pieces: [u64; 12],
     pub(crate) black_pieces: u64,
@@ -120,7 +120,7 @@ impl Board {
             | pawn::watched_by_p(&self, white);
     }
 
-    pub fn make_move(&mut self, mv: Move) {
+    pub fn make_move(&mut self, mv: Move) -> &mut Board {
         let mv_type = ((mv.from >> 4) & 0b1100) | (mv.to >> 6);
         let color: u8 = if self.white_turn { 1 } else { 0 };
         let from_sq = 1 << (mv.from & MOVE_MASK);
@@ -246,6 +246,7 @@ impl Board {
             }
         }
         self.update_metadata(mv);
+        return self;
     }
 
     fn check_castling_rights_after(&mut self, color: u8, from_sq: u64, to_sq: u64) {
