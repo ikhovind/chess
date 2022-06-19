@@ -1,6 +1,5 @@
 pub use crate::game::board_consts::{FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
-use crate::{mv, print_u64_bitboard};
-use crate::game::board_consts::RANK_MASKS;
+use crate::{print_u64_bitboard};
 use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
 use crate::pieces::*;
 use crate::pieces::bishop;
@@ -122,21 +121,5 @@ impl Board {
             | queen::watched_by_q(&self, white)
             | rook::watched_by_r(&self, white)
             | pawn::watched_by_p(&self, white);
-    }
-
-    pub fn h_and_vmoves(&self, s: usize, white: bool) -> u64 {
-        let binary_s:u64 = 1<<s;
-        let king = if white { self.kings[0] } else { self.kings[1] };
-        let possibilities_horizontal: u64 = (((self.white_pieces | self.black_pieces) - king) - 2 * binary_s) ^ (((self.white_pieces | self.black_pieces) - king).reverse_bits() - 2 * binary_s.reverse_bits()).reverse_bits();
-        let possibilities_vertical: u64 = ((((self.white_pieces | self.black_pieces) - king) & FILE_MASKS[s % 8]) - (2 * binary_s)) ^ ((((self.white_pieces | self.black_pieces) - king)& FILE_MASKS[s % 8]).reverse_bits() - (2 * binary_s.reverse_bits())).reverse_bits();
-        return (possibilities_horizontal & RANK_MASKS[s / 8]) | (possibilities_vertical & FILE_MASKS[s % 8]);
-    }
-
-    pub fn d_and_anti_d_moves(&self, s: usize, white: bool) -> u64 {
-        let binary_s:u64 = 1 << s;
-        let king = if white { self.kings[0] } else { self.kings[1] };
-        let possibilities_diagonal: u64 = ((((self.white_pieces | self.black_pieces) - king)&DIAGONAL_MASKS[(s / 8) + (s % 8)]) - (2 * binary_s)) ^ ((((self.white_pieces | self.black_pieces) - king)&DIAGONAL_MASKS[(s / 8) + (s % 8)]).reverse_bits() - (2 * (binary_s).reverse_bits())).reverse_bits();
-        let possibilities_anti_diagonal: u64 = ((((self.white_pieces | self.black_pieces) - king)&ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]) - (2 * binary_s)) ^ ((((self.white_pieces | self.black_pieces) - king)&ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]).reverse_bits() - (2 * (binary_s).reverse_bits())).reverse_bits();
-        return (possibilities_diagonal &DIAGONAL_MASKS[(s / 8) + (s % 8)]) | (possibilities_anti_diagonal &ANTI_DIAGONAL_MASKS[(s / 8) + 7 - (s % 8)]);
     }
 }

@@ -2,7 +2,6 @@ pub mod game;
 mod mv;
 mod pieces;
 
-use std::env;
 use crate::game::Board;
 use crate::mv::Move;
 

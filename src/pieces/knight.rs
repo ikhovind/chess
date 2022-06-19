@@ -75,15 +75,15 @@ pub fn watched_by_n(b: &Board, white:bool) -> u64 {
     let knights = b.knights[index];
     for i in 0u8..64u8 {
         if (1 << i) & knights != 0 {
-            let spot_1_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
+            let spot_1_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
             let spot_2_clip = !FILE_MASKS[0];
             let spot_3_clip = !FILE_MASKS[7];
-            let spot_4_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
+            let spot_4_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
 
-            let spot_5_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
+            let spot_5_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
             let spot_6_clip = !FILE_MASKS[7];
             let spot_7_clip = !FILE_MASKS[0];
-            let spot_8_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
+            let spot_8_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
 
             /* The clipping masks we just created will be used to ensure that no
         under or overflow positions are computed when calculating the
@@ -106,15 +106,15 @@ pub fn watched_by_n(b: &Board, white:bool) -> u64 {
 }
 
 pub fn attacked_from(square: u8) -> u64 {
-    let spot_1_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
+    let spot_1_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
     let spot_2_clip = !FILE_MASKS[0];
     let spot_3_clip = !FILE_MASKS[7];
-    let spot_4_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
+    let spot_4_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
 
-    let spot_5_clip = (!FILE_MASKS[7] & !FILE_MASKS[6]);
+    let spot_5_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
     let spot_6_clip = !FILE_MASKS[7];
     let spot_7_clip = !FILE_MASKS[0];
-    let spot_8_clip = (!FILE_MASKS[0] & !FILE_MASKS[1]);
+    let spot_8_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
 
     /* The clipping masks we just created will be used to ensure that no
 under or overflow positions are computed when calculating the

@@ -88,7 +88,6 @@ pub fn watched_by_p(b: &Board, white: bool) -> u64 {
 }
 
 pub fn attacked_from_square(square: u8, white: bool) -> u64 {
-    let index = if white { 1 } else { 0 };
     let s = 1 << square;
     let mut pawn_moves;
     if white {

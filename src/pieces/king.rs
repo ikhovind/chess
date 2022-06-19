@@ -1,4 +1,3 @@
-use std::ops::Index;
 use crate::{Board, Move, pieces, print_u64_bitboard};
 use crate::game::FILE_MASKS;
 use crate::pieces::bishop::watched_by_b;
@@ -133,7 +132,5 @@ pub fn get_attackers(b: &Board, white: bool) -> u64 {
 }
 
 pub fn is_double_check(attackers: u64) -> bool {
-    println!("leading zeros num: {}", attackers.leading_zeros());
-    println!("trailing zeros num: {}", attackers.trailing_zeros());
     return attackers.leading_zeros() + attackers.trailing_zeros() + 1 < 63;
 }
