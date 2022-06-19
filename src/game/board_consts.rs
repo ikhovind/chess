@@ -39,3 +39,24 @@ pub const ANTI_DIAGONAL_MASKS: [u64; 15] =
 0x804020100000000, 0x402010000000000, 0x201000000000000, 0x100000000000000
 ];
 
+pub const TO_MASK: u8     = 0b00110000;
+pub const FROM_MASK: u8     = 0b11000000;
+
+pub const DOUBLE_PAWN: u8 = 0b00010000;
+pub const TAKES: u8       = 0b00100000;
+pub const EN_PASSANT: u8 =  0b00110000; // - EP
+
+pub const PROM_Q: u8      = 0b01000000; // - Queen
+pub const PROM_R: u8      = 0b01010000; // - Rook
+pub const PROM_B: u8      = 0b01100000; // - Bishop
+pub const PROM_N: u8      = 0b01110000; // - Knight
+
+pub const TAKE_PROM_Q: u8 = 0b10000000; // - TAKES into Queen
+pub const TAKE_PROM_R: u8 = 0b10010000; // - TAKES into Rook
+pub const TAKE_PROM_B: u8 = 0b10100000; // - TAKES into Bishop
+pub const TAKE_PROM_N: u8 = 0b10110000; // - TAKES into Knight
+
+pub const SHORT_CASTLE: u8= 0b11000000; // - short castle
+pub const LONG_CASTLE: u8 = 0b11010000; // - long castle
+
+

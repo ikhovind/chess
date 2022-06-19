@@ -63,14 +63,14 @@ pub fn possible_p(b: &Board, last_move: Move, white: usize) -> Vec<Move> {
         }
     }
     // en passant
-    pawn_moves = ((b.pawns[white] << 9) & (opposing_pieces << 8) & (!RANK_MASKS[7]) & (!FILE_MASKS[7])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 };  // capture right
+    pawn_moves = ((b.pawns[white] << 9) & (opposing_pieces << 8) & (!RANK_MASKS[7]) & (!FILE_MASKS[7])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.from as u32) << 8} else { 0 };  // capture right
     for i in 0..64 {
         if ((pawn_moves >> i) & 1) == 1 {
             list.push(Move::new_ep(i - 9, i));
         }
     }
 
-    pawn_moves = ((b.pawns[white] << 7) & (opposing_pieces << 8) & (!RANK_MASKS[7]) & (!FILE_MASKS[0])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.get_to_square() as u32) << 8} else { 0 }; // capture left
+    pawn_moves = ((b.pawns[white] << 7) & (opposing_pieces << 8) & (!RANK_MASKS[7]) & (!FILE_MASKS[0])) & if Move::last_move_was_double_push(last_move) { 2_u64.pow(last_move.to as u32) << 8} else { 0 }; // capture left
     for i in 0..64 {
         if ((pawn_moves>>i)&1)==1 {
             list.push(Move::new_ep(i - 7, i));

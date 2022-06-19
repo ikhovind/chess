@@ -1,4 +1,5 @@
 pub use crate::game::board_consts::{FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
+pub use crate::game::board_consts::*;
 use crate::{print_u64_bitboard};
 use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
 use crate::pieces::*;
@@ -112,7 +113,6 @@ impl Board {
         return b;
     }
 
-
     pub fn watched(&self, white: bool) -> u64 {
         return
             bishop::watched_by_b(&self, white)
@@ -121,5 +121,53 @@ impl Board {
             | queen::watched_by_q(&self, white)
             | rook::watched_by_r(&self, white)
             | pawn::watched_by_p(&self, white);
+    }
+
+    pub fn make_move(&self, mv: Move) {
+        let mv_type = ((mv.from >> 4) & 0b1100) | (mv.to >> 6);
+        match mv_type {
+            DOUBLE_PAWN => {
+                // double push
+            }
+            TAKES => {
+
+            }
+            EN_PASSANT => {
+
+            }
+            PROM_Q => {
+
+            }
+            PROM_R => {
+
+            }
+            PROM_B => {
+
+            }
+            PROM_N => {
+
+            }
+            TAKE_PROM_Q => {
+
+            }
+            TAKE_PROM_R => {
+
+            }
+            TAKE_PROM_B => {
+
+            }
+            TAKE_PROM_N => {
+
+            }
+            SHORT_CASTLE => {
+
+            }
+            LONG_CASTLE => {
+
+            }
+            _ => {
+
+            }
+        }
     }
 }
