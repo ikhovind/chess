@@ -95,3 +95,56 @@ impl Move {
         return (m.to & TO_MASK) | (m.from & FROM_MASK) == DOUBLE_PAWN ;
     }
 }
+
+use std::fmt;
+
+impl fmt::Display for Move {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        let mut str = "";
+        match (self.from & MOVE_MASK) % 8 {
+            0 => { fmt.write_str("a")?; }
+            1 => { fmt.write_str("b")?; }
+            2 => { fmt.write_str("c")?; }
+            3 => { fmt.write_str("d")?; }
+            4 => { fmt.write_str("e")?; }
+            5 => { fmt.write_str("f")?; }
+            6 => { fmt.write_str("g")?; }
+            7 => { fmt.write_str("h")?; }
+            _ => {}
+        }
+        match (self.from & MOVE_MASK) / 8 {
+            0 => { fmt.write_str("1")?; }
+            1 => { fmt.write_str("2")?; }
+            2 => { fmt.write_str("3")?; }
+            3 => { fmt.write_str("4")?; }
+            4 => { fmt.write_str("5")?; }
+            5 => { fmt.write_str("6")?; }
+            6 => { fmt.write_str("7")?; }
+            7 => { fmt.write_str("8")?; }
+            _ => {}
+        }
+        match (self.to & MOVE_MASK) % 8 {
+            0 => { fmt.write_str("a")?; }
+            1 => { fmt.write_str("b")?; }
+            2 => { fmt.write_str("c")?; }
+            3 => { fmt.write_str("d")?; }
+            4 => { fmt.write_str("e")?; }
+            5 => { fmt.write_str("f")?; }
+            6 => { fmt.write_str("g")?; }
+            7 => { fmt.write_str("h")?; }
+            _ => {}
+        }
+        match (self.to & MOVE_MASK) / 8 {
+            0 => { fmt.write_str("1")?; }
+            1 => { fmt.write_str("2")?; }
+            2 => { fmt.write_str("3")?; }
+            3 => { fmt.write_str("4")?; }
+            4 => { fmt.write_str("5")?; }
+            5 => { fmt.write_str("6")?; }
+            6 => { fmt.write_str("7")?; }
+            7 => { fmt.write_str("8")?; }
+            _ => {}
+        }
+        Ok(())
+    }
+}

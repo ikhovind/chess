@@ -13,14 +13,14 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
     let index = if white { 1 } else { 0 };
     let opposing_pieces = if white { b.black_pieces } else { b.white_pieces };
     if white {
-        let mut pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[7]); // capture right
+        let mut pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[0]); // capture right
         for i in 0..64 {
             if ((pawn_moves >> i) & 1) == 1 {
                 list.push(Move::new_move(i - 9,i, true));
             }
         }
 
-        pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[0]); // capture left
+        pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[7]); // capture left
         for i in 0..64 {
             if ((pawn_moves>>i)&1)==1 {
                 list.push(Move::new_move(i-7,i, true));
