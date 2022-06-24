@@ -1,6 +1,7 @@
 use crate::{Board, Move};
 use crate::consts::board_consts::*;
 use crate::pieces::common_moves;
+use crate::pieces::king;
 
 pub fn watched_by_b(b: &Board, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
@@ -23,6 +24,9 @@ pub fn possible_b(b: &Board, white: bool) -> Vec<Move> {
     let opp = if white { b.black_pieces - b.pieces[K_INDEX as usize] } else { b.white_pieces - b.pieces[(K_INDEX + 1) as usize] };
 
     let mut list: Vec<Move> = Vec::new();
+    if king::is_double_check(b.attackers) {
+        return list;
+    }
     let bishops = b.pieces[(B_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & bishops != 0 {

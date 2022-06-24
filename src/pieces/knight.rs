@@ -5,6 +5,7 @@ use crate::pieces::pawn::watched_by_p;
 use crate::pieces::queen::watched_by_q;
 use crate::pieces::rook::watched_by_r;
 use crate::consts::board_consts::*;
+use crate::pieces::king;
 
 pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     let mut opposing_pieces: u64 = b.white_pieces;
@@ -16,6 +17,10 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
         index = 1;
     }
     let mut list: Vec<Move> = Vec::new();
+    if king::is_double_check(b.attackers) {
+        return list;
+    }
+
 
     let knights = b.pieces[(N_INDEX + index) as usize];
     for i in 0u8..64u8 {

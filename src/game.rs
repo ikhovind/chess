@@ -20,9 +20,9 @@ pub struct Board {
     pub(crate) black_short_c: bool,
     pub(crate) watched_squares_white: u64,
     pub(crate) watched_squares_black: u64,
-    pub(crate) check: bool,
     pub(crate) white_turn: bool,
     pub(crate) last_move: Move,
+    pub(crate) attackers: u64,
 }
 
 impl Board {
@@ -101,12 +101,14 @@ impl Board {
             black_short_c: true,
             watched_squares_black: 0,
             watched_squares_white: 0,
-            check: false,
             white_turn: true,
             last_move: Move::new_move(0,0, false),
+            attackers: 0,
         };
         b.watched_squares_black = b.watched(false);
         b.watched_squares_white = b.watched(true);
+        b.attackers = king::get_attackers(&b, b.white_turn);
+        b.update_metadata(Move::new_move(0, 0, false));
         return b;
     }
 
@@ -127,7 +129,6 @@ impl Board {
         let to_sq = 1 << (mv.to & MOVE_MASK);
         match mv_type {
             NORMAL_MOVE => {
-                self.check_castling_rights_after(color, from_sq, to_sq);
                 for i in (color as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & from_sq != 0 {
                         self.pieces[i] += to_sq;
@@ -142,7 +143,6 @@ impl Board {
             }
             TAKES => {
                 // white short castle
-                self.check_castling_rights_after(color, from_sq, to_sq);
                 for i in (color as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & to_sq != 0 {
                         self.pieces[i] += to_sq;
@@ -249,17 +249,19 @@ impl Board {
         return self;
     }
 
-    fn check_castling_rights_after(&mut self, color: u8, from_sq: u64, to_sq: u64) {
-        // white short castle
-        if (from_sq | to_sq)
-            & ((WHITE_SHORT_CASTLE_KING | WHITE_SHORT_CASTLE_ROOK)
-            | (BLACK_SHORT_CASTLE_KING | BLACK_SHORT_CASTLE_ROOK)) != 0 {
+    fn update_castling_rights(&mut self, white: bool) {
+        let color = if white { 1 } else { 0 };
+        // short castle
+        let short_rook = if white { WHITE_SHORT_CASTLE_ROOK } else { BLACK_SHORT_CASTLE_KING };
+        let long_rook = if white { WHITE_LONG_CASTLE_ROOK } else { BLACK_LONG_CASTLE_ROOK };
+        let king = if white { WHITE_KING } else { BLACK_KING };
+        if self.pieces[(R_INDEX + color) as usize] & short_rook == 0 || self.pieces[(K_INDEX + color) as usize] & king == 0 {
             self.castle_rights[(color * 2) as usize] = false;
-        } else if (from_sq | to_sq)
-            & ((WHITE_LONG_CASTLE_KING | WHITE_LONG_CASTLE_ROOK)
-            | (BLACK_LONG_CASTLE_KING | BLACK_LONG_CASTLE_ROOK)) != 0 {
+        }
+        if self.pieces[(R_INDEX + color) as usize] & long_rook == 0 || self.pieces[(K_INDEX + color) as usize] & king == 0 {
             self.castle_rights[(color * 2 + 1) as usize] = false;
         }
+        println!("castle rights: {:?}", self.castle_rights);
     }
 
     fn update_metadata(&mut self, mv: Move) {
@@ -277,17 +279,10 @@ impl Board {
         self.watched_squares_black = self.watched(false);
         self.watched_squares_white = self.watched(true);
 
-        let attacked_king = if self.white_turn { 0 } else { 1 };
-        let watch =
-            if self.white_turn {
-                self.watched_squares_white
-            }
-            else {
-                self.watched_squares_black
-            };
-        self.check = self.pieces[(K_INDEX + attacked_king) as usize] & watch != 0;
         self.white_turn = !self.white_turn;
         self.last_move = mv;
+        self.attackers = king::get_attackers(self, self.white_turn);
+        self.update_castling_rights(self.white_turn);
     }
 }
 

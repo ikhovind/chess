@@ -48,6 +48,8 @@ pub const BLACK_SHORT_CASTLE_KING: u64 = 1 << 62;
 pub const BLACK_SHORT_CASTLE_ROOK: u64 = 1 << 61;
 pub const BLACK_LONG_CASTLE_KING: u64 = 1 << 60;
 pub const BLACK_LONG_CASTLE_ROOK: u64 = 1 << 59;
+pub const BLACK_KING: u64 = 1 << 60;
+pub const WHITE_KING: u64 = 1 << 4;
 
 pub const TO_MASK: u8     = 0b00110000;
 pub const FROM_MASK: u8     = 0b11000000;

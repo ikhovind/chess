@@ -1,5 +1,6 @@
 
 use crate::game::FILE_MASKS;
+use crate::pieces::king;
 use crate::{Board, Move, print_u64_bitboard};
 use crate::mv::{BISHOP, KNIGHT, QUEEN, RANK_MASKS, ROOK};
 use crate::consts::board_consts::*;
@@ -11,6 +12,10 @@ fn white_shift(pawns: u64, dist: u8) -> u64 {
 pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
     let mut list: Vec<Move> = Vec::new();
     let index = if white { 1 } else { 0 };
+
+    if king::is_double_check(b.attackers) {
+        return list;
+    }
     let opposing_pieces = if white { b.black_pieces } else { b.white_pieces };
     if white {
         let mut pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[0]); // capture right

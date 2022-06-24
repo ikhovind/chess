@@ -44,8 +44,8 @@ fn get_all_moves(b: &Board) -> Vec<Move> {
     println!("queen: {}", pieces::queen::possible_q(b, b.white_turn).len());
     println!("king: {}", pieces::king::possible_k(b, b.white_turn).len());
     println!("pawn: {}", pieces::pawn::possible_p(b, b.white_turn).len());
-
      */
+
     let mut rook = pieces::rook::possible_r(b, b.white_turn);
     rook.append(&mut pieces::knight::possible_n(b, b.white_turn));
     rook.append(&mut pieces::bishop::possible_b(b, b.white_turn));

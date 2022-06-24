@@ -2,13 +2,17 @@ use crate::{Board, Move};
 use crate::pieces::common_moves;
 use crate::consts::board_consts::K_INDEX;
 use crate::consts::board_consts::*;
+use crate::pieces::king;
 
 pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
     let index = if white { 1 } else { 0 };
     let own = if white { b.white_pieces } else { b.black_pieces};
     let opp = if white { b.black_pieces - b.pieces[K_INDEX as usize] } else { b.white_pieces - b.pieces[(K_INDEX + 1) as usize]};
-
     let mut list: Vec<Move> = Vec::new();
+
+    if king::is_double_check(b.attackers) {
+        return list;
+    }
     let queens = b.pieces[(Q_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & queens != 0 {
