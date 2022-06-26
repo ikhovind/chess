@@ -122,6 +122,7 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
 
 pub fn get_attackers(b: &Board, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
+    if b.pieces[(K_INDEX + index) as usize] == 0 { return 0 };
     let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
     let attackers =
         pieces::knight::attacked_from(king_square) & b.pieces[(N_INDEX + 1 - index) as usize]

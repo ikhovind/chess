@@ -30,41 +30,6 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let mut b  = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
-    println!("num moves: {}", get_num_moves(b, 0));
-}
-
-fn get_all_moves(b: &Board) -> Vec<Move> {
-
-    /*
-    println!("rook: {}", pieces::rook::possible_r(b, b.white_turn).len());
-    println!("knight: {}", pieces::knight::possible_n(b, b.white_turn).len());
-    println!("bishop: {}", pieces::bishop::possible_b(b, b.white_turn).len());
-    println!("queen: {}", pieces::queen::possible_q(b, b.white_turn).len());
-    println!("king: {}", pieces::king::possible_k(b, b.white_turn).len());
-    println!("pawn: {}", pieces::pawn::possible_p(b, b.white_turn).len());
-     */
-
-    let mut rook = pieces::rook::possible_r(b, b.white_turn);
-    rook.append(&mut pieces::knight::possible_n(b, b.white_turn));
-    rook.append(&mut pieces::bishop::possible_b(b, b.white_turn));
-    rook.append(&mut pieces::queen::possible_q(b, b.white_turn));
-    rook.append(&mut pieces::king::possible_k(b, b.white_turn));
-    rook.append(&mut pieces::pawn::possible_p(b, b.white_turn));
-    return rook;
-}
-
-fn get_num_moves(b: Board, depth: u32) -> u64 {
-    let mut sum = 0;
-    let b2 = b.clone();
-    if depth == 1 {
-        return get_all_moves(&b2).len() as u64;
-    }
-    for nw in get_all_moves(&b) {
-        let &mut test = b.clone().make_move(nw);
-        let &mut test2 = b.clone().make_move(nw);
-        sum += get_num_moves(test, depth - 1);
-        if depth == 4 { println!("{}: {}", nw.to_string(), get_num_moves(test2, depth - 1));}
-    }
-    return sum;
+    let mut b  = Board::from_fen(String::from("8/5q2/8/8/2K5/8/8/8"));
+    print_u64_bitboard(b.ray_between(41, 25));
 }

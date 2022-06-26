@@ -17,7 +17,7 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
         if 2_u64.pow(i as u32) & rooks != 0 {
             let moves = !own & common_moves::h_and_vmoves(i, opp, own);
             for i2 in 0u8..64u8 {
-                if 2u64.pow(i2 as u32) & moves != 0 {
+                if 2u64.pow(i2 as u32) & moves & b.push_mask != 0 {
                     list.push(
                         Move::new_move(i, i2, opp & 2_u64.pow(i2 as u32) != 0)
                     );
@@ -45,7 +45,8 @@ pub fn watched_by_r(b: &Board, white: bool) -> u64 {
 pub fn attacked_from_square(b: &Board, square: u8, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
     let own = if white { b.white_pieces } else { b.black_pieces };
-    let moves = common_moves::h_and_vmoves(square, own - b.pieces[(K_INDEX + index) as usize], own);
+    let opp = if white { b.black_pieces } else { b.white_pieces };
+    let moves = common_moves::h_and_vmoves(square, opp - b.pieces[(K_INDEX + index) as usize], own);
 
     return moves;
 }

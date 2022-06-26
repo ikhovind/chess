@@ -19,7 +19,7 @@ pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
             let moves = !own & (common_moves::d_and_anti_d_moves(i, opp, own)
                 | common_moves::h_and_vmoves(i, opp, own));
             for i2 in 0u8..64u8 {
-                if 2u64.pow(i2 as u32) & moves != 0 {
+                if 2u64.pow(i2 as u32) & moves &b.push_mask != 0 {
                     list.push(
                         Move::new_move(i, i2, opp & 2_u64.pow(i2 as u32) != 0)
                     );

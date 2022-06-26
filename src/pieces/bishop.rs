@@ -30,7 +30,7 @@ pub fn possible_b(b: &Board, white: bool) -> Vec<Move> {
     let bishops = b.pieces[(B_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & bishops != 0 {
-            let moves = !own & common_moves::d_and_anti_d_moves(i, opp, own);
+            let moves = b.push_mask & !own & common_moves::d_and_anti_d_moves(i, opp, own);
             for i2 in 0u8..64u8 {
                 if 2u64.pow(i2 as u32) & moves != 0 {
                     list.push(

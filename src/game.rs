@@ -1,9 +1,11 @@
+use std::cmp::{max, min};
 pub use crate::consts::board_consts::{FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
 pub use crate::consts::board_consts::*;
-use crate::{print_u64_bitboard};
+use crate::{pieces, print_u64_bitboard};
 use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
 use crate::pieces::*;
 use crate::pieces::bishop;
+use crate::pieces::king::is_double_check;
 
 //[black, white]
 //[black short, black long, white short, white long]
@@ -23,6 +25,7 @@ pub struct Board {
     pub(crate) white_turn: bool,
     pub(crate) last_move: Move,
     pub(crate) attackers: u64,
+    pub(crate) push_mask: u64,
 }
 
 impl Board {
@@ -104,6 +107,7 @@ impl Board {
             white_turn: false,
             last_move: Move::new_move(0,0, false),
             attackers: 0,
+            push_mask: u64::MAX,
         };
         b.watched_squares_black = b.watched(false);
         b.watched_squares_white = b.watched(true);
@@ -281,7 +285,100 @@ impl Board {
         self.update_castling_rights(self.white_turn);
         self.white_turn = !self.white_turn;
         self.last_move = mv;
+
+        // set push mask
+        let index = if self.white_turn { 1 } else { 0 };
         self.attackers = king::get_attackers(self, self.white_turn);
+        if !king::is_double_check(self.attackers) && self.attackers != 0 {
+            self.push_mask = 0;
+            if (1 << (mv.to & MOVE_MASK)) & (self.pieces[(R_INDEX + 1) as usize] | self.pieces[(Q_INDEX + 1) as usize] | self.pieces[(B_INDEX + 1) as usize]) != 0 {
+                self.push_mask = self.ray_between((63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8, (63 - self.attackers.leading_zeros()) as u8);
+            }
+            else {
+                self.push_mask = 1 << (mv.to & MOVE_MASK);
+            }
+        }
+        else {
+            self.push_mask = u64::MAX;
+        }
+    }
+
+    fn get_all_moves(&self) -> Vec<Move> {
+
+        /*
+        println!("rook: {}", pieces::rook::possible_r(b, b.white_turn).len());
+        println!("knight: {}", pieces::knight::possible_n(b, b.white_turn).len());
+        println!("bishop: {}", pieces::bishop::possible_b(b, b.white_turn).len());
+        println!("queen: {}", pieces::queen::possible_q(b, b.white_turn).len());
+        println!("king: {}", pieces::king::possible_k(b, b.white_turn).len());
+        println!("pawn: {}", pieces::pawn::possible_p(b, b.white_turn).len());
+         */
+
+        let mut rook = rook::possible_r(self, self.white_turn);
+        rook.append(&mut knight::possible_n(self, self.white_turn));
+        rook.append(&mut bishop::possible_b(self, self.white_turn));
+        rook.append(&mut queen::possible_q(self, self.white_turn));
+        rook.append(&mut king::possible_k(self, self.white_turn));
+        rook.append(&mut pawn::possible_p(self, self.white_turn));
+        return rook;
+    }
+
+    pub fn get_num_moves(self, depth: u32) -> u64 {
+        let mut sum = 0;
+        let b2 = self.clone();
+        if depth == 1 {
+            return self.get_all_moves().len() as u64;
+        }
+        for nw in self.get_all_moves() {
+            let &mut test = self.clone().make_move(nw);
+            let &mut test2 = self.clone().make_move(nw);
+            sum += test.get_num_moves(depth - 1);
+            if depth == 4 { println!("{}: {}", nw.to_string(), test2.get_num_moves(depth - 1));}
+        }
+        return sum;
+    }
+
+    pub fn ray_between(self, attacker: u8, attacked: u8) -> u64 {
+        println!("ray between");
+        // same column
+        let mut max = max(attacker, attacked);
+        let min = min(attacker, attacked);
+        let mut ray = 0;
+        if attacker % 8 == attacked % 8 {
+            max -= 8;
+            while max != min {
+                ray |= (1 << max);
+                max -= 8;
+            }
+        }
+        // same row
+        else if attacker / 8 == attacked / 8 {
+            max -= 1;
+            while max != min {
+                ray |= (1 << max);
+                max -= 1;
+            }
+        }
+        // diagonal
+        else {
+            // to the left
+            if max % 8 < min % 8 {
+                max -= 7;
+                while max != min {
+                    ray |= (1 << max);
+                    max -= 7;
+                }
+            }
+            // to the right
+            else {
+                max -= 9;
+                while max != min {
+                    ray |= (1 << max);
+                    max -= 9;
+                }
+            }
+        }
+        return ray | (1 << attacker);
     }
 }
 
