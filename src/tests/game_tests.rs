@@ -16,9 +16,12 @@ fn sliding_moves() {
 #[test]
 fn move_gen() {
     let mut b  = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
+    /*
     assert_eq!(b.get_num_moves(1), 20);
     assert_eq!(b.get_num_moves(2), 400);
     assert_eq!(b.get_num_moves(3), 8902);
+
+     */
     assert_eq!(b.get_num_moves(4), 197281);
 }
 
@@ -51,8 +54,5 @@ fn pinned_rook_can_slide() {
 fn en_passant_discovered_check() {
     let mut b  = Board::from_fen(String::from("8/8/8/8/k2p3Q/8/2P5/2K5"));
     b.make_move(Move::new_move(10, 26, false));
-    for i in b.get_all_moves() {
-        println!("{}", i);
-    }
     assert_eq!(b.get_num_moves(1), 5);
 }

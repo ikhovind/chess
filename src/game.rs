@@ -134,7 +134,7 @@ impl Board {
         let color: u8 = if self.white_turn { 1 } else { 0 };
         let from_sq = 1 << (mv.from & MOVE_MASK);
         let to_sq = 1 << (mv.to & MOVE_MASK);
-        match mv_type {
+        match mv_type << 6 {
             NORMAL_MOVE => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & from_sq != 0 {
@@ -330,7 +330,6 @@ impl Board {
 
     pub fn get_num_moves(self, depth: u32) -> u64 {
         let mut sum = 0;
-        let b2 = self.clone();
         if depth == 1 {
             return self.get_all_moves().len() as u64;
         }
@@ -338,7 +337,9 @@ impl Board {
             let &mut test = self.clone().make_move(nw);
             let &mut test2 = self.clone().make_move(nw);
             sum += test.get_num_moves(depth - 1);
-            if depth == 4 { println!("{}: {}", nw.to_string(), test2.get_num_moves(depth - 1));}
+            if depth == 4 {
+                println!("{}: {}", nw.to_string(), test2.get_num_moves(depth - 1));
+            }
         }
         return sum;
     }
@@ -447,6 +448,6 @@ impl Board {
 impl PartialEq for Board {
     fn eq(&self, other: &Self) -> bool {
         self.pieces == other.pieces
-        || self.white_turn == other.white_turn
+        && self.white_turn == other.white_turn
     }
 }
