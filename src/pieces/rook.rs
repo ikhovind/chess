@@ -15,7 +15,7 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     }
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & rooks != 0 {
-            let moves = common_moves::h_and_vmoves(i, opp, own);
+            let moves = !own & common_moves::h_and_vmoves(i, opp, own);
             for i2 in 0u8..64u8 {
                 if 2u64.pow(i2 as u32) & moves != 0 {
                     list.push(

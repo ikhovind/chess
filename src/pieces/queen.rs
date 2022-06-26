@@ -16,8 +16,8 @@ pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
     let queens = b.pieces[(Q_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & queens != 0 {
-            let moves = common_moves::d_and_anti_d_moves(i, opp, own)
-                | common_moves::h_and_vmoves(i, opp, own);
+            let moves = !own & (common_moves::d_and_anti_d_moves(i, opp, own)
+                | common_moves::h_and_vmoves(i, opp, own));
             for i2 in 0u8..64u8 {
                 if 2u64.pow(i2 as u32) & moves != 0 {
                     list.push(

@@ -101,7 +101,7 @@ impl Board {
             black_short_c: true,
             watched_squares_black: 0,
             watched_squares_white: 0,
-            white_turn: true,
+            white_turn: false,
             last_move: Move::new_move(0,0, false),
             attackers: 0,
         };
@@ -261,7 +261,6 @@ impl Board {
         if self.pieces[(R_INDEX + color) as usize] & long_rook == 0 || self.pieces[(K_INDEX + color) as usize] & king == 0 {
             self.castle_rights[(color * 2 + 1) as usize] = false;
         }
-        println!("castle rights: {:?}", self.castle_rights);
     }
 
     fn update_metadata(&mut self, mv: Move) {
@@ -279,10 +278,10 @@ impl Board {
         self.watched_squares_black = self.watched(false);
         self.watched_squares_white = self.watched(true);
 
+        self.update_castling_rights(self.white_turn);
         self.white_turn = !self.white_turn;
         self.last_move = mv;
         self.attackers = king::get_attackers(self, self.white_turn);
-        self.update_castling_rights(self.white_turn);
     }
 }
 

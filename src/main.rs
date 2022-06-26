@@ -31,8 +31,7 @@ fn print_u64_bitboard(bitboard : u64) {
 
 fn main() {
     let mut b  = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
-    println!("sum: {}", get_num_moves(b,2));
-
+    println!("num moves: {}", get_num_moves(b, 0));
 }
 
 fn get_all_moves(b: &Board) -> Vec<Move> {
@@ -58,14 +57,14 @@ fn get_all_moves(b: &Board) -> Vec<Move> {
 fn get_num_moves(b: Board, depth: u32) -> u64 {
     let mut sum = 0;
     let b2 = b.clone();
-    if depth == 0 {
+    if depth == 1 {
         return get_all_moves(&b2).len() as u64;
     }
     for nw in get_all_moves(&b) {
         let &mut test = b.clone().make_move(nw);
         let &mut test2 = b.clone().make_move(nw);
         sum += get_num_moves(test, depth - 1);
-        if depth == 1 { println!("{}: {}", nw.to_string(), get_num_moves(test2, depth - 1));}
+        if depth == 4 { println!("{}: {}", nw.to_string(), get_num_moves(test2, depth - 1));}
     }
     return sum;
 }
