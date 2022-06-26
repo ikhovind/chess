@@ -1,6 +1,8 @@
+use std::borrow::BorrowMut;
 use crate::{Board, Move, print_u64_bitboard};
 use crate::pieces::common_moves;
 use crate::consts::board_consts::*;
+use crate::pieces::common_moves::h_and_vmoves;
 use crate::pieces::king;
 
 pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
@@ -15,7 +17,8 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     }
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & rooks != 0 {
-            let moves = !own & common_moves::h_and_vmoves(i, opp, own);
+            let pin_slide = if b.pinned_pieces & (1 << i) != 0 { b.get_pinning_ray(63u8 - (b.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i) } else { u64::MAX };
+            let moves = pin_slide & !own & common_moves::h_and_vmoves(i, opp, own);
             for i2 in 0u8..64u8 {
                 if 2u64.pow(i2 as u32) & moves & b.push_mask != 0 {
                     list.push(

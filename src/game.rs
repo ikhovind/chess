@@ -5,6 +5,7 @@ use crate::{pieces, print_u64_bitboard};
 use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
 use crate::pieces::*;
 use crate::pieces::bishop;
+use crate::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
 use crate::pieces::king::is_double_check;
 
 //[black, white]
@@ -26,6 +27,7 @@ pub struct Board {
     pub(crate) last_move: Move,
     pub(crate) attackers: u64,
     pub(crate) push_mask: u64,
+    pub(crate) pinned_pieces: u64,
 }
 
 impl Board {
@@ -108,6 +110,7 @@ impl Board {
             last_move: Move::new_move(0,0, false),
             attackers: 0,
             push_mask: u64::MAX,
+            pinned_pieces: 0,
         };
         b.watched_squares_black = b.watched(false);
         b.watched_squares_white = b.watched(true);
@@ -286,13 +289,15 @@ impl Board {
         self.white_turn = !self.white_turn;
         self.last_move = mv;
 
+        self.pinned_pieces = self.get_pinned_pieces(self.white_turn);
+
         // set push mask
         let index = if self.white_turn { 1 } else { 0 };
         self.attackers = king::get_attackers(self, self.white_turn);
         if !king::is_double_check(self.attackers) && self.attackers != 0 {
             self.push_mask = 0;
             if (1 << (mv.to & MOVE_MASK)) & (self.pieces[(R_INDEX + 1) as usize] | self.pieces[(Q_INDEX + 1) as usize] | self.pieces[(B_INDEX + 1) as usize]) != 0 {
-                self.push_mask = self.ray_between((63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8, (63 - self.attackers.leading_zeros()) as u8);
+                self.push_mask = self.ray_between( (63 - self.attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
             }
             else {
                 self.push_mask = 1 << (mv.to & MOVE_MASK);
@@ -303,15 +308,15 @@ impl Board {
         }
     }
 
-    fn get_all_moves(&self) -> Vec<Move> {
+    pub fn get_all_moves(&self) -> Vec<Move> {
 
         /*
-        println!("rook: {}", pieces::rook::possible_r(b, b.white_turn).len());
-        println!("knight: {}", pieces::knight::possible_n(b, b.white_turn).len());
-        println!("bishop: {}", pieces::bishop::possible_b(b, b.white_turn).len());
-        println!("queen: {}", pieces::queen::possible_q(b, b.white_turn).len());
-        println!("king: {}", pieces::king::possible_k(b, b.white_turn).len());
-        println!("pawn: {}", pieces::pawn::possible_p(b, b.white_turn).len());
+        println!("rook: {}", pieces::rook::possible_r(self, self.white_turn).len());
+        println!("knight: {}", pieces::knight::possible_n(self, self.white_turn).len());
+        println!("bishop: {}", pieces::bishop::possible_b(self, self.white_turn).len());
+        println!("queen: {}", pieces::queen::possible_q(self, self.white_turn).len());
+        println!("king: {}", pieces::king::possible_k(self, self.white_turn).len());
+        println!("pawn: {}", pieces::pawn::possible_p(self, self.white_turn).len());
          */
 
         let mut rook = rook::possible_r(self, self.white_turn);
@@ -338,13 +343,12 @@ impl Board {
         return sum;
     }
 
-    pub fn ray_between(self, attacker: u8, attacked: u8) -> u64 {
-        println!("ray between");
+    pub fn ray_between(self, attacker: u8, piece_square: u8) -> u64 {
         // same column
-        let mut max = max(attacker, attacked);
-        let min = min(attacker, attacked);
+        let mut max = max(attacker, piece_square);
+        let min = min(attacker, piece_square);
         let mut ray = 0;
-        if attacker % 8 == attacked % 8 {
+        if max % 8 == min % 8 {
             max -= 8;
             while max != min {
                 ray |= (1 << max);
@@ -352,7 +356,7 @@ impl Board {
             }
         }
         // same row
-        else if attacker / 8 == attacked / 8 {
+        else if max / 8 == min / 8 {
             max -= 1;
             while max != min {
                 ray |= (1 << max);
@@ -379,6 +383,64 @@ impl Board {
             }
         }
         return ray | (1 << attacker);
+    }
+
+    pub fn get_pinned_pieces(self, white: bool) -> u64 {
+        // todo kanskje bug siden opp fjerner kongen her men blir brukt som own
+        let index = if white { 1 } else { 0 };
+        let attacking_color = if white { self.black_pieces } else { self.white_pieces };
+        let def_color = if white { self.white_pieces } else { self.black_pieces };
+        let king_square: u8 = (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
+        let opp_diags = self.pieces[(B_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
+        let opp_line = self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
+        let king_diag =  DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
+        let king_anti_diag =  ANTI_DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
+        let mut pinned_pieces = 0;
+        for i in 0u8..64u8 {
+            if (1 << i) & opp_line != 0 {
+                if i % 8 == king_square % 8  {
+                    pinned_pieces |= (FILE_MASKS[(king_square % 8) as usize] & h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
+                }
+                else if (i / 8) == (king_square / 8)  {
+                    //print_u64_bitboard(h_and_vmoves(i, opp, own));
+                    pinned_pieces |= (RANK_MASKS[(king_square / 8) as usize] & h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
+                }
+            }
+            if (1 << i) & opp_diags != 0 {
+                if (1 << i) & king_diag != 0 {
+                    pinned_pieces |= king_diag & d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
+                }
+                else if (1 << i) & king_anti_diag != 0 {
+                    pinned_pieces |= king_anti_diag & d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
+                }
+            }
+        }
+        return pinned_pieces;
+    }
+    pub fn get_pinning_ray(self, king_square: u8, piece_square: u8) -> u64 {
+        // same column
+        let mut max = max(king_square, piece_square);
+        let min = min(king_square, piece_square);
+        let mut ray = 0;
+        if max % 8 == min % 8 {
+            return FILE_MASKS[(max % 8) as usize];
+        }
+        // same row
+        else if max / 8 == min / 8 {
+            return RANK_MASKS[(max / 8) as usize];
+        }
+        // diagonal
+        // to the left
+        else if (max - min) % 9 == 0 {
+            return ANTI_DIAGONAL_MASKS[(max % 8 + max / 8) as usize];
+        }
+        // to the right
+        else if (max - min) % 7 == 0 {
+            return DIAGONAL_MASKS[(max % 8 + max / 8) as usize];
+        }
+        else {
+            return 0;
+        }
     }
 }
 

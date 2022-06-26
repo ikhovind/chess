@@ -1,4 +1,4 @@
-use crate::{Board, Move};
+use crate::{Board, Move, print_u64_bitboard};
 use crate::pieces::common_moves;
 use crate::consts::board_consts::K_INDEX;
 use crate::consts::board_consts::*;
@@ -49,8 +49,9 @@ pub fn watched_by_q(b: &Board, white: bool) -> u64 {
 pub fn attacked_from_square(b: &Board, square: u8, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
     let own = if white { b.white_pieces } else { b.black_pieces };
-    let moves = common_moves::h_and_vmoves(square, own - b.pieces[(K_INDEX + index) as usize], own)
-        | common_moves::d_and_anti_d_moves(square, own - b.pieces[(K_INDEX + index) as usize], own);
+    let opp = if white { b.black_pieces } else { b.white_pieces };
+    let moves = common_moves::h_and_vmoves(square, opp - b.pieces[(K_INDEX + index) as usize], own)
+        | common_moves::d_and_anti_d_moves(square, opp - b.pieces[(K_INDEX + index) as usize], own);
 
     return moves;
 }

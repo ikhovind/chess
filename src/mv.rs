@@ -7,23 +7,23 @@ pub struct Move {
     // bit 7 and 8 are type of promotion / type of castle
     pub to: u8
 /*
-    00 11 - double push pawn
+pub const NORMAL_MOVE: u8 = 0;
+pub const DOUBLE_PAWN: u8 = 0b00010000;
+pub const TAKES: u8       = 0b00100000;
+pub const EN_PASSANT: u8 =  0b00110000; // - EP
 
-    10 10 - Takes
-    11 01 - EP
+pub const PROM_Q: u8      = 0b01000000; // - Queen
+pub const PROM_R: u8      = 0b01010000; // - Rook
+pub const PROM_B: u8      = 0b01100000; // - Bishop
+pub const PROM_N: u8      = 0b01110000; // - Knight
 
-    01 00 - Queen
-    01 01 - Rook
-    01 10 - Bishop
-    01 11 - Knight
+pub const TAKE_PROM_Q: u8 = 0b10000000; // - TAKES into Queen
+pub const TAKE_PROM_R: u8 = 0b10010000; // - TAKES into Rook
+pub const TAKE_PROM_B: u8 = 0b10100000; // - TAKES into Bishop
+pub const TAKE_PROM_N: u8 = 0b10110000; // - TAKES into Knight
 
-    11 00 - TAKES into Queen
-    11 01 - TAKES into Rook
-    11 10 - TAKES into Bishop
-    11 11 - TAKES into Knight
-
-    10 00 - short castle
-    10 01 - long castle
+pub const SHORT_CASTLE: u8= 0b11000000; // - short castle
+pub const LONG_CASTLE: u8 = 0b11010000; // - long castle
 */
 }
 pub static BASIS: u8 = 0b00111111;
@@ -38,13 +38,13 @@ impl Move {
         return Move {from: (_from & BASIS)
                 | (if is_capture {TAKES & FROM_MASK} else { 0 }),
             to: (_to & BASIS)
-                | (if is_capture {TAKES & TO_MASK} else { 0 })}
+                | (if is_capture {TAKES << 2} else { 0 })}
     }
 
     pub fn new_double_push(_from: u8, _to: u8) -> Move {
         return Move {
             from: (_from & BASIS) | (DOUBLE_PAWN & FROM_MASK),
-            to: (_to & BASIS) | (DOUBLE_PAWN & TO_MASK)
+            to: (_to & BASIS) | (DOUBLE_PAWN << 2)
         }
     }
 
@@ -52,7 +52,7 @@ impl Move {
         let typ;
         if !is_capture {
             // todo error handling
-            match (_from & FROM_MASK) & (_from & TO_MASK) {
+            match promote_to {
                 0 => typ = PROM_Q,
                 1 => typ = PROM_R,
                 2 => typ = PROM_B,
@@ -62,7 +62,7 @@ impl Move {
         }
         else {
             // todo error handling
-            match (_from & FROM_MASK) & (_from & TO_MASK) {
+            match promote_to {
                 0 => typ = TAKE_PROM_Q,
                 1 => typ = TAKE_PROM_R,
                 2 => typ = TAKE_PROM_B,
@@ -70,29 +70,26 @@ impl Move {
                 _ => typ = TAKE_PROM_Q
             }
         }
-        return Move {from: (_from & BASIS)
-            | (typ & FROM_MASK),
-            to: (_to & BASIS)
-                | (typ & TO_MASK)
+        return Move {from: (_from & BASIS) | (typ & FROM_MASK), to: (_to & BASIS) | (typ << 2)
         }
     }
 
     pub fn new_ep(_from: u8, _to:u8) -> Move{
         return Move {
             from: (_from & BASIS) | (EN_PASSANT & FROM_MASK),
-            to: (_to & BASIS) | (EN_PASSANT & TO_MASK)}
+            to: (_to & BASIS) | (EN_PASSANT << 2)}
     }
 
     pub fn new_castle(_from: u8, _to:u8) -> Move {
         let typ = if _to == 62 || _to == 6 { SHORT_CASTLE } else { LONG_CASTLE };
         return Move {
             from: (_from & BASIS) | (typ & FROM_MASK),
-            to: (_to & BASIS) | (typ & TO_MASK),
+            to: (_to & BASIS) | (typ << 2),
         }
     }
 
     pub fn last_move_was_double_push(m: Move) -> bool {
-        return (m.to & TO_MASK) | (m.from & FROM_MASK) == DOUBLE_PAWN ;
+        return (m.to << 2) | (m.from & FROM_MASK) == DOUBLE_PAWN ;
     }
 }
 
