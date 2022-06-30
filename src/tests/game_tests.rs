@@ -20,6 +20,18 @@ fn move_gen() {
     assert_eq!(b.get_num_moves(2), 400);
     assert_eq!(b.get_num_moves(3), 8902);
     assert_eq!(b.get_num_moves(4), 197281);
+    assert_eq!(b.get_num_moves(5), 9531373);
+}
+
+#[test]
+fn pos_5_perft() {
+    // https://www.chessprogramming.org/Perft_Results
+    let mut b  = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R"));
+    assert_eq!(b.get_num_moves(1), 44);
+    assert_eq!(b.get_num_moves(2), 1486);
+    assert_eq!(b.get_num_moves(3), 62379);
+    assert_eq!(b.get_num_moves(4), 2103487);
+    assert_eq!(b.get_num_moves(5),  89941194);
 }
 
 #[test]
