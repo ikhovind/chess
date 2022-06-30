@@ -51,7 +51,7 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
 
             let moves =
                 (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8)
-                    & !own_pieces & b.push_mask;
+                    & !own_pieces & b.push_mask & b.get_pinned_slide(i);
             for i2 in 0u8..64u8 {
                 if 2u64.pow(i2 as u32) & moves != 0 {
                     list.push(

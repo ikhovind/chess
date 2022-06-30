@@ -39,8 +39,9 @@ pub fn watched_by_q(b: &Board, white: bool) -> u64 {
     let queens = b.pieces[(Q_INDEX + index) as usize];
     for i in 0u8..64u8 {
         if 2_u64.pow(i as u32) & queens != 0 {
-            moves |= common_moves::d_and_anti_d_moves(i, opp, own)
-                | common_moves::h_and_vmoves(i, opp, own);
+            moves |= (common_moves::d_and_anti_d_moves(i, opp, own)
+                | common_moves::h_and_vmoves(i, opp, own))
+                & b.get_pinned_slide(i);
         }
     }
     return moves;

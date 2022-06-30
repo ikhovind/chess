@@ -399,7 +399,8 @@ impl Board {
         let opp_diags = self.pieces[(B_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
         let opp_line = self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
         let king_diag =  DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
-        let king_anti_diag =  ANTI_DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
+        // todo maybe bug
+        let king_anti_diag =  ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
         let mut pinned_pieces = 0;
         for i in 0u8..64u8 {
             if (1 << i) & opp_line != 0 {
@@ -446,6 +447,10 @@ impl Board {
         else {
             return 0;
         }
+    }
+    pub fn get_pinned_slide(self, i: u8) -> u64 {
+        let index = if self.white_turn { 1 } else { 0 };
+        return if self.pinned_pieces & (1 << i) != 0 { self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i) } else { u64::MAX };
     }
 }
 
