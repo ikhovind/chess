@@ -25,6 +25,7 @@ fn move_gen() {
 #[test]
 fn blocks_check() {
     let mut b  = Board::from_fen(String::from("1k6/3r4/8/5R2/8/3K4/8/8"));
+
     assert_eq!(b.get_num_moves(1), 7);
 }
 

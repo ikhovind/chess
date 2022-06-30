@@ -1,12 +1,13 @@
 #[cfg(test)]
 use crate::{Board, Move, pieces, print_u64_bitboard};
+use crate::pieces::king;
 use crate::pieces::king::possible_k;
 use crate::R_INDEX;
 // Note this useful idiom: importing names from outer (for mod tests) scope.
 
 #[test]
 fn detects_actual_double_check() {
-    let b = Board::from_fen(String::from("2p5/3K4/8/4n3/8/8/8/8"));
+    let b = Board::from_fen(String::from("2p5/3K4/8/4n3/8/8/8/k7"));
     assert_eq!(pieces::king::is_double_check(pieces::king::get_attackers(&b, true)), true);
 }
 
