@@ -126,10 +126,10 @@ pub fn get_attackers(b: &Board, white: bool) -> u64 {
     let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
     let attackers =
         pieces::knight::attacked_from(king_square) & b.pieces[(N_INDEX + 1 - index) as usize]
-        | pieces::bishop::attacked_from_square(b, king_square, !white) & b.pieces[(B_INDEX + 1 - index) as usize]
-        | pieces::pawn::attacked_from_square(king_square, !white) & b.pieces[(P_INDEX + 1 - index) as usize]
-        | pieces::queen::attacked_from_square(b, king_square, !white) & b.pieces[(Q_INDEX + 1 - index) as usize]
-        | pieces::rook::attacked_from_square(b, king_square, !white) & b.pieces[(R_INDEX + 1 - index) as usize];
+        | pieces::bishop::attacked_from_square(b, king_square, white) & b.pieces[(B_INDEX + 1 - index) as usize]
+        | pieces::pawn::attacked_from_square(king_square, white) & b.pieces[(P_INDEX + 1 - index) as usize]
+        | pieces::queen::attacked_from_square(b, king_square, white) & b.pieces[(Q_INDEX + 1 - index) as usize]
+        | pieces::rook::attacked_from_square(b, king_square, white) & b.pieces[(R_INDEX + 1 - index) as usize];
     return attackers;
 }
 

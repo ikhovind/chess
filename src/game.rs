@@ -134,7 +134,7 @@ impl Board {
         let color: u8 = if self.white_turn { 1 } else { 0 };
         let from_sq = 1 << (mv.from & MOVE_MASK);
         let to_sq = 1 << (mv.to & MOVE_MASK);
-        match mv_type << 6 {
+        match mv_type {
             NORMAL_MOVE => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & from_sq != 0 {
@@ -149,13 +149,12 @@ impl Board {
                 self.pieces[(P_INDEX + color) as usize] += to_sq;
             }
             TAKES => {
-                // white short castle
                 for i in (color as usize..self.pieces.len()).step_by(2) {
-                    if self.pieces[i] & to_sq != 0 {
+                    if self.pieces[i] & from_sq != 0 {
+                        self.pieces[i] += to_sq;
+                        self.pieces[i] -= from_sq;
                         for i2 in ((1 - color) as usize..self.pieces.len()).step_by(2) {
                             if self.pieces[i2] & to_sq != 0 {
-                                self.pieces[i] += to_sq;
-                                self.pieces[i] -= from_sq;
                                 self.pieces[i2] -= to_sq;
                                 break;
                             }
