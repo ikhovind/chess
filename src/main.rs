@@ -30,6 +30,8 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let mut b  = Board::from_fen(String::from("8/5q2/8/8/2K5/8/8/8"));
-    print_u64_bitboard(b.ray_between(41, 25));
+    let mut b  = Board::from_fen(String::from("rnbqkbnr/p1pppppp/8/1p6/8/N7/PPPPPPPP/R1BQKBNR"));
+    b.white_turn = false;
+    b.make_move(Move::new_move(16, 33, true));
+    println!("num: {}", b.get_all_moves().len());
 }

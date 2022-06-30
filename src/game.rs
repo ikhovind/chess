@@ -130,7 +130,7 @@ impl Board {
     }
 
     pub fn make_move(&mut self, mv: Move) -> &mut Board {
-        let mv_type = ((mv.from >> 4) & 0b1100) | (mv.to >> 6);
+        let mv_type = mv.from & TYPE_MASK | ((mv.to & TYPE_MASK) >> 2);
         let color: u8 = if self.white_turn { 1 } else { 0 };
         let from_sq = 1 << (mv.from & MOVE_MASK);
         let to_sq = 1 << (mv.to & MOVE_MASK);
@@ -152,11 +152,11 @@ impl Board {
                 // white short castle
                 for i in (color as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & to_sq != 0 {
-                        self.pieces[i] += to_sq;
-                        self.pieces[i] -= from_sq;
-                        for i in ((1 - color) as usize..self.pieces.len()).step_by(2) {
-                            if self.pieces[i] & to_sq != 0 {
-                                self.pieces[i] -= to_sq;
+                        for i2 in ((1 - color) as usize..self.pieces.len()).step_by(2) {
+                            if self.pieces[i2] & to_sq != 0 {
+                                self.pieces[i] += to_sq;
+                                self.pieces[i] -= from_sq;
+                                self.pieces[i2] -= to_sq;
                                 break;
                             }
                         }
@@ -306,6 +306,7 @@ impl Board {
         else {
             self.push_mask = u64::MAX;
         }
+
     }
 
     pub fn get_all_moves(&self) -> Vec<Move> {
@@ -329,6 +330,10 @@ impl Board {
     }
 
     pub fn get_num_moves(self, depth: u32) -> u64 {
+        return self.get_num_moves_inner(depth, depth);
+    }
+
+    fn get_num_moves_inner(self, depth: u32, initial: u32) -> u64 {
         let mut sum = 0;
         if depth == 1 {
             return self.get_all_moves().len() as u64;
@@ -336,9 +341,9 @@ impl Board {
         for nw in self.get_all_moves() {
             let &mut test = self.clone().make_move(nw);
             let &mut test2 = self.clone().make_move(nw);
-            sum += test.get_num_moves(depth - 1);
-            if depth == 4 {
-                println!("{}: {}", nw.to_string(), test2.get_num_moves(depth - 1));
+            sum += test.get_num_moves_inner(depth - 1, initial);
+            if depth == initial {
+                println!("{}: {}", nw.to_string(), test2.get_num_moves_inner(depth - 1, initial));
             }
         }
         return sum;

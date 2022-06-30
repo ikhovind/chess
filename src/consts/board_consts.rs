@@ -53,6 +53,7 @@ pub const WHITE_KING: u64 = 1 << 4;
 
 pub const TO_MASK: u8     = 0b00110000;
 pub const FROM_MASK: u8     = 0b11000000;
+pub const TYPE_MASK: u8     = 0b11000000;
 pub const MOVE_MASK: u8 = 0b00111111;
 
 pub const NORMAL_MOVE: u8 = 0;
