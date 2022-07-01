@@ -6,7 +6,7 @@ use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
 use crate::pieces::*;
 use crate::pieces::bishop;
 use crate::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
-use crate::pieces::king::is_double_check;
+use crate::pieces::king::{get_attackers, is_double_check};
 
 //[black, white]
 //[black short, black long, white short, white long]
@@ -318,7 +318,6 @@ impl Board {
         println!("king: {}", pieces::king::possible_k(self, self.white_turn).len());
         println!("pawn: {}", pieces::pawn::possible_p(self, self.white_turn).len());
          */
-
         let mut rook = rook::possible_r(self, self.white_turn);
         rook.append(&mut knight::possible_n(self, self.white_turn));
         rook.append(&mut bishop::possible_b(self, self.white_turn));
