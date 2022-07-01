@@ -5,7 +5,7 @@ mod consts;
 mod tests;
 
 use crate::game::Board;
-use crate::mv::{ANTI_DIAGONAL_MASKS, Move, P_INDEX, Q_INDEX, R_INDEX};
+use crate::mv::{ANTI_DIAGONAL_MASKS, Move, P_INDEX, Q_INDEX, R_INDEX, ROOK};
 
 fn print_u64_bitboard(bitboard : u64) {
     println!();
@@ -30,9 +30,8 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let mut b  = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R"));
-    b.make_move(Move::new_move(2, 20, false));
-
+    let mut b  = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  "));
+    b.make_move(Move::new_promotion(51, 58, true, ROOK));
     println!("num {}", b.get_all_moves().len());
-    //b.get_num_moves(2);
+    //println!("num: {}", b.get_num_moves(2));
 }
