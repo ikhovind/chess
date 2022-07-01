@@ -27,10 +27,6 @@ pub const LONG_CASTLE: u8 = 0b11010000; // - long castle
 */
 }
 pub static BASIS: u8 = 0b00111111;
-pub static QUEEN: u8 = 0b00000000;
-pub static ROOK: u8 = 0b01000000;
-pub static BISHOP: u8 = 0b10000000;
-pub static KNIGHT: u8 = 0b11000000;
 
 
 impl Move {
@@ -144,6 +140,21 @@ impl fmt::Display for Move {
             6 => { fmt.write_str("7")?; }
             7 => { fmt.write_str("8")?; }
             _ => { fmt.write_str("error")?; }
+        }
+        match (self.from & TYPE_MASK | ((self.to & TYPE_MASK) >> 2)) {
+             PROM_Q => {
+                 fmt.write_str("q");
+             }
+             PROM_R => { fmt.write_str("r");}
+             PROM_B => { fmt.write_str("b");}
+             PROM_N => { fmt.write_str("n");}
+             TAKE_PROM_Q => {
+                 fmt.write_str("q");
+             }
+             TAKE_PROM_R => { fmt.write_str("r");}
+             TAKE_PROM_B => { fmt.write_str("b");}
+             TAKE_PROM_N => { fmt.write_str("n");}
+        _ => {  }
         }
         Ok(())
     }

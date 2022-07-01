@@ -61,6 +61,11 @@ pub const DOUBLE_PAWN: u8 = 0b00010000;
 pub const TAKES: u8       = 0b00100000;
 pub const EN_PASSANT: u8 =  0b00110000; // - EP
 
+pub static QUEEN: u8 = 0;
+pub static ROOK: u8 = 1;
+pub static BISHOP: u8 = 2;
+pub static KNIGHT: u8 = 3;
+
 pub const PROM_Q: u8      = 0b01000000; // - Queen
 pub const PROM_R: u8      = 0b01010000; // - Rook
 pub const PROM_B: u8      = 0b01100000; // - Bishop

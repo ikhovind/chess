@@ -30,10 +30,7 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let mut b  = Board::from_fen(String::from("rnbqkbnr/ppppppp1/8/7p/8/4P3/PPPP1PPP/RNBQKBNR w KQkq - 0 2"));
-    b.make_move(Move::new_move(5, 33, false));
-    //b.white_turn = false;
-    //b.make_move(Move::new_move(3, 24, false));
-    println!("{:?}", b.get_all_moves().len());
-
+    let mut b  = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R"));
+    // e1g1 mangler
+    println!("num {}", b.get_num_moves(2));
 }
