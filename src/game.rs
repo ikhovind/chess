@@ -428,6 +428,7 @@ impl Board {
         let mut max = max(king_square, piece_square);
         let min = min(king_square, piece_square);
         let mut ray = 0;
+
         if max % 8 == min % 8 {
             return FILE_MASKS[(max % 8) as usize];
         }
@@ -438,7 +439,7 @@ impl Board {
         // diagonal
         // to the left
         else if (max - min) % 9 == 0 {
-            return ANTI_DIAGONAL_MASKS[(max % 8 + max / 8) as usize];
+            return ANTI_DIAGONAL_MASKS[((7 - max % 8) + max / 8) as usize];
         }
         // to the right
         else if (max - min) % 7 == 0 {

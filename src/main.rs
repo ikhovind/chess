@@ -31,7 +31,7 @@ fn print_u64_bitboard(bitboard : u64) {
 
 fn main() {
     let mut b  = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  "));
-    b.make_move(Move::new_promotion(51, 58, true, ROOK));
-    println!("num {}", b.get_all_moves().len());
-    //println!("num: {}", b.get_num_moves(2));
+    b.make_move(Move::new_move(3, 43, false));
+    //println!("num {}", b.get_all_moves().len());
+    println!("num: {}", b.get_num_moves(1));
 }

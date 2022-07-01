@@ -1,4 +1,4 @@
-use crate::{Board, Move};
+use crate::{Board, Move, print_u64_bitboard};
 use crate::consts::board_consts::*;
 use crate::pieces::common_moves;
 use crate::pieces::king;
