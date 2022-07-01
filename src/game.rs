@@ -295,17 +295,17 @@ impl Board {
         self.attackers = king::get_attackers(self, self.white_turn);
         if !king::is_double_check(self.attackers) && self.attackers != 0 {
             self.push_mask = 0;
-            if (1 << (mv.to & MOVE_MASK)) & (self.pieces[(R_INDEX + 1) as usize] | self.pieces[(Q_INDEX + 1) as usize] | self.pieces[(B_INDEX + 1) as usize]) != 0 {
+            // hvis brikken som ble flytta er en glider
+            if (1 << (63 - self.attackers.leading_zeros())) & (self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize] | self.pieces[(B_INDEX + 1 - index) as usize]) != 0 {
                 self.push_mask = self.ray_between( (63 - self.attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
             }
             else {
-                self.push_mask = 1 << (mv.to & MOVE_MASK);
+                self.push_mask = 1 << (63 - self.attackers.leading_zeros());
             }
         }
         else {
             self.push_mask = u64::MAX;
         }
-
     }
 
     pub fn get_all_moves(&self) -> Vec<Move> {
@@ -421,7 +421,7 @@ impl Board {
                 }
             }
         }
-        return pinned_pieces;
+        return pinned_pieces & def_color;
     }
     pub fn get_pinning_ray(self, king_square: u8, piece_square: u8) -> u64 {
         // same column
@@ -450,7 +450,11 @@ impl Board {
     }
     pub fn get_pinned_slide(self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
-        return if self.pinned_pieces & (1 << i) != 0 { self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i) } else { u64::MAX };
+        if self.pinned_pieces & (1 << i) != 0 {
+            return self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i)
+        } else {
+            return u64::MAX;
+        };
     }
 }
 

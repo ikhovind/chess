@@ -67,14 +67,16 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
             let moves = (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
                 spot_7 | spot_8) & !own_pieces & !opponent_watching;
 
-            // long castle
-            if b.castle_rights[(index * 2 + 1) as usize] && (long_castle && !long_castle_sq.iter().any(|&x| (x & ((b.white_pieces - b.pieces[(K_INDEX + 1) as usize]) | (b.black_pieces - b.pieces[(K_INDEX + 0) as usize])) != 0))) {
-                list.push(Move::new_castle(if white { 4 } else { 60 }, if white { 2 } else { 58 }));
-            }
+            if b.attackers == 0 {
+                // long castle
+                if b.castle_rights[(index * 2 + 1) as usize] && (long_castle && !long_castle_sq.iter().any(|&x| (x & ((b.white_pieces - b.pieces[(K_INDEX + 1) as usize]) | (b.black_pieces - b.pieces[(K_INDEX + 0) as usize])) != 0))) {
+                    list.push(Move::new_castle(if white { 4 } else { 60 }, if white { 2 } else { 58 }));
+                }
 
-            // short castle
-            if b.castle_rights[(index * 2) as usize] && (short_castle && !short_castle_sq.iter().any(|&x| (x & ((b.white_pieces - b.pieces[(K_INDEX + 1) as usize]) | (b.black_pieces - b.pieces[K_INDEX as usize])) != 0))) {
-                list.push(Move::new_castle(if white { 4 } else { 60 }, if white {6} else { 62 }));
+                // short castle
+                if b.castle_rights[(index * 2) as usize] && (short_castle && !short_castle_sq.iter().any(|&x| (x & ((b.white_pieces - b.pieces[(K_INDEX + 1) as usize]) | (b.black_pieces - b.pieces[K_INDEX as usize])) != 0))) {
+                    list.push(Move::new_castle(if white { 4 } else { 60 }, if white { 6 } else { 62 }));
+                }
             }
 
             for i2 in 0u8..64u8 {

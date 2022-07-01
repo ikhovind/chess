@@ -159,8 +159,15 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
 
 pub fn watched_by_p(b: &Board, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
-    let mut pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 9) & (!RANK_MASKS[7]) & (!FILE_MASKS[0]); // capture right
-    pawn_moves = pawn_moves | ((b.pieces[(P_INDEX + index) as usize] << 7) & (!RANK_MASKS[7]) & (!FILE_MASKS[7])); // capture left
+    let mut pawn_moves;
+    if white {
+        pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 9) & (!FILE_MASKS[0]); // capture right
+        pawn_moves |= ((b.pieces[(P_INDEX + index) as usize] << 7) & (!FILE_MASKS[7])); // capture left
+    }
+    else {
+        pawn_moves = (b.pieces[(P_INDEX + index) as usize] >> 9) & (!FILE_MASKS[7]); // capture right
+        pawn_moves = pawn_moves | ((b.pieces[(P_INDEX + index) as usize] >> 7) & (!FILE_MASKS[0])); // capture left
+    }
 
     return pawn_moves;
 }
