@@ -178,8 +178,8 @@ pub fn attacked_from_square(square: u8, white: bool) -> u64 {
         pawn_moves = (s >> 9) & (!FILE_MASKS[7]); // capture right
         pawn_moves = pawn_moves | ((s >> 7) & (!FILE_MASKS[0])); // capture left
     } else {
-        pawn_moves = (s << 9) & (!FILE_MASKS[7]); // capture right
-        pawn_moves = pawn_moves | ((s << 7) & (!FILE_MASKS[0])); // capture left
+        pawn_moves = (s << 9) & (!FILE_MASKS[0]); // capture right
+        pawn_moves = pawn_moves | ((s << 7) & (!FILE_MASKS[7])); // capture left
     }
 
 

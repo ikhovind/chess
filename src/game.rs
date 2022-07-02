@@ -9,6 +9,7 @@ use crate::pieces::*;
 use crate::pieces::bishop;
 use crate::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
 use crate::pieces::king::{get_attackers, is_double_check};
+use crate::print_u64_bitboard;
 
 //[black, white]
 //[black short, black long, white short, white long]
@@ -131,8 +132,8 @@ impl Board {
             NORMAL_MOVE => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & from_sq != 0 {
-                        self.pieces[i] += to_sq;
                         self.pieces[i] -= from_sq;
+                        self.pieces[i] += to_sq;
                         break;
                     }
                 }
@@ -144,11 +145,11 @@ impl Board {
             TAKES => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & from_sq != 0 {
-                        self.pieces[i] += to_sq;
-                        self.pieces[i] -= from_sq;
                         for i2 in ((1 - color) as usize..self.pieces.len()).step_by(2) {
                             if self.pieces[i2] & to_sq != 0 {
                                 self.pieces[i2] -= to_sq;
+                                self.pieces[i] += to_sq;
+                                self.pieces[i] -= from_sq;
                                 break;
                             }
                         }
@@ -162,9 +163,9 @@ impl Board {
                     } else {
                         to_sq >> 8
                     };
+                self.pieces[(P_INDEX + (1 - color)) as usize] -= opp;
                 self.pieces[(P_INDEX + color) as usize] -= from_sq;
                 self.pieces[(P_INDEX + color) as usize] += to_sq;
-                self.pieces[(P_INDEX + (1 - color)) as usize] -= opp;
             }
             PROM_Q => {
                 self.pieces[(P_INDEX + color) as usize] -= from_sq;
@@ -226,9 +227,9 @@ impl Board {
                 }
             }
             SHORT_CASTLE => {
+                self.pieces[(R_INDEX + color) as usize] -= to_sq << 1;
                 self.pieces[(K_INDEX + color) as usize] -= from_sq;
                 self.pieces[(K_INDEX + color) as usize] += to_sq;
-                self.pieces[(R_INDEX + color) as usize] -= to_sq << 1;
                 self.pieces[(R_INDEX + color) as usize] += from_sq << 1;
                 self.castle_rights[(color * 2 + 1) as usize] = false;
                 self.castle_rights[(color * 2) as usize] = false;

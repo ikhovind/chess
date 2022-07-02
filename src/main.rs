@@ -7,6 +7,8 @@ use std::time::Instant;
 use num_format::{Locale, WriteFormatted};
 use num_format::Locale::el;
 use crate::game::Board;
+use crate::mv::Move;
+
 pub mod game;
 mod mv;
 mod pieces;
@@ -68,5 +70,6 @@ fn test(fen: String, depth: u32) {
 }
 
 fn main() {
-    test(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "), 5);
+    let mut b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
+    println!("{}", b.get_num_moves(7));
 }
