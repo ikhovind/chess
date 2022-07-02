@@ -258,8 +258,8 @@ impl Board {
     fn update_castling_rights(&mut self, white: bool) {
         let color = if white { 1 } else { 0 };
         // short castle
-        let short_rook = if white { WHITE_SHORT_CASTLE_ROOK } else { BLACK_SHORT_CASTLE_KING };
-        let long_rook = if white { WHITE_LONG_CASTLE_ROOK } else { BLACK_LONG_CASTLE_ROOK };
+        let short_rook = if white { WHITE_SHORT_ORG_ROOK } else { BLACK_SHORT_ORG_ROOK };
+        let long_rook = if white { WHITE_LONG_ORG_ROOK } else { BLACK_LONG_ORG_ROOK };
         let king = if white { WHITE_KING } else { BLACK_KING };
         if self.pieces[(R_INDEX + color) as usize] & short_rook == 0 || self.pieces[(K_INDEX + color) as usize] & king == 0 {
             self.castle_rights[(color * 2) as usize] = false;
