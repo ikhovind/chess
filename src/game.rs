@@ -216,7 +216,7 @@ impl Board {
             }
             TAKE_PROM_N => {
                 self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(N_INDEX + color) as usize] -= to_sq;
+                self.pieces[(N_INDEX + color) as usize] += to_sq;
 
                 for i in ((1 - color) as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & to_sq != 0 {
@@ -228,14 +228,17 @@ impl Board {
             SHORT_CASTLE => {
                 self.pieces[(K_INDEX + color) as usize] -= from_sq;
                 self.pieces[(K_INDEX + color) as usize] += to_sq;
-                self.pieces[(R_INDEX + color) as usize] -= from_sq << 1;
+                self.pieces[(R_INDEX + color) as usize] -= to_sq << 1;
+                self.pieces[(R_INDEX + color) as usize] += from_sq << 1;
                 self.castle_rights[(color * 2 + 1) as usize] = false;
                 self.castle_rights[(color * 2) as usize] = false;
             }
             LONG_CASTLE => {
                 self.pieces[(K_INDEX + color) as usize] -= from_sq;
                 self.pieces[(K_INDEX + color) as usize] += to_sq;
-                self.pieces[(R_INDEX + color) as usize] -= from_sq >> 2;
+
+                self.pieces[(R_INDEX + color) as usize] += to_sq << 1;
+                self.pieces[(R_INDEX + color) as usize] -= to_sq >> 2;
                 self.castle_rights[(color * 2 + 1) as usize] = false;
                 self.castle_rights[(color * 2) as usize] = false;
             }
@@ -302,8 +305,7 @@ impl Board {
     }
 
     pub fn get_all_moves(&self) -> Vec<Move> {
-
-        /*
+/*
         println!("rook: {}", pieces::rook::possible_r(self, self.white_turn).len());
         println!("knight: {}", pieces::knight::possible_n(self, self.white_turn).len());
         println!("bishop: {}", pieces::bishop::possible_b(self, self.white_turn).len());
@@ -311,6 +313,7 @@ impl Board {
         println!("king: {}", pieces::king::possible_k(self, self.white_turn).len());
         println!("pawn: {}", pieces::pawn::possible_p(self, self.white_turn).len());
          */
+
         let mut rook = rook::possible_r(self, self.white_turn);
         rook.append(&mut knight::possible_n(self, self.white_turn));
         rook.append(&mut bishop::possible_b(self, self.white_turn));

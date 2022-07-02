@@ -48,7 +48,7 @@ pub fn attacked_from_square(b: &Board, square: u8, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
     let own = if white { b.white_pieces } else { b.black_pieces };
     let opp = if white { b.black_pieces } else { b.white_pieces };
-    let moves = common_moves::h_and_vmoves(square, opp - b.pieces[(K_INDEX + index) as usize], own);
+    let moves = h_and_vmoves(square, opp - b.pieces[(K_INDEX + 1 - index) as usize], own);
 
     return moves;
 }

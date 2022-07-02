@@ -67,6 +67,14 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
             let moves = (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
                 spot_7 | spot_8) & !own_pieces & !opponent_watching;
 
+            if white {
+                /*
+                print_u64_bitboard(b.pieces[(R_INDEX + 1) as usize]);
+                print_u64_bitboard(opponent_watching);
+                print_u64_bitboard(moves);
+
+                 */
+            }
             if b.attackers == 0 {
                 // long castle
                 if b.castle_rights[(index * 2 + 1) as usize] && (long_castle && !long_castle_sq.iter().any(|&x| (x & ((b.white_pieces - b.pieces[(K_INDEX + 1) as usize]) | (b.black_pieces - b.pieces[(K_INDEX + 0) as usize]) | (opponent_watching & x)) != 0))) {
