@@ -35,7 +35,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
         pawn_moves = b.push_mask & (((b.pieces[(P_INDEX + index) as usize] << 16) & (b.empty & (b.empty << 8))) & RANK_MASKS[3]);//move 2 forward
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 16) & ((1u64 << i))) != 0 {
-                list.push(Move::new_move(i - 16, i, false));
+                list.push(Move::new_double_push(i - 16, i));
             }
         }
         //y1,y2,Promotion Type,"P"
@@ -77,10 +77,9 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
             }
         }
 
-        pawn_moves = (b.push_mask << 8) & (((b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces << 8) & (RANK_MASKS[5]) & (!FILE_MASKS[0])) & if Move::last_move_was_double_push(b.last_move) { (1 << (b.last_move.from & MOVE_MASK) as u32) >> 8 } else { 0 }); // capture left
+        pawn_moves = (b.push_mask << 8) & (((b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces << 8) & (RANK_MASKS[5]) & (!FILE_MASKS[7])) & if Move::last_move_was_double_push(b.last_move) { (1 << (b.last_move.from & MOVE_MASK) as u32) >> 8 } else { 0 }); // capture left
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 7) & ((1u64 << i))) != 0 && check_ep_legal(b, 1 << (i - 7), 1 << (i - 8), true) {
-                println!("ep2");
                 list.push(Move::new_ep(i - 7, i));
             }
         }
@@ -196,8 +195,8 @@ fn check_ep_legal(b: &Board, move_piece: u64, taken_piece: u64, white: bool) -> 
     let own = if white { b.white_pieces - move_piece } else { b.black_pieces - move_piece };
     let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
 
-    let d_moves = common_moves::d_and_anti_d_moves(king_square, opp - b.pieces[(K_INDEX + 1 - index) as usize], own);
-    let line_moves = common_moves::h_and_vmoves(king_square, opp - b.pieces[(K_INDEX + 1 - index) as usize], own);
+    let d_moves = common_moves::d_and_anti_d_moves(king_square, opp, own);
+    let line_moves = common_moves::h_and_vmoves(king_square, opp, own) & RANK_MASKS[(king_square / 8) as usize];
     let attackers =
         d_moves & b.pieces[(B_INDEX + 1 - index) as usize]
             | (d_moves | line_moves) & b.pieces[(Q_INDEX + 1 - index) as usize]

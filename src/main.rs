@@ -30,10 +30,23 @@ fn print_u64_bitboard(bitboard : u64) {
 }
 
 fn main() {
-    let mut b = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"));
-    b.make_move(Move::new_double_push(15, 31));
+    let mut b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
+    /*
+    b.make_move(Move::new_move(25, 1, false));
+    b.make_move(Move::new_move(31, 38, false));
+    b.make_move(Move::new_move(1, 6, false));
+    b.make_move(Move::new_double_push(50, 34));
+    b.make_move(Move::new_move(8, 16, false));
+    b.make_move(Move::new_move(40, 33, false));
+    b.make_move(Move::new_move(36, 51, true));
+    b.make_move(Move::new_move(42, 57, false));
+    b.make_move(Move::new_double_push(9, 25));
+    b.make_move(Move::new_move(25, 33, false));
     b.make_move(Move::new_double_push(48, 32));
-    //b.make_move(Move::new_castle(4, 6));
-    println!("num {}", b.get_all_moves().len());
-    //println!("num {}", b.get_num_moves(2));
+    b.make_move(Move::new_double_push(51, 35));
+    b.make_move(Move::new_move(3, 24, false));
+
+     */
+    println!("num {}", b.get_num_moves(6));
+    //println!("num {}", b.get_all_moves().len());
 }

@@ -20,7 +20,41 @@ fn move_gen() {
     assert_eq!(b.get_num_moves(2), 400);
     assert_eq!(b.get_num_moves(3), 8902);
     assert_eq!(b.get_num_moves(4), 197281);
-    assert_eq!(b.get_num_moves(5), 9531373);
+    assert_eq!(b.get_num_moves(5), 4865609);
+}
+
+#[test]
+fn pos_2_perft() {
+    let mut b  = Board::from_fen(String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - "));
+    assert_eq!(b.get_num_moves(1), 48);
+    assert_eq!(b.get_num_moves(2), 2039);
+    assert_eq!(b.get_num_moves(3), 97862);
+    assert_eq!(b.get_num_moves(4), 4085603);
+    /*
+    assert_eq!(b.get_num_moves(5), 193690690);
+    assert_eq!(b.get_num_moves(6), 8031647685);
+     */
+}
+
+#[test]
+fn pos_3_perft() {
+    let mut b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
+    assert_eq!(b.get_num_moves(1), 14);
+    assert_eq!(b.get_num_moves(2), 191);
+    assert_eq!(b.get_num_moves(3), 2812);
+    assert_eq!(b.get_num_moves(4), 43238);
+    assert_eq!(b.get_num_moves(5), 674624);
+    //assert_eq!(b.get_num_moves(6), 11030083);
+}
+
+#[test]
+fn pos_4_perft() {
+    let mut b  = Board::from_fen(String::from("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"));
+    assert_eq!(b.get_num_moves(1), 6);
+    assert_eq!(b.get_num_moves(2), 264);
+    assert_eq!(b.get_num_moves(3), 9467);
+    assert_eq!(b.get_num_moves(4), 422333);
+    //assert_eq!(b.get_num_moves(5), 89941194);
 }
 
 #[test]
@@ -35,17 +69,13 @@ fn pos_5_perft() {
 }
 
 #[test]
-fn pos_3_perft() {
-    let mut b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
-    assert_eq!(b.get_num_moves(1), 14);
-    assert_eq!(b.get_num_moves(2), 191);
-    assert_eq!(b.get_num_moves(3), 2812);
-    assert_eq!(b.get_num_moves(4), 43238);
-    /*
-    assert_eq!(b.get_num_moves(5), 674624);
-    assert_eq!(b.get_num_moves(6), 11030083);
-
-     */
+fn pos_6_perft() {
+    let mut b  = Board::from_fen(String::from("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"));
+    assert_eq!(b.get_num_moves(1), 46);
+    assert_eq!(b.get_num_moves(2), 2079);
+    assert_eq!(b.get_num_moves(3), 89890);
+    assert_eq!(b.get_num_moves(4), 3894594);
+    //assert_eq!(b.get_num_moves(5), 89941194);
 }
 
 #[test]
