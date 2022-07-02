@@ -1,7 +1,9 @@
 use std::borrow::BorrowMut;
-use crate::{Board, Move, print_u64_bitboard};
-use crate::pieces::common_moves;
+
+use crate::{Board, print_u64_bitboard};
 use crate::consts::board_consts::*;
+use crate::mv::Move;
+use crate::pieces::common_moves;
 use crate::pieces::common_moves::h_and_vmoves;
 use crate::pieces::king;
 
@@ -15,7 +17,7 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     if king::is_double_check(b.attackers) {
         return list;
     }
-    for i in 0u8..64u8 {
+    for i in (rooks.trailing_zeros() as u8)..(64u8 - rooks.leading_zeros() as u8) {
         if 2_u64.pow(i as u32) & rooks != 0 {
             let moves = b.get_pinned_slide(i) & !own & common_moves::h_and_vmoves(i, opp, own);
             for i2 in 0u8..64u8 {
@@ -42,13 +44,5 @@ pub fn watched_by_r(b: &Board, white: bool) -> u64 {
             moves |= common_moves::h_and_vmoves(i, opp, own);
         }
     }
-    return moves;
-}
-pub fn attacked_from_square(b: &Board, square: u8, white: bool) -> u64 {
-    let index = if white { 1 } else { 0 };
-    let own = if white { b.white_pieces } else { b.black_pieces };
-    let opp = if white { b.black_pieces } else { b.white_pieces };
-    let moves = h_and_vmoves(square, opp - b.pieces[(K_INDEX + 1 - index) as usize], own);
-
     return moves;
 }

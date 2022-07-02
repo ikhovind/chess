@@ -1,8 +1,7 @@
-use crate::game::FILE_MASKS;
-use crate::pieces::{common_moves, king};
-use crate::{Board, Move, pieces, print_u64_bitboard};
-use crate::mv::{BISHOP, KNIGHT, QUEEN, RANK_MASKS, ROOK};
+use crate::{Board, pieces, print_u64_bitboard};
 use crate::consts::board_consts::*;
+use crate::mv::Move;
+use crate::pieces::{common_moves, king};
 
 pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
     let mut list: Vec<Move> = Vec::new();
@@ -164,8 +163,7 @@ pub fn watched_by_p(b: &Board, white: bool) -> u64 {
     if white {
         pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 9) & (!FILE_MASKS[0]); // capture right
         pawn_moves |= ((b.pieces[(P_INDEX + index) as usize] << 7) & (!FILE_MASKS[7])); // capture left
-    }
-    else {
+    } else {
         pawn_moves = (b.pieces[(P_INDEX + index) as usize] >> 9) & (!FILE_MASKS[7]); // capture right
         pawn_moves = pawn_moves | ((b.pieces[(P_INDEX + index) as usize] >> 7) & (!FILE_MASKS[0])); // capture left
     }
@@ -190,7 +188,7 @@ pub fn attacked_from_square(square: u8, white: bool) -> u64 {
 
 fn check_ep_legal(b: &Board, move_piece: u64, taken_piece: u64, white: bool) -> bool {
     let index = if white { 1 } else { 0 };
-    if b.pieces[(K_INDEX + index) as usize] == 0 { return true };
+    if b.pieces[(K_INDEX + index) as usize] == 0 { return true; };
     let opp = if white { b.black_pieces - taken_piece } else { b.white_pieces - taken_piece };
     let own = if white { b.white_pieces - move_piece } else { b.black_pieces - move_piece };
     let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;

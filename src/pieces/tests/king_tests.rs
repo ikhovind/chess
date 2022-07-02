@@ -1,8 +1,5 @@
 #[cfg(test)]
 use crate::{Board, Move, pieces, print_u64_bitboard};
-use crate::pieces::king;
-use crate::pieces::king::possible_k;
-use crate::R_INDEX;
 // Note this useful idiom: importing names from outer (for mod tests) scope.
 
 #[test]

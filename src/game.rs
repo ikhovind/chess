@@ -1,8 +1,10 @@
+#![allow(unused)]
+
 use std::cmp::{max, min};
-pub use crate::consts::board_consts::{FILE_MASKS, DIAGONAL_MASKS, ANTI_DIAGONAL_MASKS};
-pub use crate::consts::board_consts::*;
-use crate::{pieces, print_u64_bitboard};
-use crate::mv::{BISHOP, KNIGHT, Move, QUEEN, ROOK};
+
+use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, DIAGONAL_MASKS, FILE_MASKS};
+use crate::consts::board_consts::*;
+use crate::mv::Move;
 use crate::pieces::*;
 use crate::pieces::bishop;
 use crate::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
@@ -28,14 +30,14 @@ pub struct Board {
 
 impl Board {
     pub fn from_fen(fen: String) -> Board {
-        let mut _pawns = [0,0];
-        let mut _bishops = [0,0];
-        let mut _rooks = [0,0];
-        let mut _knights = [0,0];
-        let mut _queens = [0,0];
-        let mut _kings = [0,0];
+        let mut _pawns = [0, 0];
+        let mut _bishops = [0, 0];
+        let mut _rooks = [0, 0];
+        let mut _knights = [0, 0];
+        let mut _queens = [0, 0];
+        let mut _kings = [0, 0];
 
-        let mut column : u32 = 0;
+        let mut column: u32 = 0;
         let mut row = 7;
         let mut res = 0;
         let mut white = 1;
@@ -46,8 +48,7 @@ impl Board {
             }
             if !i.is_uppercase() {
                 white = 0;
-            }
-            else {
+            } else {
                 white = 1
             }
             match i.to_ascii_lowercase() {
@@ -76,7 +77,7 @@ impl Board {
                     _bishops[white] |= res;
                 }
                 '/' => {
-                    row-=1;
+                    row -= 1;
                     column = 0;
                 }
                 ' ' => {
@@ -89,9 +90,9 @@ impl Board {
             }
         }
         let empty = !_pawns[0] & !_pawns[1] & !_knights[0] & !_knights[1] & !_bishops[0] & !_bishops[1] & !_rooks[0] & !_rooks[1] & !_queens[0] & !_queens[1] & !_kings[0] & !_kings[1];
-        let black = _pawns[0]  | _knights[0] | _bishops[0] | _rooks[0]  | _queens[0] | _kings[0];
+        let black = _pawns[0] | _knights[0] | _bishops[0] | _rooks[0] | _queens[0] | _kings[0];
         let mut b = Board {
-            pieces: [_pawns[0],_pawns[1],_knights[0],_knights[1],_bishops[0],_bishops[1],_rooks[0],_rooks[1],_queens[0] ,_queens[1] ,_kings[0] , _kings[1]],
+            pieces: [_pawns[0], _pawns[1], _knights[0], _knights[1], _bishops[0], _bishops[1], _rooks[0], _rooks[1], _queens[0], _queens[1], _kings[0], _kings[1]],
             black_pieces: black,
             white_pieces: (!(empty | black)),
             empty,
@@ -99,7 +100,7 @@ impl Board {
             watched_squares_black: 0,
             watched_squares_white: 0,
             white_turn: false,
-            last_move: Move::new_move(0,0, false),
+            last_move: Move::new_move(0, 0, false),
             attackers: 0,
             push_mask: u64::MAX,
             pinned_pieces: 0,
@@ -114,11 +115,11 @@ impl Board {
     pub fn watched(&self, white: bool) -> u64 {
         return
             bishop::watched_by_b(&self, white)
-            | king::watched_by_k(&self, white)
-            | knight::watched_by_n(&self, white)
-            | queen::watched_by_q(&self, white)
-            | rook::watched_by_r(&self, white)
-            | pawn::watched_by_p(&self, white);
+                | king::watched_by_k(&self, white)
+                | knight::watched_by_n(&self, white)
+                | queen::watched_by_q(&self, white)
+                | rook::watched_by_r(&self, white)
+                | pawn::watched_by_p(&self, white);
     }
 
     pub fn make_move(&mut self, mv: Move) -> &mut Board {
@@ -158,8 +159,7 @@ impl Board {
                 let opp =
                     if to_sq & RANK_MASKS[2] != 0 {
                         to_sq << 8
-                    }
-                    else {
+                    } else {
                         to_sq >> 8
                     };
                 self.pieces[(P_INDEX + color) as usize] -= from_sq;
@@ -293,26 +293,24 @@ impl Board {
             self.push_mask = 0;
             // hvis brikken som ble flytta er en glider
             if (1 << (63 - self.attackers.leading_zeros())) & (self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize] | self.pieces[(B_INDEX + 1 - index) as usize]) != 0 {
-                self.push_mask = self.ray_between( (63 - self.attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
-            }
-            else {
+                self.push_mask = self.ray_between((63 - self.attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
+            } else {
                 self.push_mask = 1 << (63 - self.attackers.leading_zeros());
             }
-        }
-        else {
+        } else {
             self.push_mask = u64::MAX;
         }
     }
 
     pub fn get_all_moves(&self) -> Vec<Move> {
-/*
-        println!("rook: {}", pieces::rook::possible_r(self, self.white_turn).len());
-        println!("knight: {}", pieces::knight::possible_n(self, self.white_turn).len());
-        println!("bishop: {}", pieces::bishop::possible_b(self, self.white_turn).len());
-        println!("queen: {}", pieces::queen::possible_q(self, self.white_turn).len());
-        println!("king: {}", pieces::king::possible_k(self, self.white_turn).len());
-        println!("pawn: {}", pieces::pawn::possible_p(self, self.white_turn).len());
-         */
+        /*
+                println!("rook: {}", pieces::rook::possible_r(self, self.white_turn).len());
+                println!("knight: {}", pieces::knight::possible_n(self, self.white_turn).len());
+                println!("bishop: {}", pieces::bishop::possible_b(self, self.white_turn).len());
+                println!("queen: {}", pieces::queen::possible_q(self, self.white_turn).len());
+                println!("king: {}", pieces::king::possible_k(self, self.white_turn).len());
+                println!("pawn: {}", pieces::pawn::possible_p(self, self.white_turn).len());
+                 */
 
         let mut rook = rook::possible_r(self, self.white_turn);
         rook.append(&mut knight::possible_n(self, self.white_turn));
@@ -334,10 +332,10 @@ impl Board {
         }
         for nw in self.get_all_moves() {
             let &mut test = self.clone().make_move(nw);
-            let &mut test2 = self.clone().make_move(nw);
-            sum += test.get_num_moves_inner(depth - 1, initial);
+            let res = test.get_num_moves_inner(depth - 1, initial);
+            sum += res;
             if depth == initial {
-                println!("{}: {}", nw.to_string(), test2.get_num_moves_inner(depth - 1, initial));
+                println!("{}: {}", nw.to_string(), res);
             }
         }
         return sum;
@@ -393,16 +391,15 @@ impl Board {
         let king_square: u8 = (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
         let opp_diags = self.pieces[(B_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
         let opp_line = self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
-        let king_diag =  DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
+        let king_diag = DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
         // todo maybe bug
-        let king_anti_diag =  ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
+        let king_anti_diag = ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
         let mut pinned_pieces = 0;
         for i in 0u8..64u8 {
             if (1 << i) & opp_line != 0 {
-                if i % 8 == king_square % 8  {
+                if i % 8 == king_square % 8 {
                     pinned_pieces |= (FILE_MASKS[(king_square % 8) as usize] & h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
-                }
-                else if (i / 8) == (king_square / 8)  {
+                } else if (i / 8) == (king_square / 8) {
                     //print_u64_bitboard(h_and_vmoves(i, opp, own));
                     pinned_pieces |= (RANK_MASKS[(king_square / 8) as usize] & h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
                 }
@@ -410,8 +407,7 @@ impl Board {
             if (1 << i) & opp_diags != 0 {
                 if (1 << i) & king_diag != 0 {
                     pinned_pieces |= king_diag & d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
-                }
-                else if (1 << i) & king_anti_diag != 0 {
+                } else if (1 << i) & king_anti_diag != 0 {
                     pinned_pieces |= king_anti_diag & d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
                 }
             }
@@ -439,15 +435,14 @@ impl Board {
         // to the right
         else if (max - min) % 7 == 0 {
             return DIAGONAL_MASKS[(max % 8 + max / 8) as usize];
-        }
-        else {
+        } else {
             return 0;
         }
     }
     pub fn get_pinned_slide(self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
         if self.pinned_pieces & (1 << i) != 0 {
-            return self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i)
+            return self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i);
         } else {
             return u64::MAX;
         };
@@ -457,6 +452,6 @@ impl Board {
 impl PartialEq for Board {
     fn eq(&self, other: &Self) -> bool {
         self.pieces == other.pieces
-        && self.white_turn == other.white_turn
+            && self.white_turn == other.white_turn
     }
 }

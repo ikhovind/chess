@@ -1,6 +1,6 @@
 #[cfg(test)]
 use crate::{Board, Move, print_u64_bitboard};
-use crate::mv::P_INDEX;
+use crate::mv::Move;
 
 #[test]
 fn simple_pawn_move() {

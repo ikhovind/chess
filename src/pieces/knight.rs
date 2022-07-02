@@ -1,11 +1,11 @@
-use crate::{Board, Move, print_u64_bitboard};
-use crate::game::FILE_MASKS;
+use crate::{Board, print_u64_bitboard};
+use crate::consts::board_consts::*;
+use crate::mv::Move;
 use crate::pieces::bishop::watched_by_b;
+use crate::pieces::king;
 use crate::pieces::pawn::watched_by_p;
 use crate::pieces::queen::watched_by_q;
 use crate::pieces::rook::watched_by_r;
-use crate::consts::board_consts::*;
-use crate::pieces::king;
 
 pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     let mut opposing_pieces: u64 = b.white_pieces;
@@ -58,7 +58,7 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
                         Move::new_move(
                             i,
                             i2,
-                            opposing_pieces & 2_u64.pow(i2 as u32) != 0
+                            opposing_pieces & 2_u64.pow(i2 as u32) != 0,
                         )
                     );
                 }
@@ -72,7 +72,7 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
 }
 
 
-pub fn watched_by_n(b: &Board, white:bool) -> u64 {
+pub fn watched_by_n(b: &Board, white: bool) -> u64 {
     let mut index = 0;
     if white {
         index = 1;

@@ -1,12 +1,10 @@
-use std::os::unix::raw::uid_t;
-use crate::{Board, Move, pieces, print_u64_bitboard};
-use crate::game::FILE_MASKS;
-use crate::mv::K_INDEX;
+use crate::{Board, pieces, print_u64_bitboard};
+use crate::consts::board_consts::*;
+use crate::mv::Move;
 use crate::pieces::bishop::watched_by_b;
+use crate::pieces::common_moves;
 use crate::pieces::knight::watched_by_n;
 use crate::pieces::rook::watched_by_r;
-use crate::consts::board_consts::*;
-use crate::pieces::common_moves;
 
 pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
     let mut opposing_pieces: u64 = b.white_pieces;
@@ -38,7 +36,7 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
             1 << 6,
         ];
     }
-    let short_castle= b.castle_rights[(index * 2) as usize];
+    let short_castle = b.castle_rights[(index * 2) as usize];
     let long_castle = b.castle_rights[(index * 2 + 1) as usize];
     let long_castle_rook = if white { WHITE_LONG_ORG_ROOK } else { BLACK_LONG_ORG_ROOK };
     let mut list: Vec<Move> = Vec::new();
@@ -124,9 +122,9 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
 
 pub fn get_attackers(b: &Board, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
-    let opp  = if white { b.black_pieces } else { b.white_pieces  };
-    let own  = if white { b.white_pieces } else { b.black_pieces  };
-    if b.pieces[(K_INDEX + index) as usize] == 0 { return 0 };
+    let opp = if white { b.black_pieces } else { b.white_pieces };
+    let own = if white { b.white_pieces } else { b.black_pieces };
+    if b.pieces[(K_INDEX + index) as usize] == 0 { return 0; };
     let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
 
     let d_moves = common_moves::d_and_anti_d_moves(king_square, opp, own);

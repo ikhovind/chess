@@ -1,3 +1,4 @@
+#![allow(unused)]
 pub const FILE_MASKS: [u64; 8] =
     [
         72340172838076673,
