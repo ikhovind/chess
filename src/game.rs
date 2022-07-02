@@ -17,10 +17,6 @@ pub struct Board {
     pub(crate) white_pieces: u64,
     pub(crate) empty: u64,
     pub(crate) castle_rights: [bool; 4],
-    pub(crate) white_long_c: bool,
-    pub(crate) white_short_c: bool,
-    pub(crate) black_long_c: bool,
-    pub(crate) black_short_c: bool,
     pub(crate) watched_squares_white: u64,
     pub(crate) watched_squares_black: u64,
     pub(crate) white_turn: bool,
@@ -100,10 +96,6 @@ impl Board {
             white_pieces: (!(empty | black)),
             empty,
             castle_rights: [true, true, true, true],
-            white_long_c: true,
-            white_short_c: true,
-            black_long_c: true,
-            black_short_c: true,
             watched_squares_black: 0,
             watched_squares_white: 0,
             white_turn: false,
@@ -284,8 +276,9 @@ impl Board {
         self.watched_squares_black = self.watched(false);
         self.watched_squares_white = self.watched(true);
 
-        self.update_castling_rights(self.white_turn);
         self.white_turn = !self.white_turn;
+        self.update_castling_rights(self.white_turn);
+        self.update_castling_rights(!self.white_turn);
         self.last_move = mv;
 
         self.pinned_pieces = self.get_pinned_pieces(self.white_turn);
