@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod pawn_tests {
-    use crate::{Board, Move, print_u64_bitboard};
+    use crate::{Board, print_u64_bitboard};
+    use crate::mv::Move;
 
     #[test]
     fn simple_en_passant() {

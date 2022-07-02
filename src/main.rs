@@ -1,6 +1,12 @@
 #![allow(unused)]
-use crate::game::Board;
 
+use std::fs::{File, OpenOptions};
+use std::io::{Read, Write};
+use std::path::Path;
+use std::time::Instant;
+use num_format::{Locale, WriteFormatted};
+use num_format::Locale::el;
+use crate::game::Board;
 pub mod game;
 mod mv;
 mod pieces;
@@ -28,24 +34,39 @@ fn print_u64_bitboard(bitboard: u64) {
     }
 }
 
-fn main() {
-    let mut b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
-    /*
-    b.make_move(Move::new_move(25, 1, false));
-    b.make_move(Move::new_move(31, 38, false));
-    b.make_move(Move::new_move(1, 6, false));
-    b.make_move(Move::new_double_push(50, 34));
-    b.make_move(Move::new_move(8, 16, false));
-    b.make_move(Move::new_move(40, 33, false));
-    b.make_move(Move::new_move(36, 51, true));
-    b.make_move(Move::new_move(42, 57, false));
-    b.make_move(Move::new_double_push(9, 25));
-    b.make_move(Move::new_move(25, 33, false));
-    b.make_move(Move::new_double_push(48, 32));
-    b.make_move(Move::new_double_push(51, 35));
-    b.make_move(Move::new_move(3, 24, false));
+fn test(fen: String, depth: u32) {
 
-     */
-    println!("num {}", b.get_num_moves(5));
-    //println!("num {}", b.get_all_moves().len());
+    let mut b = Board::from_fen(String::from(fen.clone()));
+    let now = Instant::now();
+    {
+        b.get_num_moves(depth);
+    }
+    let elapsed = now.elapsed();
+
+    let mut writer = String::new(); // Could also be Vec::new(), File::open(...), ...
+    // Write "1,000,000" into the writer...
+    writer.write_formatted(&elapsed.as_millis(), &Locale::fr);
+
+    let mut file;
+    if !Path::new("timestamps.txt").exists() {
+        println!("creating");
+        file = File::create("timestamps.txt").expect("ERROR READING FROM FILE");
+    }
+    else {
+        file = OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open("timestamps.txt")
+            .unwrap();
+    };
+
+    //let mut file = File::open("timestamps.txt").expect("ERROR READING FROM FILE");
+    let res_tmp = format!(" | depth: {}, execution time: {} ms\n", depth, &writer.to_string());
+    let mut res = fen.clone();
+    res.push_str(&*res_tmp);
+    file.write_all(res.as_bytes()).expect("ERROR WRITING TO FILE");
+}
+
+fn main() {
+    test(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "), 5);
 }

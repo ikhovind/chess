@@ -1,6 +1,7 @@
 #[cfg(test)]
-use crate::{Board, Move, print_u64_bitboard};
+use crate::{Board, print_u64_bitboard};
 use crate::consts::board_consts::{FILE_MASKS, RANK_MASKS};
+use crate::mv::Move;
 use crate::pieces::common_moves;
 
 #[test]
