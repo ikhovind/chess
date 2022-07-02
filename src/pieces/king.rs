@@ -43,7 +43,6 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
     let short_castle= b.castle_rights[(index * 2) as usize];
     let long_castle = b.castle_rights[(index * 2 + 1) as usize];
     let mut list: Vec<Move> = Vec::new();
-
     let kings = b.pieces[(K_INDEX + index) as usize];
 
     for i in 0u8..64u8 {
@@ -54,12 +53,12 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
 
             /* remember the representation of the board in relation to the bitindex
                 when looking at these shifts.... */
-            let spot_1 = king_clip_file_h << 7;
+            let spot_1 = king_clip_file_a << 7;
             let spot_2 = king_loc << 8;
             let spot_3 = king_clip_file_h << 9;
             let spot_4 = king_clip_file_h << 1;
 
-            let spot_5 = king_clip_file_a >> 7;
+            let spot_5 = king_clip_file_h >> 7;
             let spot_6 = king_loc >> 8;
             let spot_7 = king_clip_file_a >> 9;
             let spot_8 = king_clip_file_a >> 1;
@@ -115,12 +114,12 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
 
             /* remember the representation of the board in relation to the bitindex
                 when looking at these shifts.... */
-            let spot_1 = king_clip_file_h << 7;
+            let spot_1 = king_clip_file_a << 7;
             let spot_2 = king_loc << 8;
             let spot_3 = king_clip_file_h << 9;
             let spot_4 = king_clip_file_h << 1;
 
-            let spot_5 = king_clip_file_a >> 7;
+            let spot_5 = king_clip_file_h >> 7;
             let spot_6 = king_loc >> 8;
             let spot_7 = king_clip_file_a >> 9;
             let spot_8 = king_clip_file_a >> 1;

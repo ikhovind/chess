@@ -26,21 +26,31 @@ fn move_gen() {
 #[test]
 fn pos_5_perft() {
     // https://www.chessprogramming.org/Perft_Results
-    let mut b  = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R"));
+    let mut b  = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8 "));
     assert_eq!(b.get_num_moves(1), 44);
     assert_eq!(b.get_num_moves(2), 1486);
     assert_eq!(b.get_num_moves(3), 62379);
-    //assert_eq!(b.get_num_moves(4), 2103487);
+    assert_eq!(b.get_num_moves(4), 2103487);
     //assert_eq!(b.get_num_moves(5), 89941194);
+}
+
+#[test]
+fn pos_3_perft() {
+    let mut b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
+    assert_eq!(b.get_num_moves(1), 14);
+    assert_eq!(b.get_num_moves(2), 191);
+    assert_eq!(b.get_num_moves(3), 2812);
+    assert_eq!(b.get_num_moves(4), 43238);
+    /*
+    assert_eq!(b.get_num_moves(5), 674624);
+    assert_eq!(b.get_num_moves(6), 11030083);
+
+     */
 }
 
 #[test]
 fn blocks_check() {
     let mut b  = Board::from_fen(String::from("1k6/3r4/8/5R2/8/3K4/8/8"));
-
-    for i in b.get_all_moves() {
-        println!("{}", i);
-    }
     assert_eq!(b.get_num_moves(1), 7);
 }
 
