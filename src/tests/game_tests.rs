@@ -43,7 +43,6 @@ fn pos_3_perft() {
     assert_eq!(b.get_num_moves(4), 43238);
     assert_eq!(b.get_num_moves(5), 674624);
     assert_eq!(b.get_num_moves(6), 11030083);
-    // fails
     assert_eq!(b.get_num_moves(7), 178633661);
     assert_eq!(b.get_num_moves(8), 3009794393);
 }
@@ -67,25 +66,24 @@ fn pos_5_perft() {
     assert_eq!(b.get_num_moves(2), 1486);
     assert_eq!(b.get_num_moves(3), 62379);
     assert_eq!(b.get_num_moves(4), 2103487);
-    // fails
     assert_eq!(b.get_num_moves(5), 89941194);
 }
 
 #[test]
 fn pos_6_perft() {
     let mut b = Board::from_fen(String::from("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"));
+    /*
     assert_eq!(b.get_num_moves(1), 46);
     assert_eq!(b.get_num_moves(2), 2079);
     assert_eq!(b.get_num_moves(3), 89890);
     assert_eq!(b.get_num_moves(4), 3894594);
+    */
     // fails
     assert_eq!(b.get_num_moves(5), 164075551);
     assert_eq!(b.get_num_moves(6), 6923051137);
-    /*
-    assert_eq!(b.get_num_moves(7),  287188994746 );
-    assert_eq!(b.get_num_moves(8),  11923589843526 );
-    assert_eq!(b.get_num_moves(9),  490154852788714 );
-     */
+    //assert_eq!(b.get_num_moves(7),  287188994746 );
+    //assert_eq!(b.get_num_moves(8),  11923589843526 );
+    //assert_eq!(b.get_num_moves(9),  490154852788714 );
 }
 
 #[test]

@@ -38,7 +38,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
             }
         }
         //y1,y2,Promotion Type,"P"
-        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 7) & opposing_pieces & RANK_MASKS[7] & !FILE_MASKS[0]);//pawn promotion by capture left
+        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 7) & opposing_pieces & RANK_MASKS[7] & !FILE_MASKS[7]);//pawn promotion by capture left
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 7) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i - 7, i, true, QUEEN));
@@ -48,7 +48,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
             }
         }
 
-        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 9) & opposing_pieces & RANK_MASKS[7] & !FILE_MASKS[7]);//pawn promotion by capture right
+        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 9) & opposing_pieces & RANK_MASKS[7] & !FILE_MASKS[0]);//pawn promotion by capture right
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 9) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i - 9, i, true, QUEEN));
