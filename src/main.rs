@@ -41,10 +41,15 @@ fn print_u64_bitboard(bitboard: u64) {
 fn test(fen: String, depth: u32) {
 
     let mut b = Board::from_fen(String::from(fen.clone()));
-    let now = Instant::now();
 
+
+    let mut num = 0;
+    for i in 1..(depth) {
+        num += b.get_num_moves(i);
+    }
+    let now = Instant::now();
     {
-        b.get_num_moves(depth);
+        num += b.get_num_moves(depth);
     }
 
     let elapsed = now.elapsed();
@@ -52,6 +57,10 @@ fn test(fen: String, depth: u32) {
     let mut writer = String::new(); // Could also be Vec::new(), File::open(...), ...
     // Write "1,000,000" into the writer...
     writer.write_formatted(&elapsed.as_millis(), &Locale::fr);
+    println!("num: {}", num);
+    let mut writer2 = String::new(); // Could also be Vec::new(), File::open(...), ...
+    // Write "1,000,000" into the writer...
+    writer2.write_formatted(&((num as u128) / (elapsed.as_millis()) * 1000), &Locale::fr);
 
     let mut file;
     if !Path::new("timestamps.txt").exists() {
@@ -67,9 +76,10 @@ fn test(fen: String, depth: u32) {
     };
 
     //let mut file = File::open("timestamps.txt").expect("ERROR READING FROM FILE");
-    let res_tmp = format!(" | depth: {}, execution time: {} ms, date: {}\n",
+    let res_tmp = format!(" | depth: {}, execution time: {} ms, num per second: {},  date: {}\n",
                           depth,
                           &writer.to_string(),
+                          &writer2.to_string(),
                           iso8601(&SystemTime::now()));
 
     let mut res = fen.clone();

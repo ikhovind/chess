@@ -1,4 +1,6 @@
+use num_format::Locale::el;
 use crate::{Board, pieces, print_u64_bitboard};
+use crate::computed::lookup_consts::KING_MOVES;
 use crate::consts::board_consts::*;
 use crate::mv::Move;
 use crate::pieces::bishop::watched_by_b;
@@ -6,62 +8,33 @@ use crate::pieces::common_moves;
 use crate::pieces::knight::watched_by_n;
 use crate::pieces::rook::watched_by_r;
 
-pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
-    let mut opposing_pieces: u64 = b.white_pieces;
-    let mut opponent_watching: u64 = b.watched_squares_white;
-    let mut own_pieces = b.black_pieces;
-    let mut index: u8 = 0;
-    let mut short_castle_sq = vec![
-        1 << 61,
-        1 << 62,
-    ];
-    let mut long_castle_sq = vec![
-        1 << 57,
-        1 << 58,
-        1 << 59,
-    ];
-    if white {
-        opposing_pieces = b.black_pieces;
-        opponent_watching = b.watched_squares_black;
-        own_pieces = b.white_pieces;
-        index = 1;
 
-        long_castle_sq = vec![
-            1 << 1,
-            1 << 2,
-            1 << 3,
-        ];
-        short_castle_sq = vec![
-            1 << 5,
-            1 << 6,
-        ];
-    }
+const B_SHORT_CASTLE_SQUARE: [u64; 2] = [1 << 61, 1 << 62];
+const W_SHORT_CASTLE_SQUARE: [u64; 2] = [1 << 61, 1 << 62];
+const W_LONG_CASTLE_SQUARE: [u64; 3] = [1 << 1, 1 << 2, 1 << 3];
+const B_LONG_CASTLE_SQUARE: [u64; 3] = [1 << 57, 1 << 58, 1 << 59];
+
+pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
+    let opposing_pieces: u64 = if white { b.black_pieces } else { b.white_pieces };
+    let opponent_watching = if white { b.watched_squares_black } else { b.watched_squares_white };
+
+    let own_pieces = if white { b.white_pieces } else {b.black_pieces};
+    let index = if white { 1 } else { 0 };
+
+    let short_castle_sq = if white { W_SHORT_CASTLE_SQUARE } else { B_SHORT_CASTLE_SQUARE };
+    let long_castle_sq = if white { W_LONG_CASTLE_SQUARE } else { B_LONG_CASTLE_SQUARE };
+
     let short_castle = b.castle_rights[(index * 2) as usize];
     let long_castle = b.castle_rights[(index * 2 + 1) as usize];
     let long_castle_rook = if white { WHITE_LONG_ORG_ROOK } else { BLACK_LONG_ORG_ROOK };
+
     let mut list: Vec<Move> = Vec::new();
+
     let kings = b.pieces[(K_INDEX + index) as usize];
 
-    for i in 0u8..64u8 {
+    for i in 0..64 {
         if (1 << i) & kings != 0 {
-            let king_loc = 1 << i;
-            let king_clip_file_h = king_loc & !FILE_MASKS[7];
-            let king_clip_file_a = king_loc & !FILE_MASKS[0];
-
-            /* remember the representation of the board in relation to the bitindex
-                when looking at these shifts.... */
-            let spot_1 = king_clip_file_a << 7;
-            let spot_2 = king_loc << 8;
-            let spot_3 = king_clip_file_h << 9;
-            let spot_4 = king_clip_file_h << 1;
-
-            let spot_5 = king_clip_file_h >> 7;
-            let spot_6 = king_loc >> 8;
-            let spot_7 = king_clip_file_a >> 9;
-            let spot_8 = king_clip_file_a >> 1;
-
-            let moves = (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
-                spot_7 | spot_8) & !own_pieces & !opponent_watching;
+            let moves = KING_MOVES[i] & !own_pieces & !opponent_watching;
 
             if b.attackers == 0 {
                 // long castle
@@ -78,7 +51,7 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
             for i2 in 0u8..64u8 {
                 if (1 << i2) & moves != 0 {
                     list.push(
-                        Move::new_move(i, i2, opposing_pieces & (1 << i2) != 0)
+                        Move::new_move(i as u8, i2, opposing_pieces & (1 << i2) != 0)
                     );
                 }
             }
@@ -88,36 +61,15 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
 }
 
 pub fn watched_by_k(b: &Board, white: bool) -> u64 {
-    let mut index = 0;
-    if white {
-        index = 1;
-    }
-    let mut moves = 0;
+    let index = if white { 1 } else { 0 };
     let kings = b.pieces[(K_INDEX + index) as usize];
 
-    for i in 0u8..64u8 {
+    for i in 0..64 {
         if (1 << i) & kings != 0 {
-            let king_loc = 1 << i;
-            let king_clip_file_h = king_loc & !FILE_MASKS[7];
-            let king_clip_file_a = king_loc & !FILE_MASKS[0];
-
-            /* remember the representation of the board in relation to the bitindex
-                when looking at these shifts.... */
-            let spot_1 = king_clip_file_a << 7;
-            let spot_2 = king_loc << 8;
-            let spot_3 = king_clip_file_h << 9;
-            let spot_4 = king_clip_file_h << 1;
-
-            let spot_5 = king_clip_file_h >> 7;
-            let spot_6 = king_loc >> 8;
-            let spot_7 = king_clip_file_a >> 9;
-            let spot_8 = king_clip_file_a >> 1;
-
-            moves = moves | spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 |
-                spot_7 | spot_8;
+            return KING_MOVES[i];
         }
     }
-    return moves;
+    return 0;
 }
 
 pub fn get_attackers(b: &Board, white: bool) -> u64 {
