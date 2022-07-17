@@ -332,8 +332,7 @@ impl Board {
             return self.get_all_moves().len() as u64;
         }
         for nw in self.get_all_moves() {
-            let &mut test = self.clone().make_move(nw);
-            let res = test.get_num_moves_inner(depth - 1, initial);
+            let res = self.clone().make_move(nw).get_num_moves_inner(depth - 1, initial);
             sum += res;
             if depth == initial {
                 println!("{}: {}", nw.to_string(), res);
@@ -342,7 +341,7 @@ impl Board {
         return sum;
     }
 
-    pub fn ray_between(self, attacker: u8, piece_square: u8) -> u64 {
+    pub fn ray_between(&self, attacker: u8, piece_square: u8) -> u64 {
         // same column
         let mut max = max(attacker, piece_square);
         let min = min(attacker, piece_square);
@@ -384,7 +383,7 @@ impl Board {
         return ray | (1 << attacker);
     }
 
-    pub fn get_pinned_pieces(self, white: bool) -> u64 {
+    pub fn get_pinned_pieces(&self, white: bool) -> u64 {
         // todo kanskje bug siden opp fjerner kongen her men blir brukt som own
         let index = if white { 1 } else { 0 };
         let attacking_color = if white { self.black_pieces } else { self.white_pieces };
@@ -440,12 +439,12 @@ impl Board {
             return 0;
         }
     }
-    pub fn get_pinned_slide(self, i: u8) -> u64 {
+    pub fn get_pinned_slide(&self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
-        if self.pinned_pieces & (1 << i) != 0 {
-            return self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i);
+        return if self.pinned_pieces & (1 << i) != 0 {
+            self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i)
         } else {
-            return u64::MAX;
+            u64::MAX
         };
     }
 }

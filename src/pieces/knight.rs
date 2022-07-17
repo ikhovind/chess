@@ -1,4 +1,4 @@
-use crate::{Board, print_u64_bitboard};
+use crate::{Board, computed, print_u64_bitboard};
 use crate::consts::board_consts::*;
 use crate::mv::Move;
 use crate::pieces::bishop::watched_by_b;
@@ -8,14 +8,10 @@ use crate::pieces::queen::watched_by_q;
 use crate::pieces::rook::watched_by_r;
 
 pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
-    let mut opposing_pieces: u64 = b.white_pieces;
-    let mut own_pieces = b.black_pieces;
-    let mut index = 0;
-    if white {
-        opposing_pieces = b.black_pieces;
-        own_pieces = b.white_pieces;
-        index = 1;
-    }
+    let opposing_pieces = if white { b.black_pieces } else { b.white_pieces };
+    let own_pieces = if !white { b.black_pieces } else { b.white_pieces };
+    let index = if white { 1 } else { 0 };
+
     let mut list: Vec<Move> = Vec::new();
     if king::is_double_check(b.attackers) {
         return list;
@@ -23,40 +19,21 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
 
 
     let knights = b.pieces[(N_INDEX + index) as usize];
-    for i in 0u8..64u8 {
-        if 2_u64.pow(i as u32) & knights != 0 {
-            let spot_1_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
-            let spot_2_clip = !FILE_MASKS[0];
-            let spot_3_clip = !FILE_MASKS[7];
-            let spot_4_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
 
-            let spot_5_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
-            let spot_6_clip = !FILE_MASKS[7];
-            let spot_7_clip = !FILE_MASKS[0];
-            let spot_8_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
 
-            /* The clipping masks we just created will be used to ensure that no
-        under or overflow positions are computed when calculating the
-        possible moves of the knight in certain files. */
 
-            let spot_1 = ((1 << i) & spot_1_clip) << 6;
-            let spot_2 = ((1 << i) & spot_2_clip) << 15;
-            let spot_3 = ((1 << i) & spot_3_clip) << 17;
-            let spot_4 = ((1 << i) & spot_4_clip) << 10;
-
-            let spot_5 = ((1 << i) & spot_5_clip) >> 6;
-            let spot_6 = ((1 << i) & spot_6_clip) >> 15;
-            let spot_7 = ((1 << i) & spot_7_clip) >> 17;
-            let spot_8 = ((1 << i) & spot_8_clip) >> 10;
+    for i in 0..64 {
+        if (1 << i) & knights != 0 {
 
             let moves =
-                (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8)
-                    & !own_pieces & b.push_mask & b.get_pinned_slide(i);
-            for i2 in 0u8..64u8 {
-                if 2u64.pow(i2 as u32) & moves != 0 {
+            computed::lookup_consts::KNIGHT_MOVES[i]
+                    & !own_pieces & b.push_mask & b.get_pinned_slide(i as u8);
+
+            for i2 in 0..64 {
+                if (1 << i2) & moves != 0 {
                     list.push(
                         Move::new_move(
-                            i,
+                            i as u8,
                             i2,
                             opposing_pieces & 2_u64.pow(i2 as u32) != 0,
                         )

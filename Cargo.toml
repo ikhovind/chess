@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 num-format = "0.4.0"
+chrono = "0.4"
 
 [profile.dev]
 overflow-checks = false

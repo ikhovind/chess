@@ -3,7 +3,8 @@
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::Path;
-use std::time::Instant;
+use std::time::{Instant, SystemTime};
+use chrono::{DateTime, Utc};
 use num_format::{Locale, WriteFormatted};
 use num_format::Locale::el;
 use crate::game::Board;
@@ -11,6 +12,7 @@ use crate::mv::Move;
 
 pub mod game;
 mod mv;
+mod computed;
 mod pieces;
 mod consts;
 mod tests;
@@ -40,9 +42,11 @@ fn test(fen: String, depth: u32) {
 
     let mut b = Board::from_fen(String::from(fen.clone()));
     let now = Instant::now();
+
     {
         b.get_num_moves(depth);
     }
+
     let elapsed = now.elapsed();
 
     let mut writer = String::new(); // Could also be Vec::new(), File::open(...), ...
@@ -63,13 +67,25 @@ fn test(fen: String, depth: u32) {
     };
 
     //let mut file = File::open("timestamps.txt").expect("ERROR READING FROM FILE");
-    let res_tmp = format!(" | depth: {}, execution time: {} ms\n", depth, &writer.to_string());
+    let res_tmp = format!(" | depth: {}, execution time: {} ms, date: {}\n",
+                          depth,
+                          &writer.to_string(),
+                          iso8601(&SystemTime::now()));
+
     let mut res = fen.clone();
     res.push_str(&*res_tmp);
     file.write_all(res.as_bytes()).expect("ERROR WRITING TO FILE");
 }
 
+fn iso8601(st: &std::time::SystemTime) -> String {
+    let dt: DateTime<Utc> = st.clone().into();
+    format!("{}", dt.format("%Y-%m-%d"))
+    // formats like "2001-07-08T00:34:60.026490+09:30"
+}
+
 fn main() {
-    let mut b = Board::from_fen(String::from("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"));
-    test(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -"), 5);
+    let mut b = Board::from_fen(
+        String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
+    );
+    test(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"), 5);
 }
