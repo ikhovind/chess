@@ -10,7 +10,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
     if king::is_double_check(b.attackers) {
         return list;
     }
-    let opposing_pieces = if white { b.black_pieces } else { b.white_pieces };
+    let opposing_pieces = if white { b.get_black_pieces() } else { b.get_white_pieces() };
     if white {
         let mut pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[0])); // capture right
         for i in 0..64 {
@@ -189,8 +189,8 @@ pub fn attacked_from_square(square: u8, white: bool) -> u64 {
 fn check_ep_legal(b: &Board, move_piece: u64, taken_piece: u64, white: bool) -> bool {
     let index = if white { 1 } else { 0 };
     if b.pieces[(K_INDEX + index) as usize] == 0 { return true; };
-    let opp = if white { b.black_pieces - taken_piece } else { b.white_pieces - taken_piece };
-    let own = if white { b.white_pieces - move_piece } else { b.black_pieces - move_piece };
+    let opp = if white { b.get_black_pieces() - taken_piece } else { b.get_white_pieces() - taken_piece };
+    let own = if white { b.get_white_pieces() - move_piece } else { b.get_black_pieces() - move_piece };
     let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
 
     let d_moves = common_moves::d_and_anti_d_moves(king_square, opp, own);

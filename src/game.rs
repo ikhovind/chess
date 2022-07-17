@@ -15,18 +15,14 @@ use crate::print_u64_bitboard;
 //[black short, black long, white short, white long]
 #[derive(Debug, Clone, Copy)]
 pub struct Board {
-    pub(crate) pieces: [u64; 12],
-    pub(crate) black_pieces: u64,
-    pub(crate) white_pieces: u64,
-    pub(crate) empty: u64,
-    pub(crate) castle_rights: [bool; 4],
-    pub(crate) watched_squares_white: u64,
-    pub(crate) watched_squares_black: u64,
-    pub(crate) white_turn: bool,
-    pub(crate) last_move: Move,
-    pub(crate) attackers: u64,
-    pub(crate) push_mask: u64,
-    pub(crate) pinned_pieces: u64,
+    pub pieces: [u64; 12],
+    pub empty: u64,
+    pub castle_rights: [bool; 4],
+    pub white_turn: bool,
+    pub last_move: Move,
+    pub attackers: u64,
+    pub push_mask: u64,
+    pub pinned_pieces: u64,
 }
 
 impl Board {
@@ -91,26 +87,28 @@ impl Board {
             }
         }
         let empty = !_pawns[0] & !_pawns[1] & !_knights[0] & !_knights[1] & !_bishops[0] & !_bishops[1] & !_rooks[0] & !_rooks[1] & !_queens[0] & !_queens[1] & !_kings[0] & !_kings[1];
-        let black = _pawns[0] | _knights[0] | _bishops[0] | _rooks[0] | _queens[0] | _kings[0];
         let mut b = Board {
             pieces: [_pawns[0], _pawns[1], _knights[0], _knights[1], _bishops[0], _bishops[1], _rooks[0], _rooks[1], _queens[0], _queens[1], _kings[0], _kings[1]],
-            black_pieces: black,
-            white_pieces: (!(empty | black)),
             empty,
             castle_rights: [true, true, true, true],
-            watched_squares_black: 0,
-            watched_squares_white: 0,
             white_turn: false,
             last_move: Move::new_move(0, 0, false),
             attackers: 0,
             push_mask: u64::MAX,
             pinned_pieces: 0,
         };
-        b.watched_squares_black = b.watched(false);
-        b.watched_squares_white = b.watched(true);
         b.attackers = king::get_attackers(&b, b.white_turn);
         b.update_metadata(&Move::new_move(0, 0, false));
         return b;
+    }
+
+
+    pub fn get_white_pieces(&self) -> u64 {
+        return self.pieces[P_INDEX + 1] | self.pieces[N_INDEX + 1] | self.pieces[B_INDEX + 1] | self.pieces[R_INDEX + 1] | self.pieces[Q_INDEX + 1] | self.pieces[K_INDEX + 1];
+    }
+
+    pub fn get_black_pieces(&self) -> u64 {
+        return self.pieces[P_INDEX] | self.pieces[N_INDEX] | self.pieces[B_INDEX] | self.pieces[R_INDEX] | self.pieces[Q_INDEX] | self.pieces[K_INDEX];
     }
 
     pub fn watched(&self, white: bool) -> u64 {
@@ -139,8 +137,8 @@ impl Board {
                 }
             }
             DOUBLE_PAWN => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(P_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[P_INDEX + color as usize] += to_sq;
             }
             TAKES => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
@@ -163,29 +161,29 @@ impl Board {
                     } else {
                         to_sq >> 8
                     };
-                self.pieces[(P_INDEX + (1 - color)) as usize] -= opp;
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(P_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + (1 - color) as usize] -= opp;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[P_INDEX + color as usize] += to_sq;
             }
             PROM_Q => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(Q_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[Q_INDEX + color as usize] += to_sq;
             }
             PROM_R => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(R_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[R_INDEX + color as usize] += to_sq;
             }
             PROM_B => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(B_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[B_INDEX + color as usize] += to_sq;
             }
             PROM_N => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(N_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[N_INDEX + color as usize] += to_sq;
             }
             TAKE_PROM_Q => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(Q_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[Q_INDEX + color as usize] += to_sq;
 
                 for i in ((1 - color) as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & to_sq != 0 {
@@ -195,8 +193,8 @@ impl Board {
                 }
             }
             TAKE_PROM_R => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(R_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[R_INDEX + color as usize] += to_sq;
                 for i in ((1 - color) as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & to_sq != 0 {
                         self.pieces[i] -= to_sq;
@@ -205,8 +203,8 @@ impl Board {
                 }
             }
             TAKE_PROM_B => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(B_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[B_INDEX + color as usize] += to_sq;
 
                 for i in ((1 - color) as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & to_sq != 0 {
@@ -216,8 +214,8 @@ impl Board {
                 }
             }
             TAKE_PROM_N => {
-                self.pieces[(P_INDEX + color) as usize] -= from_sq;
-                self.pieces[(N_INDEX + color) as usize] += to_sq;
+                self.pieces[P_INDEX + color as usize] -= from_sq;
+                self.pieces[N_INDEX + color as usize] += to_sq;
 
                 for i in ((1 - color) as usize..self.pieces.len()).step_by(2) {
                     if self.pieces[i] & to_sq != 0 {
@@ -227,19 +225,19 @@ impl Board {
                 }
             }
             SHORT_CASTLE => {
-                self.pieces[(R_INDEX + color) as usize] -= to_sq << 1;
-                self.pieces[(K_INDEX + color) as usize] -= from_sq;
-                self.pieces[(K_INDEX + color) as usize] += to_sq;
-                self.pieces[(R_INDEX + color) as usize] += from_sq << 1;
+                self.pieces[R_INDEX + color as usize] -= to_sq << 1;
+                self.pieces[K_INDEX + color as usize] -= from_sq;
+                self.pieces[K_INDEX + color as usize] += to_sq;
+                self.pieces[R_INDEX + color as usize] += from_sq << 1;
                 self.castle_rights[(color * 2 + 1) as usize] = false;
                 self.castle_rights[(color * 2) as usize] = false;
             }
             LONG_CASTLE => {
-                self.pieces[(K_INDEX + color) as usize] -= from_sq;
-                self.pieces[(K_INDEX + color) as usize] += to_sq;
+                self.pieces[K_INDEX + color as usize] -= from_sq;
+                self.pieces[K_INDEX + color as usize] += to_sq;
 
-                self.pieces[(R_INDEX + color) as usize] += to_sq << 1;
-                self.pieces[(R_INDEX + color) as usize] -= to_sq >> 2;
+                self.pieces[R_INDEX + color as usize] += to_sq << 1;
+                self.pieces[R_INDEX + color as usize] -= to_sq >> 2;
                 self.castle_rights[(color * 2 + 1) as usize] = false;
                 self.castle_rights[(color * 2) as usize] = false;
             }
@@ -266,19 +264,7 @@ impl Board {
     }
 
     fn update_metadata(&mut self, mv: &Move) {
-        self.black_pieces = 0;
-        self.white_pieces = 0;
-
-        for i in (0usize..self.pieces.len()).step_by(2) {
-            self.black_pieces |= self.pieces[i];
-        }
-
-        for i in (1usize..self.pieces.len()).step_by(2) {
-            self.white_pieces |= self.pieces[i];
-        }
-        self.empty = !self.white_pieces & !self.black_pieces;
-        self.watched_squares_black = self.watched(false);
-        self.watched_squares_white = self.watched(true);
+        self.empty = !self.get_white_pieces() & !self.get_black_pieces();
 
         self.white_turn = !self.white_turn;
         self.update_castling_rights(self.white_turn);
@@ -386,8 +372,8 @@ impl Board {
     pub fn get_pinned_pieces(&self, white: bool) -> u64 {
         // todo kanskje bug siden opp fjerner kongen her men blir brukt som own
         let index = if white { 1 } else { 0 };
-        let attacking_color = if white { self.black_pieces } else { self.white_pieces };
-        let def_color = if white { self.white_pieces } else { self.black_pieces };
+        let attacking_color = if white { self.get_black_pieces() } else { self.get_white_pieces() };
+        let def_color = if white { self.get_white_pieces() } else { self.get_black_pieces() };
         let king_square: u8 = (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
         let opp_diags = self.pieces[(B_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
         let opp_line = self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];

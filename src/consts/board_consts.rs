@@ -91,10 +91,10 @@ pub const SHORT_CASTLE: u8 = 0b11000000;
 // - short castle
 pub const LONG_CASTLE: u8 = 0b11010000; // - long castle
 
-pub const P_INDEX: u8 = 0;
-pub const N_INDEX: u8 = 2;
-pub const B_INDEX: u8 = 4;
-pub const R_INDEX: u8 = 6;
-pub const Q_INDEX: u8 = 8;
-pub const K_INDEX: u8 = 10;
+pub const P_INDEX: usize = 0;
+pub const N_INDEX: usize = 2;
+pub const B_INDEX: usize = 4;
+pub const R_INDEX: usize = 6;
+pub const Q_INDEX: usize = 8;
+pub const K_INDEX: usize = 10;
 
