@@ -67,18 +67,23 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
                 list.push(Move::new_promotion(i - 8, i, false, KNIGHT));
             }
         }
-        // en passant
-        pawn_moves = (b.push_mask << 8) & (b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces << 8) & RANK_MASKS[5] & !FILE_MASKS[0] & if Move::last_move_was_double_push(b.last_move) { (1 << (b.last_move.from & MOVE_MASK) as u32) >> 8 } else { 0 };  // capture right
-        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
-            if pawn_moves & b.get_pinned_slide(i - 9) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i - 9), 1 << (i - 8), true) {
-                list.push(Move::new_ep(i - 9, i));
-            }
-        }
 
-        pawn_moves = (b.push_mask << 8) & (b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces << 8) & (RANK_MASKS[5]) & (!FILE_MASKS[7]) & if Move::last_move_was_double_push(b.last_move) { (1 << (b.last_move.from & MOVE_MASK) as u32) >> 8 } else { 0 }; // capture left
-        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
-            if pawn_moves & b.get_pinned_slide(i - 7) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i - 7), 1 << (i - 8), true) {
-                list.push(Move::new_ep(i - 7, i));
+        // en passant
+        if Move::last_move_was_double_push(b.last_move) {
+            pawn_moves = (b.push_mask << 8) & (b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces << 8) & RANK_MASKS[5] & !FILE_MASKS[0] & ((1 << (b.last_move.from & MOVE_MASK) as u32) >> 8);  // capture right
+            for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
+                if pawn_moves & b.get_pinned_slide(i - 9) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i - 9), 1 << (i - 8), true) {
+                    list.push(Move::new_ep(i - 9, i));
+                    break;
+                }
+            }
+
+            pawn_moves = (b.push_mask << 8) & (b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces << 8) & (RANK_MASKS[5]) & (!FILE_MASKS[7]) & ((1 << (b.last_move.from & MOVE_MASK) as u32) >> 8); // capture left
+            for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
+                if pawn_moves & b.get_pinned_slide(i - 7) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i - 7), 1 << (i - 8), true) {
+                    list.push(Move::new_ep(i - 7, i));
+                    break;
+                }
             }
         }
     } else {
@@ -138,17 +143,19 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
             }
         }
 
-        pawn_moves = (b.push_mask >> 8) & (b.pieces[(P_INDEX + index) as usize] >> 9) & (opposing_pieces >> 8) & (RANK_MASKS[2]) & (!FILE_MASKS[7]) & if Move::last_move_was_double_push(b.last_move) { ((1 << (b.last_move.from & MOVE_MASK)) as u64) << 8 } else { 0 };  // capture right
-        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
-            if pawn_moves & b.get_pinned_slide(i + 9) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i + 9), 1 << (i + 8), false) {
-                list.push(Move::new_ep(i + 9, i));
+        if Move::last_move_was_double_push(b.last_move) {
+            pawn_moves = (b.push_mask >> 8) & (b.pieces[(P_INDEX + index) as usize] >> 9) & (opposing_pieces >> 8) & (RANK_MASKS[2]) & (!FILE_MASKS[7]) & if Move::last_move_was_double_push(b.last_move) { ((1 << (b.last_move.from & MOVE_MASK)) as u64) << 8 } else { 0 };  // capture right
+            for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
+                if pawn_moves & b.get_pinned_slide(i + 9) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i + 9), 1 << (i + 8), false) {
+                    list.push(Move::new_ep(i + 9, i));
+                }
             }
-        }
 
-        pawn_moves = (b.push_mask >> 8) & (b.pieces[(P_INDEX + index) as usize] >> 7) & (opposing_pieces >> 8) & (RANK_MASKS[2]) & (!FILE_MASKS[0]) & if Move::last_move_was_double_push(b.last_move) { ((1 << (b.last_move.from & MOVE_MASK)) as u64) << 8 } else { 0 }; // capture left
-        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
-            if pawn_moves & b.get_pinned_slide(i + 7) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i + 7), 1 << (i + 8), false) {
-                list.push(Move::new_ep(i + 7, i));
+            pawn_moves = (b.push_mask >> 8) & (b.pieces[(P_INDEX + index) as usize] >> 7) & (opposing_pieces >> 8) & (RANK_MASKS[2]) & (!FILE_MASKS[0]) & if Move::last_move_was_double_push(b.last_move) { ((1 << (b.last_move.from & MOVE_MASK)) as u64) << 8 } else { 0 }; // capture left
+            for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
+                if pawn_moves & b.get_pinned_slide(i + 7) & (1u64 << i) != 0 && check_ep_legal(b, 1 << (i + 7), 1 << (i + 8), false) {
+                    list.push(Move::new_ep(i + 7, i));
+                }
             }
         }
     }

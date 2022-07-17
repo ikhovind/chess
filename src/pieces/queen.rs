@@ -17,7 +17,8 @@ pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
     let queens = b.pieces[(Q_INDEX + index) as usize];
     for i in (queens.trailing_zeros())..(64 - queens.leading_zeros()) {
         if (1 << i) & queens != 0 {
-            let moves = b.push_mask & b.get_pinned_slide(i as u8) & !own & (common_moves::d_and_anti_d_moves(i as u8, opp, own)
+            let moves = b.push_mask & b.get_pinned_slide(i as u8) & !own
+                & (common_moves::d_and_anti_d_moves(i as u8, opp, own)
                 | common_moves::h_and_vmoves(i as u8, opp, own));
             for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
                 if (1 << i2)  & moves != 0 {
