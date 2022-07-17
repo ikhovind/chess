@@ -17,13 +17,13 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     if king::is_double_check(b.attackers) {
         return list;
     }
-    for i in (rooks.trailing_zeros() as u8)..(64u8 - rooks.leading_zeros() as u8) {
+    for i in (rooks.trailing_zeros())..(64 - rooks.leading_zeros()) {
         if (1 << i) & rooks != 0 {
-            let moves = b.get_pinned_slide(i) & !own & common_moves::h_and_vmoves(i, opp, own);
-            for i2 in 0u8..64u8 {
+            let moves = b.get_pinned_slide(i as u8) & !own & common_moves::h_and_vmoves(i as u8, opp, own);
+            for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
                 if (1 << i2) & moves & b.push_mask != 0 {
                     list.push(
-                        Move::new_move(i, i2, opp & (1 << i2) != 0)
+                        Move::new_move(i as u8, i2 as u8, opp & (1 << i2) != 0)
                     );
                 }
             }
@@ -39,7 +39,7 @@ pub fn watched_by_r(b: &Board, white: bool) -> u64 {
     let mut moves = 0;
 
     let rooks = b.pieces[(R_INDEX + index) as usize];
-    for i in 0u8..64u8 {
+    for i in (rooks.trailing_zeros() as u8)..(64u8 - rooks.leading_zeros() as u8) {
         if (1 << i) & rooks != 0 {
             moves |= common_moves::h_and_vmoves(i, opp, own);
         }

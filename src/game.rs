@@ -16,7 +16,6 @@ use crate::print_u64_bitboard;
 #[derive(Debug, Clone, Copy)]
 pub struct Board {
     pub pieces: [u64; 12],
-    pub empty: u64,
     pub castle_rights: [bool; 4],
     pub white_turn: bool,
     pub last_move: Move,
@@ -86,10 +85,8 @@ impl Board {
                 _ => {}
             }
         }
-        let empty = !_pawns[0] & !_pawns[1] & !_knights[0] & !_knights[1] & !_bishops[0] & !_bishops[1] & !_rooks[0] & !_rooks[1] & !_queens[0] & !_queens[1] & !_kings[0] & !_kings[1];
         let mut b = Board {
             pieces: [_pawns[0], _pawns[1], _knights[0], _knights[1], _bishops[0], _bishops[1], _rooks[0], _rooks[1], _queens[0], _queens[1], _kings[0], _kings[1]],
-            empty,
             castle_rights: [true, true, true, true],
             white_turn: false,
             last_move: Move::new_move(0, 0, false),
@@ -109,6 +106,10 @@ impl Board {
 
     pub fn get_black_pieces(&self) -> u64 {
         return self.pieces[P_INDEX] | self.pieces[N_INDEX] | self.pieces[B_INDEX] | self.pieces[R_INDEX] | self.pieces[Q_INDEX] | self.pieces[K_INDEX];
+    }
+
+    pub fn get_empty(&self) -> u64 {
+        return !(self.get_white_pieces() | self.get_black_pieces());
     }
 
     pub fn watched(&self, white: bool) -> u64 {
@@ -264,8 +265,6 @@ impl Board {
     }
 
     fn update_metadata(&mut self, mv: &Move) {
-        self.empty = !self.get_white_pieces() & !self.get_black_pieces();
-
         self.white_turn = !self.white_turn;
         self.update_castling_rights(self.white_turn);
         self.update_castling_rights(!self.white_turn);

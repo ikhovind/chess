@@ -55,10 +55,10 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
                 }
             }
 
-            for i2 in 0u8..64u8 {
+            for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
                 if (1 << i2) & moves != 0 {
                     list.push(
-                        Move::new_move(i as u8, i2, opposing_pieces & (1 << i2) != 0)
+                        Move::new_move(i as u8, i2 as u8, opposing_pieces & (1 << i2) != 0)
                     );
                 }
             }

@@ -25,13 +25,13 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
                 list.push(Move::new_move(i - 7, i, true));
             }
         }
-        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.empty & !RANK_MASKS[7]);//move 1 forward
+        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.get_empty() & !RANK_MASKS[7]);//move 1 forward
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_move(i - 8, i, false));
             }
         }
-        pawn_moves = b.push_mask & (((b.pieces[(P_INDEX + index) as usize] << 16) & (b.empty & (b.empty << 8))) & RANK_MASKS[3]);//move 2 forward
+        pawn_moves = b.push_mask & (((b.pieces[(P_INDEX + index) as usize] << 16) & (b.get_empty() & (b.get_empty() << 8))) & RANK_MASKS[3]);//move 2 forward
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 16) & ((1u64 << i))) != 0 {
                 list.push(Move::new_double_push(i - 16, i));
@@ -58,7 +58,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
             }
         }
 
-        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.empty & RANK_MASKS[7]);//pawn promotion by move 1 forward
+        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.get_empty() & RANK_MASKS[7]);//pawn promotion by move 1 forward
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i - 8, i, false, QUEEN));
@@ -96,13 +96,13 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
                 list.push(Move::new_move(i + 9, i, true));
             }
         }
-        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 8) & b.empty & !RANK_MASKS[0]);//move 1 forward
+        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 8) & b.get_empty() & !RANK_MASKS[0]);//move 1 forward
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_move(i + 8, i, false));
             }
         }
-        pawn_moves = b.push_mask & (((b.pieces[(P_INDEX + index) as usize] >> 16) & (b.empty & (b.empty >> 8))) & RANK_MASKS[4]);//move 2 forward
+        pawn_moves = b.push_mask & (((b.pieces[(P_INDEX + index) as usize] >> 16) & (b.get_empty() & (b.get_empty() >> 8))) & RANK_MASKS[4]);//move 2 forward
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 16) & ((1u64 << i))) != 0 {
                 list.push(Move::new_double_push(i + 16, i));
@@ -129,7 +129,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
             }
         }
 
-        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 8) & b.empty & RANK_MASKS[0]);//pawn promotion by move 1 forward
+        pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 8) & b.get_empty() & RANK_MASKS[0]);//pawn promotion by move 1 forward
         for i in 0..64 {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i + 8, i, false, QUEEN));

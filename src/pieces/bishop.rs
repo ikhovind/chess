@@ -11,7 +11,7 @@ pub fn watched_by_b(b: &Board, white: bool) -> u64 {
     let mut moves = 0;
 
     let bishops = b.pieces[(B_INDEX + index) as usize];
-    for i in 0u8..64u8 {
+    for i in (bishops.trailing_zeros() as u8)..(64u8 - bishops.leading_zeros() as u8) {
         if (1 << i) & bishops != 0 {
             moves |= common_moves::d_and_anti_d_moves(i, opp, own);
         }
@@ -29,13 +29,13 @@ pub fn possible_b(b: &Board, white: bool) -> Vec<Move> {
         return list;
     }
     let bishops = b.pieces[(B_INDEX + index) as usize];
-    for i in (bishops.trailing_zeros() as u8)..(64u8 - bishops.leading_zeros() as u8) {
+    for i in (bishops.trailing_zeros())..(64 - bishops.leading_zeros()) {
         if (1 << i) & bishops != 0 {
-            let moves = b.get_pinned_slide(i) & b.push_mask & !own & common_moves::d_and_anti_d_moves(i, opp, own);
-            for i2 in 0u8..64u8 {
+            let moves = b.get_pinned_slide(i as u8) & b.push_mask & !own & common_moves::d_and_anti_d_moves(i as u8, opp, own);
+            for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
                 if (1 << i2) & moves != 0 {
                     list.push(
-                        Move::new_move(i, i2, opp & (1 << i2) != 0)
+                        Move::new_move(i as u8, i2 as u8, opp & (1 << i2) != 0)
                     );
                 }
             }

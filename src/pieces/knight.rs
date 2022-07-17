@@ -1,4 +1,5 @@
 use crate::{Board, computed, print_u64_bitboard};
+use crate::computed::lookup_consts::KNIGHT_MOVES;
 use crate::consts::board_consts::*;
 use crate::mv::Move;
 use crate::pieces::bishop::watched_by_b;
@@ -22,19 +23,19 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
 
 
 
-    for i in 0..64 {
+    for i in (knights.trailing_zeros())..(64 - knights.leading_zeros()) {
         if (1 << i) & knights != 0 {
 
             let moves =
-            computed::lookup_consts::KNIGHT_MOVES[i]
+            computed::lookup_consts::KNIGHT_MOVES[i as usize]
                     & !own_pieces & b.push_mask & b.get_pinned_slide(i as u8);
 
-            for i2 in 0..64 {
+            for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
                 if (1 << i2) & moves != 0 {
                     list.push(
                         Move::new_move(
                             i as u8,
-                            i2,
+                            i2 as u8,
                             opposing_pieces & (1 << i2) != 0,
                         )
                     );
@@ -56,62 +57,14 @@ pub fn watched_by_n(b: &Board, white: bool) -> u64 {
     }
     let mut moves = 0;
     let knights = b.pieces[(N_INDEX + index) as usize];
-    for i in 0u8..64u8 {
+    for i in (knights.trailing_zeros())..(64 - knights.leading_zeros()) {
         if (1 << i) & knights != 0 {
-            let spot_1_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
-            let spot_2_clip = !FILE_MASKS[0];
-            let spot_3_clip = !FILE_MASKS[7];
-            let spot_4_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
-
-            let spot_5_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
-            let spot_6_clip = !FILE_MASKS[7];
-            let spot_7_clip = !FILE_MASKS[0];
-            let spot_8_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
-
-            /* The clipping masks we just created will be used to ensure that no
-        under or overflow positions are computed when calculating the
-        possible moves of the knight in certain files. */
-
-            let spot_1 = ((1 << i) & spot_1_clip) << 6;
-            let spot_2 = ((1 << i) & spot_2_clip) << 15;
-            let spot_3 = ((1 << i) & spot_3_clip) << 17;
-            let spot_4 = ((1 << i) & spot_4_clip) << 10;
-
-            let spot_5 = ((1 << i) & spot_5_clip) >> 6;
-            let spot_6 = ((1 << i) & spot_6_clip) >> 15;
-            let spot_7 = ((1 << i) & spot_7_clip) >> 17;
-            let spot_8 = ((1 << i) & spot_8_clip) >> 10;
-
-            moves = moves | spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
+            moves |= KNIGHT_MOVES[i as usize];
         }
     }
     return moves;
 }
 
 pub fn attacked_from(square: u8) -> u64 {
-    let spot_1_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
-    let spot_2_clip = !FILE_MASKS[0];
-    let spot_3_clip = !FILE_MASKS[7];
-    let spot_4_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
-
-    let spot_5_clip = !FILE_MASKS[7] & !FILE_MASKS[6];
-    let spot_6_clip = !FILE_MASKS[7];
-    let spot_7_clip = !FILE_MASKS[0];
-    let spot_8_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
-
-    /* The clipping masks we just created will be used to ensure that no
-under or overflow positions are computed when calculating the
-possible moves of the knight in certain files. */
-
-    let spot_1 = ((1u64 << square) & spot_1_clip) << 6;
-    let spot_2 = ((1u64 << square) & spot_2_clip) << 15;
-    let spot_3 = ((1u64 << square) & spot_3_clip) << 17;
-    let spot_4 = ((1u64 << square) & spot_4_clip) << 10;
-
-    let spot_5 = ((1u64 << square) & spot_5_clip) >> 6;
-    let spot_6 = ((1u64 << square) & spot_6_clip) >> 15;
-    let spot_7 = ((1u64 << square) & spot_7_clip) >> 17;
-    let spot_8 = ((1u64 << square) & spot_8_clip) >> 10;
-
-    return spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
+    return KNIGHT_MOVES[square as usize];
 }
