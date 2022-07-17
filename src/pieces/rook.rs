@@ -19,9 +19,9 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     }
     for i in (rooks.trailing_zeros())..(64 - rooks.leading_zeros()) {
         if (1 << i) & rooks != 0 {
-            let moves = b.get_pinned_slide(i as u8) & !own & common_moves::h_and_vmoves(i as u8, opp, own);
+            let moves = b.push_mask & b.get_pinned_slide(i as u8) & !own & common_moves::h_and_vmoves(i as u8, opp, own);
             for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
-                if (1 << i2) & moves & b.push_mask != 0 {
+                if (1 << i2) & moves != 0 {
                     list.push(
                         Move::new_move(i as u8, i2 as u8, opp & (1 << i2) != 0)
                     );

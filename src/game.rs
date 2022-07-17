@@ -369,7 +369,6 @@ impl Board {
     }
 
     pub fn get_pinned_pieces(&self, white: bool) -> u64 {
-        // todo kanskje bug siden opp fjerner kongen her men blir brukt som own
         let index = if white { 1 } else { 0 };
         let attacking_color = if white { self.get_black_pieces() } else { self.get_white_pieces() };
         let def_color = if white { self.get_white_pieces() } else { self.get_black_pieces() };
@@ -377,23 +376,22 @@ impl Board {
         let opp_diags = self.pieces[(B_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
         let opp_line = self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
         let king_diag = DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
-        // todo maybe bug
         let king_anti_diag = ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
+
         let mut pinned_pieces = 0;
-        for i in 0u8..64u8 {
+        for i in (opp_diags | opp_line).trailing_zeros() as u8..(64u8 - (opp_diags | opp_line).leading_zeros() as u8) {
             if (1 << i) & opp_line != 0 {
                 if i % 8 == king_square % 8 {
-                    pinned_pieces |= (FILE_MASKS[(king_square % 8) as usize] & h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
+                    pinned_pieces |= (h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
                 } else if (i / 8) == (king_square / 8) {
-                    //print_u64_bitboard(h_and_vmoves(i, opp, own));
-                    pinned_pieces |= (RANK_MASKS[(king_square / 8) as usize] & h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
+                    pinned_pieces |=  (h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
                 }
             }
             if (1 << i) & opp_diags != 0 {
                 if (1 << i) & king_diag != 0 {
-                    pinned_pieces |= king_diag & d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
+                    pinned_pieces |= d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
                 } else if (1 << i) & king_anti_diag != 0 {
-                    pinned_pieces |= king_anti_diag & d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
+                    pinned_pieces |= d_and_anti_d_moves(i, def_color, attacking_color) & d_and_anti_d_moves(king_square, attacking_color, def_color);
                 }
             }
         }
