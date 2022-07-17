@@ -13,33 +13,33 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
     let opposing_pieces = if white { b.get_black_pieces() } else { b.get_white_pieces() };
     if white {
         let mut pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[0])); // capture right
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 9) & ((1u64 << i))) != 0 {
                 list.push(Move::new_move(i - 9, i, true));
             }
         }
 
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces) & (!RANK_MASKS[7]) & (!FILE_MASKS[7])); // capture left
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 7) & ((1u64 << i))) != 0 {
                 list.push(Move::new_move(i - 7, i, true));
             }
         }
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.get_empty() & !RANK_MASKS[7]);//move 1 forward
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_move(i - 8, i, false));
             }
         }
         pawn_moves = b.push_mask & (((b.pieces[(P_INDEX + index) as usize] << 16) & (b.get_empty() & (b.get_empty() << 8))) & RANK_MASKS[3]);//move 2 forward
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 16) & ((1u64 << i))) != 0 {
                 list.push(Move::new_double_push(i - 16, i));
             }
         }
         //y1,y2,Promotion Type,"P"
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 7) & opposing_pieces & RANK_MASKS[7] & !FILE_MASKS[7]);//pawn promotion by capture left
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 7) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i - 7, i, true, QUEEN));
                 list.push(Move::new_promotion(i - 7, i, true, ROOK));
@@ -49,7 +49,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
         }
 
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 9) & opposing_pieces & RANK_MASKS[7] & !FILE_MASKS[0]);//pawn promotion by capture right
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 9) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i - 9, i, true, QUEEN));
                 list.push(Move::new_promotion(i - 9, i, true, ROOK));
@@ -59,7 +59,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
         }
 
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.get_empty() & RANK_MASKS[7]);//pawn promotion by move 1 forward
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i - 8, i, false, QUEEN));
                 list.push(Move::new_promotion(i - 8, i, false, ROOK));
@@ -70,47 +70,47 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
         // todo det går kanskje ann å en passante når man bare skal ta vanlig?
         // en passant
         pawn_moves = (b.push_mask << 8) & (((b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces << 8) & (RANK_MASKS[5]) & (!FILE_MASKS[0])) & if Move::last_move_was_double_push(b.last_move) { (1 << (b.last_move.from & MOVE_MASK) as u32) >> 8 } else { 0 });  // capture right
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 9) & ((1u64 << i))) != 0 && check_ep_legal(b, 1 << (i - 9), 1 << (i - 8), true) {
                 list.push(Move::new_ep(i - 9, i));
             }
         }
 
         pawn_moves = (b.push_mask << 8) & (((b.pieces[(P_INDEX + index) as usize] << 7) & (opposing_pieces << 8) & (RANK_MASKS[5]) & (!FILE_MASKS[7])) & if Move::last_move_was_double_push(b.last_move) { (1 << (b.last_move.from & MOVE_MASK) as u32) >> 8 } else { 0 }); // capture left
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i - 7) & ((1u64 << i))) != 0 && check_ep_legal(b, 1 << (i - 7), 1 << (i - 8), true) {
                 list.push(Move::new_ep(i - 7, i));
             }
         }
     } else {
         let mut pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 7) & (opposing_pieces) & (!RANK_MASKS[0]) & (!FILE_MASKS[0])); // capture left
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 7) & ((1u64 << i))) != 0 {
                 list.push(Move::new_move(i + 7, i, true));
             }
         }
 
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 9) & (opposing_pieces) & (!RANK_MASKS[0]) & (!FILE_MASKS[7])); // capture right
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 9) & (1u64 << i)) != 0 {
                 list.push(Move::new_move(i + 9, i, true));
             }
         }
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 8) & b.get_empty() & !RANK_MASKS[0]);//move 1 forward
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_move(i + 8, i, false));
             }
         }
         pawn_moves = b.push_mask & (((b.pieces[(P_INDEX + index) as usize] >> 16) & (b.get_empty() & (b.get_empty() >> 8))) & RANK_MASKS[4]);//move 2 forward
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 16) & ((1u64 << i))) != 0 {
                 list.push(Move::new_double_push(i + 16, i));
             }
         }
         //y1,y2,Promotion Type,"P"
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 9) & opposing_pieces & RANK_MASKS[0] & !FILE_MASKS[7]);//pawn promotion by capture right
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 9) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i + 9, i, true, QUEEN));
                 list.push(Move::new_promotion(i + 9, i, true, ROOK));
@@ -120,7 +120,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
         }
 
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 7) & opposing_pieces & RANK_MASKS[0] & !FILE_MASKS[0]);//pawn promotion by capture left
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 7) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i + 7, i, true, QUEEN));
                 list.push(Move::new_promotion(i + 7, i, true, ROOK));
@@ -130,7 +130,7 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
         }
 
         pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] >> 8) & b.get_empty() & RANK_MASKS[0]);//pawn promotion by move 1 forward
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 8) & ((1u64 << i))) != 0 {
                 list.push(Move::new_promotion(i + 8, i, false, QUEEN));
                 list.push(Move::new_promotion(i + 8, i, false, ROOK));
@@ -140,14 +140,14 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
         }
 
         pawn_moves = (b.push_mask >> 8) & (((b.pieces[(P_INDEX + index) as usize] >> 9) & (opposing_pieces >> 8) & (RANK_MASKS[2]) & (!FILE_MASKS[7])) & if Move::last_move_was_double_push(b.last_move) { ((1 << (b.last_move.from & MOVE_MASK)) as u64) << 8 } else { 0 });  // capture right
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 9) & ((1u64 << i))) != 0 && check_ep_legal(b, 1 << (i + 9), 1 << (i + 8), false) {
                 list.push(Move::new_ep(i + 9, i));
             }
         }
 
         pawn_moves = (b.push_mask >> 8) & (((b.pieces[(P_INDEX + index) as usize] >> 7) & (opposing_pieces >> 8) & (RANK_MASKS[2]) & (!FILE_MASKS[0])) & if Move::last_move_was_double_push(b.last_move) { ((1 << (b.last_move.from & MOVE_MASK)) as u64) << 8 } else { 0 }); // capture left
-        for i in 0..64 {
+        for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
             if (((pawn_moves >> i) & 1) == 1) && (b.get_pinned_slide(i + 7) & ((1u64 << i))) != 0 && check_ep_legal(b, 1 << (i + 7), 1 << (i + 8), false) {
                 list.push(Move::new_ep(i + 7, i));
             }
