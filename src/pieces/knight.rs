@@ -35,7 +35,7 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
                         Move::new_move(
                             i as u8,
                             i2,
-                            opposing_pieces & 2_u64.pow(i2 as u32) != 0,
+                            opposing_pieces & (1 << i2) != 0,
                         )
                     );
                 }

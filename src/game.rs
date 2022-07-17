@@ -109,7 +109,7 @@ impl Board {
         b.watched_squares_black = b.watched(false);
         b.watched_squares_white = b.watched(true);
         b.attackers = king::get_attackers(&b, b.white_turn);
-        b.update_metadata(Move::new_move(0, 0, false));
+        b.update_metadata(&Move::new_move(0, 0, false));
         return b;
     }
 
@@ -123,7 +123,7 @@ impl Board {
                 | pawn::watched_by_p(&self, white);
     }
 
-    pub fn make_move(&mut self, mv: Move) -> &mut Board {
+    pub fn make_move(&mut self, mv: &Move) -> &mut Board {
         let mv_type = mv.from & TYPE_MASK | ((mv.to & TYPE_MASK) >> 2);
         let color: u8 = if self.white_turn { 1 } else { 0 };
         let from_sq = 1 << (mv.from & MOVE_MASK);
@@ -265,7 +265,7 @@ impl Board {
         }
     }
 
-    fn update_metadata(&mut self, mv: Move) {
+    fn update_metadata(&mut self, mv: &Move) {
         self.black_pieces = 0;
         self.white_pieces = 0;
 
@@ -283,7 +283,7 @@ impl Board {
         self.white_turn = !self.white_turn;
         self.update_castling_rights(self.white_turn);
         self.update_castling_rights(!self.white_turn);
-        self.last_move = mv;
+        self.last_move = *mv;
 
         self.pinned_pieces = self.get_pinned_pieces(self.white_turn);
 
@@ -326,13 +326,13 @@ impl Board {
         return self.get_num_moves_inner(depth, depth);
     }
 
-    fn get_num_moves_inner(self, depth: u32, initial: u32) -> u64 {
+    fn get_num_moves_inner(&self, depth: u32, initial: u32) -> u64 {
         let mut sum = 0;
         if depth == 1 {
             return self.get_all_moves().len() as u64;
         }
         for nw in self.get_all_moves() {
-            let res = self.clone().make_move(nw).get_num_moves_inner(depth - 1, initial);
+            let res = self.clone().make_move(&nw).get_num_moves_inner(depth - 1, initial);
             sum += res;
             if depth == initial {
                 println!("{}: {}", nw.to_string(), res);
@@ -414,6 +414,7 @@ impl Board {
         }
         return pinned_pieces & def_color;
     }
+
     pub fn get_pinning_ray(self, king_square: u8, piece_square: u8) -> u64 {
         // same column
         let mut max = max(king_square, piece_square);
@@ -439,6 +440,7 @@ impl Board {
             return 0;
         }
     }
+
     pub fn get_pinned_slide(&self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
         return if self.pinned_pieces & (1 << i) != 0 {

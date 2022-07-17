@@ -43,7 +43,7 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
     let kings = b.pieces[(K_INDEX + index) as usize];
 
     for i in 0u8..64u8 {
-        if 2_u64.pow(i as u32) & kings != 0 {
+        if (1 << i) & kings != 0 {
             let king_loc = 1 << i;
             let king_clip_file_h = king_loc & !FILE_MASKS[7];
             let king_clip_file_a = king_loc & !FILE_MASKS[0];
@@ -76,9 +76,9 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
             }
 
             for i2 in 0u8..64u8 {
-                if 2u64.pow(i2 as u32) & moves != 0 {
+                if (1 << i2) & moves != 0 {
                     list.push(
-                        Move::new_move(i, i2, opposing_pieces & 2_u64.pow(i2 as u32) != 0)
+                        Move::new_move(i, i2, opposing_pieces & (1 << i2) != 0)
                     );
                 }
             }
@@ -96,7 +96,7 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
     let kings = b.pieces[(K_INDEX + index) as usize];
 
     for i in 0u8..64u8 {
-        if 2_u64.pow(i as u32) & kings != 0 {
+        if (1 << i) & kings != 0 {
             let king_loc = 1 << i;
             let king_clip_file_h = king_loc & !FILE_MASKS[7];
             let king_clip_file_a = king_loc & !FILE_MASKS[0];

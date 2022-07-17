@@ -15,14 +15,14 @@ pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
         return list;
     }
     let queens = b.pieces[(Q_INDEX + index) as usize];
-    for i in 0u8..64u8 {
-        if 2_u64.pow(i as u32) & queens != 0 {
+    for i in (queens.trailing_zeros() as u8)..(64u8 - queens.leading_zeros() as u8) {
+        if (1 << i) & queens != 0 {
             let moves = b.get_pinned_slide(i) & !own & (common_moves::d_and_anti_d_moves(i, opp, own)
                 | common_moves::h_and_vmoves(i, opp, own));
             for i2 in 0u8..64u8 {
-                if 2u64.pow(i2 as u32) & moves &b.push_mask != 0 {
+                if (1 << i2)  & moves &b.push_mask != 0 {
                     list.push(
-                        Move::new_move(i, i2, opp & 2_u64.pow(i2 as u32) != 0)
+                        Move::new_move(i, i2, opp & (1 << i2) != 0)
                     );
                 }
             }
@@ -39,7 +39,7 @@ pub fn watched_by_q(b: &Board, white: bool) -> u64 {
 
     let queens = b.pieces[(Q_INDEX + index) as usize];
     for i in (queens.trailing_zeros() as u8)..(64u8 - queens.leading_zeros() as u8) {
-        if 2_u64.pow(i as u32) & queens != 0 {
+        if (1 << i) & queens != 0 {
             moves |= (common_moves::d_and_anti_d_moves(i, opp, own)
                 | common_moves::h_and_vmoves(i, opp, own));
         }
