@@ -39,9 +39,9 @@ pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
     let mut list: Vec<Move> = Vec::new();
     let kings = b.pieces[K_INDEX + index as usize];
 
-    for i in 0..64 {
+    for i in (kings.trailing_zeros() as u8)..(64u8 - kings.leading_zeros() as u8) {
         if (1 << i) & kings != 0 {
-            let moves = KING_MOVES[i] & !own_pieces & !opponent_watching;
+            let moves = KING_MOVES[i as usize] & !own_pieces & !opponent_watching;
 
             if b.attackers == 0 {
                 // long castle
@@ -75,9 +75,9 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
     let mut moves = 0;
     let kings = b.pieces[(K_INDEX + index) as usize];
 
-    for i in 0..64 {
+    for i in (kings.trailing_zeros())..(64 - kings.leading_zeros()) {
         if (1 << i) & kings != 0 {
-            return KING_MOVES[i];
+            return KING_MOVES[i as usize];
         }
     }
     return moves;
