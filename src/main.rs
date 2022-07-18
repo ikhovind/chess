@@ -7,8 +7,10 @@ use std::time::{Instant, SystemTime};
 use chrono::{DateTime, Utc};
 use num_format::{Locale, WriteFormatted};
 use num_format::Locale::el;
+use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, DIAGONAL_MASKS, FILE_MASKS, RANK_MASKS};
 use crate::game::Board;
 use crate::mv::Move;
+use crate::pieces::common_moves::{anti_diag_ray, diag_ray, h_moves, ray_between, v_moves};
 
 pub mod game;
 mod mv;
@@ -99,3 +101,6 @@ fn main() {
     );
     test(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"), 6);
 }
+
+
+

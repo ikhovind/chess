@@ -7,7 +7,7 @@ use crate::consts::board_consts::*;
 use crate::mv::Move;
 use crate::pieces::*;
 use crate::pieces::bishop;
-use crate::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
+use crate::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves, ray_between};
 use crate::pieces::king::{get_attackers, is_double_check};
 use crate::print_u64_bitboard;
 
@@ -279,7 +279,7 @@ impl Board {
             else {
                 // hvis brikken som ble flytta er en glider
                 if (1 << (63 - attackers.leading_zeros())) & (self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize] | self.pieces[(B_INDEX + 1 - index) as usize]) != 0 {
-                    self.push_mask = self.ray_between((63 - attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
+                    self.push_mask = ray_between((63 - attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
                 } else {
                     self.push_mask = 1 << (63 - attackers.leading_zeros());
                 }
@@ -327,47 +327,6 @@ impl Board {
         return sum;
     }
 
-    pub fn ray_between(&self, attacker: u8, piece_square: u8) -> u64 {
-        // same column
-        let mut max = max(attacker, piece_square);
-        let min = min(attacker, piece_square);
-        let mut ray = 0;
-        if max % 8 == min % 8 {
-            max -= 8;
-            while max != min {
-                ray |= (1 << max);
-                max -= 8;
-            }
-        }
-        // same row
-        else if max / 8 == min / 8 {
-            max -= 1;
-            while max != min {
-                ray |= (1 << max);
-                max -= 1;
-            }
-        }
-        // diagonal
-        else {
-            // to the left
-            if max % 8 < min % 8 {
-                max -= 7;
-                while max != min {
-                    ray |= (1 << max);
-                    max -= 7;
-                }
-            }
-            // to the right
-            else {
-                max -= 9;
-                while max != min {
-                    ray |= (1 << max);
-                    max -= 9;
-                }
-            }
-        }
-        return ray | (1 << attacker);
-    }
 
     pub fn get_pinned_pieces(&self, white: bool) -> u64 {
         let index = if white { 1 } else { 0 };
