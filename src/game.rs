@@ -1,6 +1,8 @@
 #![allow(unused)]
 
 use std::cmp::{max, min};
+use crossbeam_utils::thread;
+use num_format::Locale::{kn, qu};
 
 use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, DIAGONAL_MASKS, FILE_MASKS};
 use crate::consts::board_consts::*;
@@ -290,21 +292,38 @@ impl Board {
     }
 
     pub fn get_all_moves(&self) -> Vec<Move> {
-        /*
-                println!("rook: {}", pieces::rook::possible_r(self, self.white_turn).len());
-                println!("knight: {}", pieces::knight::possible_n(self, self.white_turn).len());
-                println!("bishop: {}", pieces::bishop::possible_b(self, self.white_turn).len());
-                println!("queen: {}", pieces::queen::possible_q(self, self.white_turn).len());
-                println!("king: {}", pieces::king::possible_k(self, self.white_turn).len());
-                println!("pawn: {}", pieces::pawn::possible_p(self, self.white_turn).len());
-                 */
+        let mut rook = vec![];
+        let mut knight: Vec<Move> = vec![];
+        let mut bishop: Vec<Move> = vec![];
+        let mut queen: Vec<Move> = vec![];
+        let mut king: Vec<Move> = vec![];
+        let mut pawn: Vec<Move> = vec![];
 
-        let mut rook = rook::possible_r(self, self.white_turn);
-        rook.append(&mut knight::possible_n(self, self.white_turn));
-        rook.append(&mut bishop::possible_b(self, self.white_turn));
-        rook.append(&mut queen::possible_q(self, self.white_turn));
-        rook.append(&mut king::possible_k(self, self.white_turn));
-        rook.append(&mut pawn::possible_p(self, self.white_turn));
+        thread::scope(|s| {
+            let threads = [
+                s.spawn(|_| {
+                    return rook::possible_r(self, self.white_turn);
+                }),
+                s.spawn(|_| {
+                    return (knight::possible_n(self, self.white_turn));
+                }),
+                s.spawn(|_| {
+                    return (bishop::possible_b(self, self.white_turn));
+                }),
+                s.spawn(|_| {
+                    return (queen::possible_q(self, self.white_turn));
+                }),
+                s.spawn(|_| {
+                    return (king::possible_k(self, self.white_turn));
+                }),
+                s.spawn(|_| {
+                    return (pawn::possible_p(self, self.white_turn));
+                }),
+            ];
+            for i in threads{
+                rook.append(&mut i.join().unwrap())
+            }
+        });
         return rook;
     }
 
