@@ -25,9 +25,6 @@ pub fn possible_b(b: &Board, white: bool) -> Vec<Move> {
     let opp = if white { b.get_black_pieces() - b.pieces[K_INDEX as usize] } else { b.get_white_pieces() - b.pieces[(K_INDEX + 1) as usize] };
 
     let mut list: Vec<Move> = Vec::new();
-    if king::is_double_check(b.attackers) {
-        return list;
-    }
     let bishops = b.pieces[(B_INDEX + index) as usize];
     for i in (bishops.trailing_zeros())..(64 - bishops.leading_zeros()) {
         if (1 << i) & bishops != 0 {

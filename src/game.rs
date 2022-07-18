@@ -19,7 +19,6 @@ pub struct Board {
     pub castle_rights: [bool; 4],
     pub white_turn: bool,
     pub last_move: Move,
-    pub attackers: u64,
     pub push_mask: u64,
     pub pinned_pieces: u64,
 }
@@ -90,11 +89,9 @@ impl Board {
             castle_rights: [true, true, true, true],
             white_turn: false,
             last_move: Move::new_move(0, 0, false),
-            attackers: 0,
             push_mask: u64::MAX,
             pinned_pieces: 0,
         };
-        b.attackers = king::get_attackers(&b, b.white_turn);
         b.update_metadata(&Move::new_move(0, 0, false));
         return b;
     }
@@ -274,14 +271,18 @@ impl Board {
 
         // set push mask
         let index = if self.white_turn { 1 } else { 0 };
-        self.attackers = king::get_attackers(self, self.white_turn);
-        if !king::is_double_check(self.attackers) && self.attackers != 0 {
-            self.push_mask = 0;
-            // hvis brikken som ble flytta er en glider
-            if (1 << (63 - self.attackers.leading_zeros())) & (self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize] | self.pieces[(B_INDEX + 1 - index) as usize]) != 0 {
-                self.push_mask = self.ray_between((63 - self.attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
-            } else {
-                self.push_mask = 1 << (63 - self.attackers.leading_zeros());
+        let attackers = king::get_attackers(self, self.white_turn);
+        if attackers != 0 {
+            if king::is_double_check(attackers) {
+                self.push_mask = 0;
+            }
+            else {
+                // hvis brikken som ble flytta er en glider
+                if (1 << (63 - attackers.leading_zeros())) & (self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize] | self.pieces[(B_INDEX + 1 - index) as usize]) != 0 {
+                    self.push_mask = self.ray_between((63 - attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
+                } else {
+                    self.push_mask = 1 << (63 - attackers.leading_zeros());
+                }
             }
         } else {
             self.push_mask = u64::MAX;
@@ -400,34 +401,31 @@ impl Board {
 
     pub fn get_pinning_ray(self, king_square: u8, piece_square: u8) -> u64 {
         // same column
-        let mut max = max(king_square, piece_square);
-        let min = min(king_square, piece_square);
-        let mut ray = 0;
-
-        if max % 8 == min % 8 {
-            return FILE_MASKS[(max % 8) as usize];
+        if king_square % 8 == piece_square % 8 {
+            return FILE_MASKS[(king_square % 8) as usize];
         }
         // same row
-        else if max / 8 == min / 8 {
-            return RANK_MASKS[(max / 8) as usize];
+        if king_square / 8 == piece_square / 8 {
+            return RANK_MASKS[(king_square / 8) as usize];
         }
+        let max = max(king_square, piece_square);
         // diagonal
         // to the left
-        else if (max - min) % 9 == 0 {
+        if u8::abs_diff(king_square, piece_square) % 9 == 0 {
             return ANTI_DIAGONAL_MASKS[((7 - max % 8) + max / 8) as usize];
         }
         // to the right
-        else if (max - min) % 7 == 0 {
-            return DIAGONAL_MASKS[(max % 8 + max / 8) as usize];
+        return if u8::abs_diff(king_square, piece_square) % 7 == 0 {
+            DIAGONAL_MASKS[(max % 8 + max / 8) as usize]
         } else {
-            return 0;
+            0
         }
     }
 
     pub fn get_pinned_slide(&self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
         return if self.pinned_pieces & (1 << i) != 0 {
-            self.get_pinning_ray(63u8 - (self.pieces[(K_INDEX + index) as usize].leading_zeros() as u8), i)
+            self.get_pinning_ray((63 - (self.pieces[K_INDEX + index].leading_zeros()) as u8), i)
         } else {
             u64::MAX
         };

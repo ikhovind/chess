@@ -11,9 +11,6 @@ pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
     let opp = if white { b.get_black_pieces() - b.pieces[K_INDEX as usize] } else { b.get_white_pieces() - b.pieces[(K_INDEX + 1) as usize]};
     let mut list: Vec<Move> = Vec::new();
 
-    if king::is_double_check(b.attackers) {
-        return list;
-    }
     let queens = b.pieces[(Q_INDEX + index) as usize];
     for i in (queens.trailing_zeros())..(64 - queens.leading_zeros()) {
         if (1 << i) & queens != 0 {

@@ -14,9 +14,6 @@ pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     let mut list: Vec<Move> = Vec::new();
     let rooks = b.pieces[(R_INDEX + index) as usize];
 
-    if king::is_double_check(b.attackers) {
-        return list;
-    }
     for i in (rooks.trailing_zeros())..(64 - rooks.leading_zeros()) {
         if (1 << i) & rooks != 0 {
             let moves = b.push_mask & b.get_pinned_slide(i as u8) & !own & common_moves::h_and_vmoves(i as u8, opp, own);

@@ -14,9 +14,6 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     let index = if white { 1 } else { 0 };
 
     let mut list: Vec<Move> = Vec::new();
-    if king::is_double_check(b.attackers) {
-        return list;
-    }
 
 
     let knights = b.pieces[(N_INDEX + index) as usize];

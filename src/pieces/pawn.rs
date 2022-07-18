@@ -7,9 +7,6 @@ pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
     let mut list: Vec<Move> = Vec::new();
     let index = if white { 1 } else { 0 };
 
-    if king::is_double_check(b.attackers) {
-        return list;
-    }
     let opposing_pieces = if white { b.get_black_pieces() } else { b.get_white_pieces() };
     if white {
         let mut pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 9) & (opposing_pieces) & !(RANK_MASKS[7] | FILE_MASKS[0])); // capture right
