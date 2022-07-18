@@ -373,9 +373,9 @@ impl Board {
         let index = if white { 1 } else { 0 };
         let attacking_color = if white { self.get_black_pieces() } else { self.get_white_pieces() };
         let def_color = if white { self.get_white_pieces() } else { self.get_black_pieces() };
-        let king_square: u8 = (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
-        let opp_diags = self.pieces[(B_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
-        let opp_line = self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize];
+        let king_square  = (63 - self.pieces[K_INDEX + index].leading_zeros()) as u8;
+        let opp_diags = self.pieces[B_INDEX + 1 - index] | self.pieces[Q_INDEX + 1 - index];
+        let opp_line = self.pieces[R_INDEX + 1 - index] | self.pieces[Q_INDEX + 1 - index];
         let king_diag = DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
         let king_anti_diag = ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
 
@@ -408,15 +408,14 @@ impl Board {
         if king_square / 8 == piece_square / 8 {
             return RANK_MASKS[(king_square / 8) as usize];
         }
-        let max = max(king_square, piece_square);
         // diagonal
         // to the left
-        if u8::abs_diff(king_square, piece_square) % 9 == 0 {
-            return ANTI_DIAGONAL_MASKS[((7 - max % 8) + max / 8) as usize];
+        if u8::abs_diff(piece_square, king_square) % 9 == 0 {
+            return ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
         }
         // to the right
-        return if u8::abs_diff(king_square, piece_square) % 7 == 0 {
-            DIAGONAL_MASKS[(max % 8 + max / 8) as usize]
+        return if u8::abs_diff(piece_square, king_square) % 7 == 0 {
+            DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize]
         } else {
             0
         }
