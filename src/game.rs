@@ -127,11 +127,8 @@ impl Board {
         match mv_type {
             NORMAL_MOVE => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
-                    if self.pieces[i] & from_sq != 0 {
-                        self.pieces[i] -= from_sq;
-                        self.pieces[i] += to_sq;
-                        break;
-                    }
+                    let bit_mask = ((self.pieces[i] & from_sq) != 0) as u64 * u64::MAX;
+                    self.pieces[i] +=  bit_mask & (to_sq - from_sq);
                 }
             }
             DOUBLE_PAWN => {
