@@ -1,21 +1,17 @@
-#![allow(unused)]
-
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::{Write};
 use std::path::Path;
 use std::time::{Instant, SystemTime};
 use chrono::{DateTime, Utc};
 use num_format::{Locale, WriteFormatted};
-use num_format::Locale::el;
 use crate::game::Board;
-use crate::mv::Move;
+use crate::opponent::engine;
 
 pub mod game;
 mod mv;
-mod computed;
-mod pieces;
 mod consts;
-mod tests;
+mod move_gen;
+mod opponent;
 
 fn print_u64_bitboard(bitboard: u64) {
     println!();
@@ -56,11 +52,11 @@ fn test(fen: String, depth: u32) {
 
     let mut writer = String::new(); // Could also be Vec::new(), File::open(...), ...
     // Write "1,000,000" into the writer...
-    writer.write_formatted(&elapsed.as_millis(), &Locale::fr);
+    writer.write_formatted(&elapsed.as_millis(), &Locale::fr).expect("TODO: panic message");
     println!("num: {}", num);
     let mut writer2 = String::new(); // Could also be Vec::new(), File::open(...), ...
     // Write "1,000,000" into the writer...
-    writer2.write_formatted(&((num as u128) / (elapsed.as_millis()) * 1000), &Locale::fr);
+    writer2.write_formatted(&((num as u128) / (elapsed.as_millis()) * 1000), &Locale::fr).expect("TODO: panic message");
 
     let mut file;
     if !Path::new("timestamps.txt").exists() {
@@ -97,5 +93,8 @@ fn main() {
     let mut b = Board::from_fen(
         String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")
     );
-    test(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"), 6);
+
+    println!("{}", engine::eval(&b));
+
+    //test(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"), 6);
 }

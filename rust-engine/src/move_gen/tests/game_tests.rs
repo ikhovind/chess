@@ -1,19 +1,19 @@
 #[cfg(test)]
-use crate::{Board, print_u64_bitboard};
+use crate::{Board};
 use crate::consts::board_consts::{FILE_MASKS, RANK_MASKS};
 use crate::mv::Move;
-use crate::pieces::common_moves;
+use crate::move_gen::pieces::common_moves;
 
 #[test]
 fn sliding_moves() {
-    let mut b = Board::from_fen(String::from("k7/8/8/8/3R4/8/8/K7"));
+    let b = Board::from_fen(String::from("k7/8/8/8/3R4/8/8/K7"));
     assert_eq!(common_moves::h_and_vmoves(27, b.get_black_pieces(), b.get_white_pieces()),
                FILE_MASKS[3] - (1 << 27) + RANK_MASKS[3] - (1 << 27));
 }
 
 #[test]
 fn move_gen() {
-    let mut b = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
+    let b = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"));
     assert_eq!(b.get_num_moves(1), 20);
     assert_eq!(b.get_num_moves(2), 400);
     assert_eq!(b.get_num_moves(3), 8902);
@@ -24,7 +24,7 @@ fn move_gen() {
 
 #[test]
 fn pos_2_perft() {
-    let mut b = Board::from_fen(String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - "));
+    let b = Board::from_fen(String::from("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - "));
     assert_eq!(b.get_num_moves(1), 48);
     assert_eq!(b.get_num_moves(2), 2039);
     assert_eq!(b.get_num_moves(3), 97862);
@@ -35,7 +35,7 @@ fn pos_2_perft() {
 
 #[test]
 fn pos_3_perft() {
-    let mut b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
+    let b = Board::from_fen(String::from("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - "));
     assert_eq!(b.get_num_moves(1), 14);
     assert_eq!(b.get_num_moves(2), 191);
     assert_eq!(b.get_num_moves(3), 2812);
@@ -48,7 +48,7 @@ fn pos_3_perft() {
 
 #[test]
 fn pos_4_perft() {
-    let mut b = Board::from_fen(String::from("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"));
+    let b = Board::from_fen(String::from("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"));
     assert_eq!(b.get_num_moves(1), 6);
     assert_eq!(b.get_num_moves(2), 264);
     assert_eq!(b.get_num_moves(3), 9467);
@@ -60,7 +60,7 @@ fn pos_4_perft() {
 #[test]
 fn pos_5_perft() {
     // https://www.chessprogramming.org/Perft_Results
-    let mut b = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8 "));
+    let b = Board::from_fen(String::from("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8 "));
     assert_eq!(b.get_num_moves(1), 44);
     assert_eq!(b.get_num_moves(2), 1486);
     assert_eq!(b.get_num_moves(3), 62379);
@@ -70,7 +70,7 @@ fn pos_5_perft() {
 
 #[test]
 fn pos_6_perft() {
-    let mut b = Board::from_fen(String::from("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"));
+    let b = Board::from_fen(String::from("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"));
     assert_eq!(b.get_num_moves(1), 46);
     assert_eq!(b.get_num_moves(2), 2079);
     assert_eq!(b.get_num_moves(3), 89890);
@@ -85,7 +85,7 @@ fn pos_6_perft() {
 
 #[test]
 fn blocks_check() {
-    let mut b = Board::from_fen(String::from("1k6/3r4/8/5R2/8/3K4/8/8"));
+    let b = Board::from_fen(String::from("1k6/3r4/8/5R2/8/3K4/8/8"));
     assert_eq!(b.get_num_moves(1), 7);
 }
 

@@ -1,12 +1,8 @@
-use crate::{Board, computed, print_u64_bitboard};
-use crate::computed::lookup_consts::KNIGHT_MOVES;
+use crate::Board;
 use crate::consts::board_consts::*;
+use crate::move_gen::computed_moves;
+use crate::move_gen::computed_moves::lookup_consts::KNIGHT_MOVES;
 use crate::mv::Move;
-use crate::pieces::bishop::watched_by_b;
-use crate::pieces::king;
-use crate::pieces::pawn::watched_by_p;
-use crate::pieces::queen::watched_by_q;
-use crate::pieces::rook::watched_by_r;
 
 pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
     let opposing_pieces = if white { b.get_black_pieces() } else { b.get_white_pieces() };
@@ -24,7 +20,7 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
         if (1 << i) & knights != 0 {
 
             let moves =
-            computed::lookup_consts::KNIGHT_MOVES[i as usize]
+            computed_moves::lookup_consts::KNIGHT_MOVES[i as usize]
                     & !own_pieces & b.push_mask & b.get_pinned_slide(i as u8);
 
             for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {

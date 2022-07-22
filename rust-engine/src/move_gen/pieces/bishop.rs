@@ -1,8 +1,7 @@
-use crate::{Board, print_u64_bitboard};
+use crate::{Board};
 use crate::consts::board_consts::*;
 use crate::mv::Move;
-use crate::pieces::common_moves;
-use crate::pieces::king;
+use crate::move_gen::pieces::common_moves;
 
 pub fn watched_by_b(b: &Board, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };

@@ -1,6 +1,5 @@
 use std::fmt;
 
-use crate::consts::board_consts::{FILE_MASKS, RANK_MASKS};
 use crate::consts::board_consts::*;
 
 #[derive(Clone, Copy, Debug)]

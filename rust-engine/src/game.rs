@@ -1,15 +1,11 @@
-#![allow(unused)]
-
 use std::cmp::{max, min};
 
 use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, DIAGONAL_MASKS, FILE_MASKS};
 use crate::consts::board_consts::*;
 use crate::mv::Move;
-use crate::pieces::*;
-use crate::pieces::bishop;
-use crate::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
-use crate::pieces::king::{get_attackers, is_double_check};
-use crate::print_u64_bitboard;
+use crate::move_gen::pieces::*;
+use crate::move_gen::pieces::bishop;
+use crate::move_gen::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
 
 //[black, white]
 //[black short, black long, white short, white long]
@@ -35,7 +31,7 @@ impl Board {
         let mut column: u32 = 0;
         let mut row = 7;
         let mut res = 0;
-        let mut white = 1;
+        let mut white;
         for i in fen.chars() {
             if i.is_alphabetic() {
                 res = 2_u64.pow((column + row * 8) as u32);
@@ -287,15 +283,6 @@ impl Board {
     }
 
     pub fn get_all_moves(&self) -> Vec<Move> {
-        /*
-                println!("rook: {}", pieces::rook::possible_r(self, self.white_turn).len());
-                println!("knight: {}", pieces::knight::possible_n(self, self.white_turn).len());
-                println!("bishop: {}", pieces::bishop::possible_b(self, self.white_turn).len());
-                println!("queen: {}", pieces::queen::possible_q(self, self.white_turn).len());
-                println!("king: {}", pieces::king::possible_k(self, self.white_turn).len());
-                println!("pawn: {}", pieces::pawn::possible_p(self, self.white_turn).len());
-                 */
-
         let mut rook = rook::possible_r(self, self.white_turn);
         rook.append(&mut knight::possible_n(self, self.white_turn));
         rook.append(&mut bishop::possible_b(self, self.white_turn));
@@ -332,7 +319,7 @@ impl Board {
         if max % 8 == min % 8 {
             max -= 8;
             while max != min {
-                ray |= (1 << max);
+                ray |= 1 << max;
                 max -= 8;
             }
         }
@@ -340,7 +327,7 @@ impl Board {
         else if max / 8 == min / 8 {
             max -= 1;
             while max != min {
-                ray |= (1 << max);
+                ray |= 1 << max;
                 max -= 1;
             }
         }
@@ -350,7 +337,7 @@ impl Board {
             if max % 8 < min % 8 {
                 max -= 7;
                 while max != min {
-                    ray |= (1 << max);
+                    ray |= 1 << max;
                     max -= 7;
                 }
             }
@@ -358,7 +345,7 @@ impl Board {
             else {
                 max -= 9;
                 while max != min {
-                    ray |= (1 << max);
+                    ray |= 1 << max;
                     max -= 9;
                 }
             }
@@ -380,9 +367,9 @@ impl Board {
         for i in (opp_diags | opp_line).trailing_zeros() as u8..(64u8 - (opp_diags | opp_line).leading_zeros() as u8) {
             if (1 << i) & opp_line != 0 {
                 if i % 8 == king_square % 8 {
-                    pinned_pieces |= (h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
+                    pinned_pieces |= h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color);
                 } else if (i / 8) == (king_square / 8) {
-                    pinned_pieces |=  (h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color));
+                    pinned_pieces |=  h_and_vmoves(i, def_color, attacking_color) & h_and_vmoves(king_square, attacking_color, def_color);
                 }
             }
             if (1 << i) & opp_diags != 0 {
@@ -421,7 +408,7 @@ impl Board {
     pub fn get_pinned_slide(&self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
         return if self.pinned_pieces & (1 << i) != 0 {
-            self.get_pinning_ray((63 - (self.pieces[K_INDEX + index].leading_zeros()) as u8), i)
+            self.get_pinning_ray(63 - (self.pieces[K_INDEX + index].leading_zeros()) as u8, i)
         } else {
             u64::MAX
         };

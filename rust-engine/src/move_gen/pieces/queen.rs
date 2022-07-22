@@ -1,9 +1,8 @@
-use crate::{Board, print_u64_bitboard};
-use crate::pieces::common_moves;
+use crate::{Board};
+use crate::move_gen::pieces::common_moves;
 use crate::consts::board_consts::K_INDEX;
 use crate::consts::board_consts::*;
 use crate::mv::Move;
-use crate::pieces::king;
 
 pub fn possible_q(b: &Board, white: bool) -> Vec<Move> {
     let index = if white { 1 } else { 0 };
@@ -38,8 +37,8 @@ pub fn watched_by_q(b: &Board, white: bool) -> u64 {
     let queens = b.pieces[(Q_INDEX + index) as usize];
     for i in (queens.trailing_zeros() as u8)..(64u8 - queens.leading_zeros() as u8) {
         if (1 << i) & queens != 0 {
-            moves |= (common_moves::d_and_anti_d_moves(i, opp, own)
-                | common_moves::h_and_vmoves(i, opp, own));
+            moves |= common_moves::d_and_anti_d_moves(i, opp, own)
+                | common_moves::h_and_vmoves(i, opp, own);
         }
     }
     return moves;

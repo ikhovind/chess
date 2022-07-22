@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use crate::consts::board_consts::FILE_MASKS;
 
 pub const KNIGHT_MOVES: [u64; 64] = calculate_knight_moves();
@@ -16,7 +15,7 @@ const fn calculate_knight_moves() -> [u64; 64] {
     let spot_8_clip = !FILE_MASKS[0] & !FILE_MASKS[1];
 
     /* The clipping masks we just created will be used to ensure that no
-under or overflow positions are computed when calculating the
+under or overflow positions are computed_moves when calculating the
 possible moves of the knight in certain files. */
     let mut ans: [u64; 64] = [0; 64];
     let mut i = 0;
@@ -31,7 +30,7 @@ possible moves of the knight in certain files. */
         let spot_7 = ((1 << i) & spot_7_clip) >> 17;
         let spot_8 = ((1 << i) & spot_8_clip) >> 10;
         let moves =
-            (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8);
+            spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
         ans[i as usize] = moves;
         i += 1;
     }
@@ -58,7 +57,7 @@ const fn calculate_king_moves() -> [u64; 64] {
         let spot_7 = king_clip_file_a >> 9;
         let spot_8 = king_clip_file_a >> 1;
 
-        ans[i] = (spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8);
+        ans[i] = spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
         i += 1;
     }
     return ans;

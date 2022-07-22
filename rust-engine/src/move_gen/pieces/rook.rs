@@ -1,11 +1,7 @@
-use std::borrow::BorrowMut;
-
-use crate::{Board, print_u64_bitboard};
+use crate::{Board};
 use crate::consts::board_consts::*;
 use crate::mv::Move;
-use crate::pieces::common_moves;
-use crate::pieces::common_moves::h_and_vmoves;
-use crate::pieces::king;
+use crate::move_gen::pieces::common_moves;
 
 pub fn possible_r(b: &Board, white: bool) -> Vec<Move> {
     let index = if white { 1 } else { 0 };

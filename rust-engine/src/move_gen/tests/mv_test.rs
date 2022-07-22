@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::{Board, print_u64_bitboard};
+use crate::{Board};
 use crate::mv::Move;
 
 #[test]

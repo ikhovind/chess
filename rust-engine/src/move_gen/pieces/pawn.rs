@@ -1,7 +1,7 @@
-use crate::{Board, pieces, print_u64_bitboard};
+use crate::{Board};
 use crate::consts::board_consts::*;
 use crate::mv::Move;
-use crate::pieces::{common_moves, king};
+use crate::move_gen::pieces::{common_moves};
 
 pub fn possible_p(b: &Board, white: bool) -> Vec<Move> {
     let mut list: Vec<Move> = Vec::new();
@@ -165,7 +165,7 @@ pub fn watched_by_p(b: &Board, white: bool) -> u64 {
 
     if white {
         pawn_moves = (b.pieces[(P_INDEX + index) as usize] << 9) & (!FILE_MASKS[0]); // capture right
-        pawn_moves |= ((b.pieces[(P_INDEX + index) as usize] << 7) & (!FILE_MASKS[7])); // capture left
+        pawn_moves |= (b.pieces[(P_INDEX + index) as usize] << 7) & (!FILE_MASKS[7]); // capture left
     } else {
         pawn_moves = (b.pieces[(P_INDEX + index) as usize] >> 9) & (!FILE_MASKS[7]); // capture right
         pawn_moves = pawn_moves | ((b.pieces[(P_INDEX + index) as usize] >> 7) & (!FILE_MASKS[0])); // capture left

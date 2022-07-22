@@ -1,11 +1,9 @@
-use crate::{Board, pieces, print_u64_bitboard};
-use crate::computed::lookup_consts::KING_MOVES;
+use crate::{Board};
 use crate::consts::board_consts::*;
+use crate::move_gen::computed_moves::lookup_consts::KING_MOVES;
+use crate::move_gen::pieces;
 use crate::mv::Move;
-use crate::pieces::bishop::watched_by_b;
-use crate::pieces::common_moves;
-use crate::pieces::knight::watched_by_n;
-use crate::pieces::rook::watched_by_r;
+use crate::move_gen::pieces::common_moves;
 
 pub fn possible_k(b: &Board, white: bool) -> Vec<Move> {
     let opposing_pieces: u64 = if white {b.get_black_pieces()} else { b.get_white_pieces() };
@@ -72,7 +70,6 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
     if white {
         index = 1;
     }
-    let mut moves = 0;
     let kings = b.pieces[(K_INDEX + index) as usize];
 
     for i in (kings.trailing_zeros())..(64 - kings.leading_zeros()) {
@@ -80,7 +77,7 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
             return KING_MOVES[i as usize];
         }
     }
-    return moves;
+    return 0;
 }
 
 pub fn get_attackers(b: &Board, white: bool) -> u64 {

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod pawn_tests {
-    use crate::{Board, print_u64_bitboard};
+    use crate::{Board};
     use crate::mv::Move;
 
     #[test]
