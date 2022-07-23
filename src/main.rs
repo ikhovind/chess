@@ -1,9 +1,6 @@
 use std::fs::{File, OpenOptions};
-use std::io;
-use std::io::{Read, Write};
-use std::net::{TcpListener, Shutdown, TcpStream};
+use std::io::{Write};
 use std::path::Path;
-use std::process::exit;
 use std::time::{Instant, SystemTime};
 use chrono::{DateTime, Utc};
 use num_format::{Locale, WriteFormatted};
@@ -13,8 +10,7 @@ extern crate vampirc_uci;
 use simple_websockets::{Event, Responder};
 use std::collections::HashMap;
 
-use std::thread;
-use vampirc_uci::{MessageList, parse, parse_with_unknown, UciMessage, UciTimeControl};
+use vampirc_uci::{MessageList, parse, UciMessage, UciTimeControl};
 pub mod game;
 mod mv;
 mod consts;
