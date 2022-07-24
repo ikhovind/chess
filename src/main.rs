@@ -122,14 +122,14 @@ fn main() {
                 clients.remove(&client_id);
             },
             Event::Message(client_id, message) => {
-                println!("Received a message from client #{}: {:?}", client_id, message);
+                println!("Received move: #{}: {:?}", client_id, message);
                 // retrieve this client's `Responder`:
                 match message {
                     Message::Text(txt) => {
                         let mv = &Move::parse_move(&txt, &games[client_id as usize]);
                         match mv {
                             Ok(mv) => {
-                                games[client_id as usize].make_move(mv);
+                                games.get_mut(client_id as usize).unwrap().make_move(mv);
                             }
                             Err(_) => {
                                 println!("Received invalid move");
@@ -141,14 +141,14 @@ fn main() {
                 let responder = clients.get(&client_id).unwrap();
                 // echo the message back:
                 if !games.get(client_id as usize).unwrap().white_turn {
-                    unsafe {
-                        let best_move = eval(games.get(client_id as usize).unwrap());
-                        match best_move {
-                            Some(mv) => {
-                                games.get_mut(client_id as usize).unwrap().make_move(&mv);
-                                responder.send(Message::Text(mv.to_string()));
-                            }
-                            None => {}
+                    let best_move = eval(games.get(client_id as usize).unwrap());
+                    match best_move {
+                        Some(mv) => {
+                            games.get_mut(client_id as usize).unwrap().make_move(&mv);
+                            responder.send(Message::Text(mv.to_string()));
+                        }
+                        None => {
+                            println!("No available moves");
                         }
                     }
                 }

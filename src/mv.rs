@@ -36,12 +36,12 @@ pub static BASIS: u8 = 0b00111111;
 impl Move {
     pub fn parse_move(notation: &str, b: &Board) -> Result<Move, String>{
         if notation.len() == 4 {
-                let from_row = notation.as_bytes()[0] - 97;
-            let from_column = (notation.as_bytes()[1] - 97) * 8;
+                let from_column = notation.as_bytes()[0] - 97;
+            let from_row = (notation.as_bytes()[1] - 97) * 8;
             let from_ix = from_column + from_row;
 
-            let to_row = notation.as_bytes()[2] - 97;
-            let to_column = (notation.as_bytes()[3] - 97) * 8;
+            let to_column = notation.as_bytes()[2] - 97;
+            let to_row = (notation.as_bytes()[3] - 97) * 8;
             let to_ix = to_column + to_row;
 
             if (b.pieces[P_INDEX] | b.pieces[P_INDEX + 1]) & (1 << from_ix) != 0
@@ -63,9 +63,7 @@ impl Move {
             }
             return Ok(Move::new_move(from_ix, to_ix, (b.get_white_pieces() | b.get_black_pieces()) & (1 << to_ix) != 0));
         }
-        // todo error handling
-        let b = "Not a legal move";
-        return Err(b.to_string());
+        return Err("Not a legal move".to_string());
     }
     pub fn new_move(_from: u8, _to: u8, is_capture: bool) -> Move {
         return Move {
