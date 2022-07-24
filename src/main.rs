@@ -98,7 +98,7 @@ fn iso8601(st: &std::time::SystemTime) -> String {
 
 fn main() {
     // listen for WebSockets on port 8080:
-    let event_hub = simple_websockets::launch(8080)
+    let event_hub = simple_websockets::launch(3389)
         .expect("failed to listen on port 8080");
     // map between client ids and the client's `Responder`:
     let mut clients: HashMap<u64, Responder> = HashMap::new();
