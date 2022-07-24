@@ -18,4 +18,5 @@ RUN apk add --no-cache libgcc
 # copy the binary into the final image
 COPY --from=0 /app/target/release/chess .
 # set the binary as entrypoint
+EXPOSE 8080
 ENTRYPOINT ["/chess"]
