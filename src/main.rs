@@ -7,10 +7,15 @@ use num_format::{Locale, WriteFormatted};
 use crate::game::Board;
 use crate::opponent::engine;
 extern crate vampirc_uci;
-use simple_websockets::{Event, Responder};
+extern crate core;
+
+use simple_websockets::{Event, Message, Responder};
 use std::collections::HashMap;
 
 use vampirc_uci::{MessageList, parse, UciMessage, UciTimeControl};
+use crate::engine::eval;
+use crate::mv::Move;
+
 pub mod game;
 mod mv;
 mod consts;
@@ -99,15 +104,16 @@ fn iso8601(st: &std::time::SystemTime) -> String {
 fn main() {
     // listen for WebSockets on port 8080:
     let event_hub = simple_websockets::launch(3389)
-        .expect("failed to listen on port 8080");
+        .expect("failed to listen on port 3389");
     // map between client ids and the client's `Responder`:
     let mut clients: HashMap<u64, Responder> = HashMap::new();
-
+    let mut games = vec!();
     loop {
         match event_hub.poll_event() {
             Event::Connect(client_id, responder) => {
                 println!("A client connected with id #{}", client_id);
                 // add their Responder to our `clients` map:
+                games.push(Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")));
                 clients.insert(client_id, responder);
             },
             Event::Disconnect(client_id) => {
@@ -118,9 +124,34 @@ fn main() {
             Event::Message(client_id, message) => {
                 println!("Received a message from client #{}: {:?}", client_id, message);
                 // retrieve this client's `Responder`:
+                match message {
+                    Message::Text(txt) => {
+                        let mv = &Move::parse_move(&txt, &games[client_id as usize]);
+                        match mv {
+                            Ok(mv) => {
+                                games[client_id as usize].make_move(mv);
+                            }
+                            Err(_) => {
+                                println!("Received invalid move");
+                            }
+                        }
+                    }
+                    Message::Binary(_) => {}
+                }
                 let responder = clients.get(&client_id).unwrap();
                 // echo the message back:
-                responder.send(message);
+                if !games.get(client_id as usize).unwrap().white_turn {
+                    unsafe {
+                        let best_move = eval(games.get(client_id as usize).unwrap());
+                        match best_move {
+                            Some(mv) => {
+                                games.get_mut(client_id as usize).unwrap().make_move(&mv);
+                                responder.send(Message::Text(mv.to_string()));
+                            }
+                            None => {}
+                        }
+                    }
+                }
             },
         }
     }
