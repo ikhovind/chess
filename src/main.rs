@@ -8,9 +8,13 @@ use crate::game::Board;
 use crate::opponent::engine;
 extern crate vampirc_uci;
 extern crate core;
+extern crate log;
 
 use simple_websockets::{Event, Message, Responder};
 use std::collections::HashMap;
+use std::thread::Builder;
+use log::LevelFilter;
+use log::LevelFilter::Info;
 
 use vampirc_uci::{MessageList, parse, UciMessage, UciTimeControl};
 use crate::engine::eval;
@@ -102,6 +106,9 @@ fn iso8601(st: &std::time::SystemTime) -> String {
 
 
 fn main() {
+    use log::LevelFilter;
+
+    simple_logging::log_to_file("game.log", LevelFilter::Info).unwrap();
     // listen for WebSockets on port 8080:
     let event_hub = simple_websockets::launch(3389)
         .expect("failed to listen on port 3389");
@@ -111,18 +118,18 @@ fn main() {
     loop {
         match event_hub.poll_event() {
             Event::Connect(client_id, responder) => {
-                println!("A client connected with id #{}", client_id);
+                log::info!("A client connected with id #{}", client_id);
                 // add their Responder to our `clients` map:
                 games.push(Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")));
                 clients.insert(client_id, responder);
             },
             Event::Disconnect(client_id) => {
-                println!("Client #{} disconnected.", client_id);
+                log::info!("Client #{} disconnected.", client_id);
                 // remove the disconnected client from the clients map:
                 clients.remove(&client_id);
             },
             Event::Message(client_id, message) => {
-                println!("Received move: #{}: {:?}", client_id, message);
+                log::info!("Received move: #{}: {:?}", client_id, message);
                 // retrieve this client's `Responder`:
                 match message {
                     Message::Text(txt) => {
@@ -132,7 +139,7 @@ fn main() {
                                 games.get_mut(client_id as usize).unwrap().make_move(mv);
                             }
                             Err(_) => {
-                                println!("Received invalid move");
+                                log::error!("Received invalid move");
                             }
                         }
                     }
@@ -148,7 +155,7 @@ fn main() {
                             responder.send(Message::Text(mv.to_string()));
                         }
                         None => {
-                            println!("No available moves");
+                            log::warn!("No available moves");
                         }
                     }
                 }
@@ -161,7 +168,7 @@ fn parser(input: &str) -> Result<&str, &str> {
     let messages: MessageList = parse(&input);
 
     for m in messages {
-        println!("m: {}", m);
+        log::info!("parsing m uci: {}", m);
         match m {
             UciMessage::Uci => {
                 return Result::Err("Not implemented yet ");

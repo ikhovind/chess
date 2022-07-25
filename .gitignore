@@ -2,3 +2,5 @@
 **/.idea/
 *swp
 rust-engine/timestamps.txt
+*.log
+timestamps.txt

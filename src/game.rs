@@ -233,7 +233,7 @@ impl Board {
                 self.castle_rights[(color * 2) as usize] = false;
             }
             _ => {
-                eprintln!("illegal move??: {}", mv_type);
+                log::error!("illegal move??: {}", mv_type);
             }
         }
         self.update_metadata(mv);
