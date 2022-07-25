@@ -108,7 +108,7 @@ fn iso8601(st: &std::time::SystemTime) -> String {
 fn main() {
     use log::LevelFilter;
 
-    simple_logging::log_to_file("game.log", LevelFilter::Info).unwrap();
+    simple_logging::log_to_file(shellexpand::tilde("~/game.log").as_ref(), LevelFilter::Info).unwrap();
     // listen for WebSockets on port 8080:
     let event_hub = simple_websockets::launch(3389)
         .expect("failed to listen on port 3389");
