@@ -41,7 +41,7 @@ jobs:
         touch ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-        ssh ing_hovind@34.88.111.133 /home/ing_hovind/.cargo/bin/cargo build --manifest-path /home/ing_hovind/chess/Cargo.toml
+        ssh ing_hovind@34.88.111.133 RUSTFLAGS="-C target-cpu=native" /home/ing_hovind/.cargo/bin/cargo build --release --manifest-path /home/ing_hovind/chess/Cargo.toml
         ssh ing_hovind@34.88.111.133 sudo systemctl restart engine        
       env:
         SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
