@@ -114,13 +114,13 @@ fn main() {
         .expect("failed to listen on port 3389");
     // map between client ids and the client's `Responder`:
     let mut clients: HashMap<u64, Responder> = HashMap::new();
-    let mut games = vec!();
+    let mut games: HashMap<u64, Board> = HashMap::new();
     loop {
         match event_hub.poll_event() {
             Event::Connect(client_id, responder) => {
                 log::info!("A client connected with id #{}", client_id);
                 // add their Responder to our `clients` map:
-                games.push(Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")));
+                games.insert(client_id, Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")));
                 clients.insert(client_id, responder);
             },
             Event::Disconnect(client_id) => {
@@ -133,10 +133,10 @@ fn main() {
                 // retrieve this client's `Responder`:
                 match message {
                     Message::Text(txt) => {
-                        let mv = &Move::parse_move(&txt, &games[client_id as usize]);
+                        let mv = &Move::parse_move(&txt, &games.get(&client_id).unwrap());
                         match mv {
                             Ok(mv) => {
-                                games.get_mut(client_id as usize).unwrap().make_move(mv);
+                                games.get_mut(&client_id).unwrap().make_move(mv);
                             }
                             Err(_) => {
                                 log::error!("Received invalid move");
@@ -147,11 +147,11 @@ fn main() {
                 }
                 let responder = clients.get(&client_id).unwrap();
                 // echo the message back:
-                if !games.get(client_id as usize).unwrap().white_turn {
-                    let best_move = eval(games.get(client_id as usize).unwrap());
+                if !games.get(&client_id).unwrap().white_turn {
+                    let best_move = eval(games.get(&client_id).unwrap());
                     match best_move {
                         Some(mv) => {
-                            games.get_mut(client_id as usize).unwrap().make_move(&mv);
+                            games.get_mut(&client_id).unwrap().make_move(&mv);
                             responder.send(Message::Text(mv.to_string()));
                         }
                         None => {
