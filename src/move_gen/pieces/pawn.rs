@@ -194,7 +194,7 @@ fn check_ep_legal(b: &Board, move_piece: u64, taken_piece: u64, white: bool) -> 
     if b.pieces[(K_INDEX + index) as usize] == 0 { return true; };
     let opp = if white { b.get_black_pieces() - taken_piece } else { b.get_white_pieces() - taken_piece };
     let own = if white { b.get_white_pieces() - move_piece } else { b.get_black_pieces() - move_piece };
-    let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
+    let king_square: u8 = b.pieces[(K_INDEX + index) as usize].trailing_zeros() as u8;
 
     let d_moves = common_moves::d_and_anti_d_moves(king_square, opp, own);
     let line_moves = common_moves::h_and_vmoves(king_square, opp, own) & RANK_MASKS[(king_square / 8) as usize];

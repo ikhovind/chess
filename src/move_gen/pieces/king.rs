@@ -85,7 +85,7 @@ pub fn get_attackers(b: &Board, white: bool) -> u64 {
     let opp = if white { b.get_black_pieces() } else { b.get_white_pieces() };
     let own = if white { b.get_white_pieces() } else { b.get_black_pieces() };
     if b.pieces[(K_INDEX + index) as usize] == 0 { return 0; };
-    let king_square: u8 = (63 - b.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8;
+    let king_square: u8 = b.pieces[(K_INDEX + index) as usize].trailing_zeros() as u8;
 
     let d_moves = common_moves::d_and_anti_d_moves(king_square, opp, own);
     let line_moves = common_moves::h_and_vmoves(king_square, opp, own);

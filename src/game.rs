@@ -6,6 +6,7 @@ use crate::mv::Move;
 use crate::move_gen::pieces::*;
 use crate::move_gen::pieces::bishop;
 use crate::move_gen::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
+use crate::print_u64_bitboard;
 
 //[black, white]
 //[black short, black long, white short, white long]
@@ -116,10 +117,15 @@ impl Board {
     }
 
     pub fn make_move(&mut self, mv: &Move) -> &mut Board {
+        //print_u64_bitboard(self.pieces[K_INDEX + 1]);
         let mv_type = mv.from & TYPE_MASK | ((mv.to & TYPE_MASK) >> 2);
         let color: u8 = if self.white_turn { 1 } else { 0 };
-        let from_sq = 1 << (mv.from & MOVE_MASK);
-        let to_sq = 1 << (mv.to & MOVE_MASK);
+        let from_sq = 1u64 << (mv.from & MOVE_MASK);
+        let to_sq = 1u64 << (mv.to & MOVE_MASK);
+        if 5 == (mv.to & MOVE_MASK) {
+            println!("black pieces:");
+            print_u64_bitboard(self.get_black_pieces());
+        }
         match mv_type {
             NORMAL_MOVE => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
@@ -216,10 +222,13 @@ impl Board {
                 }
             }
             SHORT_CASTLE => {
-                self.pieces[R_INDEX + color as usize] -= to_sq << 1;
                 self.pieces[K_INDEX + color as usize] -= from_sq;
                 self.pieces[K_INDEX + color as usize] += to_sq;
+
+                self.pieces[R_INDEX + color as usize] -= to_sq << 1;
                 self.pieces[R_INDEX + color as usize] += from_sq << 1;
+
+
                 self.castle_rights[(color * 2 + 1) as usize] = false;
                 self.castle_rights[(color * 2) as usize] = false;
             }
@@ -236,6 +245,7 @@ impl Board {
                 log::error!("illegal move??: {}", mv_type);
             }
         }
+        //print_u64_bitboard(self.pieces[K_INDEX + 1]);
         self.update_metadata(mv);
         return self;
     }
@@ -271,10 +281,10 @@ impl Board {
             }
             else {
                 // hvis brikken som ble flytta er en glider
-                if (1 << (63 - attackers.leading_zeros())) & (self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize] | self.pieces[(B_INDEX + 1 - index) as usize]) != 0 {
-                    self.push_mask = self.ray_between((63 - attackers.leading_zeros()) as u8, (63 - self.pieces[(K_INDEX + index) as usize].leading_zeros()) as u8);
+                if (1u64 << attackers.trailing_zeros()) & (self.pieces[(R_INDEX + 1 - index) as usize] | self.pieces[(Q_INDEX + 1 - index) as usize] | self.pieces[(B_INDEX + 1 - index) as usize]) != 0 {
+                    self.push_mask = self.ray_between(attackers.trailing_zeros() as u8, self.pieces[(K_INDEX + index) as usize].trailing_zeros() as u8);
                 } else {
-                    self.push_mask = 1 << (63 - attackers.leading_zeros());
+                    self.push_mask = 1 << attackers.trailing_zeros();
                 }
             }
         } else {
@@ -284,12 +294,19 @@ impl Board {
 
     pub fn get_all_moves(&self) -> Vec<Move> {
         let mut rook = rook::possible_r(self, self.white_turn);
+        for mv in rook.clone() {
+            if (1 << (mv.to & 0b00111111)) & self.pieces[K_INDEX + 1] != 0 {
+                //println!("taking king with rook from: {}", mv);
+                //println!("white? : {}", self.white_turn);
+                //print_u64_bitboard(self.pieces[R_INDEX]);
+            }
+        }
         rook.append(&mut knight::possible_n(self, self.white_turn));
         rook.append(&mut bishop::possible_b(self, self.white_turn));
         rook.append(&mut queen::possible_q(self, self.white_turn));
         rook.append(&mut king::possible_k(self, self.white_turn));
         rook.append(&mut pawn::possible_p(self, self.white_turn));
-        return rook;
+        return rook.clone();
     }
 
     pub fn get_num_moves(self, depth: u32) -> u64 {
@@ -357,10 +374,13 @@ impl Board {
         let index = if white { 1 } else { 0 };
         let attacking_color = if white { self.get_black_pieces() } else { self.get_white_pieces() };
         let def_color = if white { self.get_white_pieces() } else { self.get_black_pieces() };
-        let king_square  = (63 - self.pieces[K_INDEX + index].leading_zeros()) as u8;
+        let king_square  = self.pieces[K_INDEX + index].trailing_zeros() as u8;
+        if self.pieces[K_INDEX + index].count_ones() != 1 {
+            println!("more than one: {}", self.pieces[K_INDEX + index].count_ones());
+        }
         let opp_diags = self.pieces[B_INDEX + 1 - index] | self.pieces[Q_INDEX + 1 - index];
         let opp_line = self.pieces[R_INDEX + 1 - index] | self.pieces[Q_INDEX + 1 - index];
-        let king_diag = DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize];
+        let king_diag = DIAGONAL_MASKS[((king_square as usize) / 8) + ((king_square as usize) % 8)];
         let king_anti_diag = ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
 
         let mut pinned_pieces = 0;
@@ -408,7 +428,7 @@ impl Board {
     pub fn get_pinned_slide(&self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
         return if self.pinned_pieces & (1 << i) != 0 {
-            self.get_pinning_ray(63 - (self.pieces[K_INDEX + index].leading_zeros()) as u8, i)
+            self.get_pinning_ray(self.pieces[K_INDEX + index].trailing_zeros() as u8, i)
         } else {
             u64::MAX
         };

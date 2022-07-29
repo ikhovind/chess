@@ -12,11 +12,13 @@ extern crate log;
 
 use simple_websockets::{Event, Message, Responder};
 use std::collections::HashMap;
+use std::env;
 use std::thread::Builder;
 use log::LevelFilter;
 use log::LevelFilter::Info;
 
 use vampirc_uci::{MessageList, parse, UciMessage, UciTimeControl};
+use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, DIAGONAL_MASKS};
 use crate::engine::eval;
 use crate::mv::Move;
 
@@ -106,10 +108,6 @@ fn iso8601(st: &std::time::SystemTime) -> String {
 
 
 fn main() {
-    use log::LevelFilter;
-
-    simple_logging::log_to_file(shellexpand::tilde("~/game.log").as_ref(), LevelFilter::Info).unwrap();
-    // listen for WebSockets on port 8080:
     let event_hub = simple_websockets::launch(3389)
         .expect("failed to listen on port 3389");
     // map between client ids and the client's `Responder`:

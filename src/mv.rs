@@ -5,9 +5,7 @@ use crate::consts::board_consts::*;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Move {
-    //smallest 6 bits are to square, bit 7 is promotion, bit 8 is castle, both are ep
     pub from: u8,
-    // bit 7 and 8 are type of promotion / type of castle
     pub to: u8,
     /*
     pub const NORMAL_MOVE: u8 = 0;
@@ -65,6 +63,7 @@ impl Move {
         }
         return Err("Not a legal move".to_string());
     }
+
     pub fn new_move(_from: u8, _to: u8, is_capture: bool) -> Move {
         return Move {
             from: (_from & BASIS)
@@ -118,7 +117,11 @@ impl Move {
     }
 
     pub fn new_castle(_from: u8, _to: u8) -> Move {
-        let typ = if _to == 62 || _to == 6 { SHORT_CASTLE } else { LONG_CASTLE };
+        let typ = if _to == 62 || _to == 6 {
+            SHORT_CASTLE
+        } else {
+            LONG_CASTLE
+        };
         return Move {
             from: (_from & BASIS) | (typ & FROM_MASK),
             to: (_to & BASIS) | (typ << 2),
@@ -127,6 +130,16 @@ impl Move {
 
     pub fn last_move_was_double_push(m: Move) -> bool {
         return (((m.to & !MOVE_MASK) >> 2) | (m.from & !MOVE_MASK)) == DOUBLE_PAWN;
+    }
+
+    pub fn is_capture(&self) -> bool {
+        let m_type =  (((self.to & !MOVE_MASK) >> 2) | (self.from & !MOVE_MASK));
+        return m_type == TAKES ||
+            m_type == EN_PASSANT ||
+            m_type == TAKE_PROM_B ||
+            m_type == TAKE_PROM_Q ||
+            m_type == TAKE_PROM_N ||
+            m_type == TAKE_PROM_R;
     }
 }
 

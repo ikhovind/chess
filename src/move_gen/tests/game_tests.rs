@@ -30,7 +30,7 @@ fn pos_2_perft() {
     assert_eq!(b.get_num_moves(3), 97862);
     assert_eq!(b.get_num_moves(4), 4085603);
     assert_eq!(b.get_num_moves(5), 193690690);
-    //assert_eq!(b.get_num_moves(6), 8031647685);
+    assert_eq!(b.get_num_moves(6), 8031647685);
 }
 
 #[test]
@@ -42,8 +42,8 @@ fn pos_3_perft() {
     assert_eq!(b.get_num_moves(4), 43238);
     assert_eq!(b.get_num_moves(5), 674624);
     assert_eq!(b.get_num_moves(6), 11030083);
-    //assert_eq!(b.get_num_moves(7), 178633661);
-    //assert_eq!(b.get_num_moves(8), 3009794393);
+    assert_eq!(b.get_num_moves(7), 178633661);
+    assert_eq!(b.get_num_moves(8), 3009794393);
 }
 
 #[test]
@@ -76,8 +76,8 @@ fn pos_6_perft() {
     assert_eq!(b.get_num_moves(3), 89890);
     assert_eq!(b.get_num_moves(4), 3894594);
     assert_eq!(b.get_num_moves(5), 164075551);
+    assert_eq!(b.get_num_moves(6), 6923051137);
     // too big to test
-    //assert_eq!(b.get_num_moves(6), 6923051137);
     //assert_eq!(b.get_num_moves(7),  287188994746 );
     //assert_eq!(b.get_num_moves(8),  11923589843526 );
     //assert_eq!(b.get_num_moves(9),  490154852788714 );

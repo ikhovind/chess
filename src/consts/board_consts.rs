@@ -98,3 +98,5 @@ pub const R_INDEX: usize = 6;
 pub const Q_INDEX: usize = 8;
 pub const K_INDEX: usize = 10;
 
+pub const P_INF: i16 = 10000;
+pub const N_INF: i16 = -10000;
