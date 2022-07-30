@@ -7,7 +7,6 @@ use crate::opponent::search::{count_material, search_moves};
 pub fn eval(b: &Board) -> Option<Move> {
     log::info!("thinking about move");
     let moves = b.get_all_moves();
-    print_u64_bitboard(b.get_black_pieces());
     if moves.len() > 0 {
         let mut best_score = i16::MIN;
         let mut best_yet = moves[0];

@@ -180,7 +180,7 @@ async fn main() {
         .tls()
         .cert_path("../certs/cert.pem")
         .key_path("../certs/privkey.rsa")
-        .run(([127, 0, 0, 1], 3030)).await;
+        .run(([0, 0, 0, 0], 3389)).await;
 }
 
 async fn user_connected(ws: WebSocket, users: Users, mut game: Games) {
