@@ -34,8 +34,9 @@ pub static BASIS: u8 = 0b00111111;
 impl Move {
     pub fn parse_move(notation: &str, b: &Board) -> Result<Move, String>{
         if notation.len() == 4 {
+
             let from_column = notation.as_bytes()[0] - 97;
-            let from_row = (notation.as_bytes()[1] - 48);
+            let from_row = (notation.as_bytes()[1] - 49);
             let from_ix = from_column + from_row * 8;
 
             let to_column = notation.as_bytes()[2] - 97;

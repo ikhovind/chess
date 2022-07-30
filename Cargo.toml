@@ -8,17 +8,19 @@ edition = "2021"
 [dependencies]
 num-format = "0.4.0"
 chrono = "0.4"
-rand = "*"
-vampirc-uci = "0.11"
-simple-websockets = "0.1.4"
 log = "0.4.17"
 fern = "0.6.1"
-shellexpand = "2.1.0"
+tokio = { version = "1", features = ["full"] }
+futures-util = "0.3.5"
+warp = {version="*", features = ["tls"]}
+tokio-stream = "0.1.9"
 
 [profile.dev]
 overflow-checks = false
 
+
 [profile.release]
 lto = true
 codegen-units = 1
+opt-level = 3
 panic = "abort"

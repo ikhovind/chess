@@ -100,3 +100,5 @@ pub const K_INDEX: usize = 10;
 
 pub const P_INF: i16 = 10000;
 pub const N_INF: i16 = -10000;
+
+pub const BASE_POS: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";

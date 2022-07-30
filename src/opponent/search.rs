@@ -24,7 +24,7 @@ pub fn search_moves(b: &Board, depth: u8, mut best_current_side: i16, best_oppon
     }
     else {
         if depth == 0 {
-            return quiescence_search(b, best_current_side, best_opponent);
+            return quiescence_search(&b, best_current_side, best_opponent);
         }
         for mv in moves {
             let evaluation = -search_moves(b.clone().make_move(&mv), depth - 1, -best_opponent, -best_current_side);
@@ -53,14 +53,13 @@ pub fn count_material(b: &Board) -> i16 {
 }
 
 fn quiescence_search(b: &Board, mut best_current_side: i16, best_opponent: i16) -> i16 {
-    let mut eval = count_material(b);
+    let mut eval = count_material(&b);
     if eval >= best_opponent {
         return best_opponent;
     }
     best_current_side = max(best_current_side, eval);
     //log::info!("quiesence eval: {}", mv);
 
-    let moves = b.get_all_moves();
     for mv in b.get_all_moves() {
         if mv.is_capture() {
             eval = -quiescence_search(b.clone().make_move(&mv), -best_opponent, -best_current_side);

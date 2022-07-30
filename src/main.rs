@@ -6,19 +6,30 @@ use chrono::{DateTime, Utc};
 use num_format::{Locale, WriteFormatted};
 use crate::game::Board;
 use crate::opponent::engine;
-extern crate vampirc_uci;
 extern crate core;
 extern crate log;
 
-use simple_websockets::{Event, Message, Responder};
 use std::collections::HashMap;
-use std::env;
-use std::thread::Builder;
-use log::LevelFilter;
-use log::LevelFilter::Info;
+use std::sync::{
+    atomic::{AtomicUsize, Ordering},
+    Arc,
+};
 
-use vampirc_uci::{MessageList, parse, UciMessage, UciTimeControl};
-use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, DIAGONAL_MASKS};
+use futures_util::{SinkExt, StreamExt, TryFutureExt};
+use tokio::sync::{mpsc, RwLock};
+use tokio_stream::wrappers::UnboundedReceiverStream;
+use warp::ws::{Message, WebSocket};
+use warp::Filter;
+
+use std::{env, future};
+use std::net::TcpStream;
+use std::thread::Builder;
+use log::{info, LevelFilter, log};
+use log::LevelFilter::Info;
+use num_format::Locale::{es, my};
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use warp::sse::keep_alive;
+use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, BASE_POS, DIAGONAL_MASKS};
 use crate::engine::eval;
 use crate::mv::Move;
 
@@ -107,146 +118,164 @@ fn iso8601(st: &std::time::SystemTime) -> String {
 }
 
 
-fn main() {
-    let event_hub = simple_websockets::launch(3389)
-        .expect("failed to listen on port 3389");
+/// Our global unique user id counter.
+static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
 
-    // map between client ids and the client's `Responder`:
-    let mut clients: HashMap<u64, Responder> = HashMap::new();
-    let mut games: HashMap<u64, Board> = HashMap::new();
-    loop {
-        match event_hub.poll_event() {
-            Event::Connect(client_id, responder) => {
-                log::info!("A client connected with id #{}", client_id);
-                // add their Responder to our `clients` map:
-                games.insert(client_id, Board::from_fen(String::from("    rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")));
-                clients.insert(client_id, responder);
-            },
-            Event::Disconnect(client_id) => {
-                log::info!("Client #{} disconnected.", client_id);
-                // remove the disconnected client from the clients map:
-                clients.remove(&client_id);
-            },
-            Event::Message(client_id, message) => {
-                log::info!("Received move: #{}: {:?}", client_id, message);
-                // retrieve this client's `Responder`:
-                match message {
-                    Message::Text(txt) => {
-                        let mv = &Move::parse_move(&txt, &games.get(&client_id).unwrap());
-                        match mv {
-                            Ok(mv) => {
-                                games.get_mut(&client_id).unwrap().make_move(mv);
+/// Our state of currently connected users.
+///
+/// - Key is their id
+/// - Value is a sender of `warp::ws::Message`
+type Users = Arc<RwLock<HashMap<usize, mpsc::UnboundedSender<Message>>>>;
+type Games = HashMap<usize, Board>;
+
+#[tokio::main]
+async fn main() {
+    fern::Dispatch::new()
+        // Perform allocation-free log formatting
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "{}[{}][{}] {}",
+                chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
+                record.target(),
+                record.level(),
+                message
+            ))
+        })
+        // Add blanket level filter -
+        .level(log::LevelFilter::Info)
+        // - and per-module overrides
+        .level_for("rustls", log::LevelFilter::Warn)
+        .level_for("hyper", log::LevelFilter::Warn)
+        .level_for("tungstenite", log::LevelFilter::Warn)
+        // Output to stdout, files, and other Dispatch configurations
+        .chain(std::io::stdout())
+        // Apply globally
+        .apply().unwrap();    // Keep track of all connected users, key is usize, value
+
+    // is a websocket sender.
+    let users = Users::default();
+    // Turn our "state" into a new Filter...
+    let users = warp::any().map(move || users.clone());
+
+    let games = Games::default();
+
+    // Turn our "state" into a new Filter...
+    let games = warp::any().map(move || games.clone());
+
+    keep_alive();
+    // GET /chat -> websocket upgrade
+    let chat = warp::any()
+        // The `ws()` filter will prepare Websocket handshake...
+        .and(warp::ws())
+        .and(users)
+        .and(games)
+        .map(|ws: warp::ws::Ws, users, games| {
+
+            // This will call our function if the handshake succeeds.
+            ws.on_upgrade(move |socket| user_connected(socket, users, games))
+        });
+
+
+    warp::serve(chat)
+        .tls()
+        .cert_path("../certs/cert.pem")
+        .key_path("../certs/privkey.rsa")
+        .run(([127, 0, 0, 1], 3030)).await;
+}
+
+async fn user_connected(ws: WebSocket, users: Users, mut game: Games) {
+    // Use a counter to assign a new unique ID for this user.
+    let my_id = NEXT_USER_ID.fetch_add(1, Ordering::Relaxed);
+
+    log::info!("new chat user: {}", my_id);
+
+    // Split the socket into a sender and receive of messages.
+    let (mut user_ws_tx, mut user_ws_rx) = ws.split();
+
+    // Use an unbounded channel to handle buffering and flushing of messages
+    // to the websocket...
+    let (tx, rx) = mpsc::unbounded_channel();
+    let mut rx = UnboundedReceiverStream::new(rx);
+
+
+    tokio::task::spawn(async move {
+        while let Some(message) = rx.next().await {
+            user_ws_tx
+                .send(message)
+                .unwrap_or_else(|e| {
+                    log::error!("websocket send error: {}", e);
+                })
+                .await;
+        }
+    });
+
+    // Save the sender in our list of connected users.
+    users.write().await.insert(my_id, tx);
+    //game.write().await.insert(my_id, Board::from_fen(String::from(BASE_POS)));
+    game.insert(my_id, Board::from_fen(String::from(BASE_POS)));
+
+    // Return a `Future` that is basically a state machine managing
+    // this specific user's connection.
+    while let Some(result) = user_ws_rx.next().await {
+        let msg = match result {
+            Ok(msg) => msg,
+            Err(e) => {
+                log::error!("websocket error(uid={}): {}", my_id, e);
+                break;
+            }
+        };
+        user_message(my_id, msg, &users,game.get_mut(&my_id).unwrap()).await;
+    }
+
+    // user_ws_rx stream will keep processing as long as the user stays
+    // connected. Once they disconnect, then...
+    user_disconnected(my_id, &users, &mut game).await;
+}
+
+async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Board) {
+    // Skip any non-Text messages...
+    match msg.to_str() {
+        Ok(s) => {
+            if s.len() > 5 {
+                log::info!("received ping");
+                return;
+            }
+            else {
+                log::info!("Received message: {}", s);
+                match Move::parse_move(&s, &game) {
+                    Ok(m) => {
+                        log::info!("Parsed move: {}", m);
+                        game.make_move(&m);
+                        let return_msg = match eval(&game) {
+                            Some(ai_m) => {
+                                log::info!("Making move: {}", ai_m);
+                                game.make_move(&ai_m);
+                                ai_m.to_string()
                             }
-                            Err(_) => {
-                                log::error!("Received invalid move");
+                            None => {
+                                String::from("No available moves")
                             }
+                        };
+                        if let Err(_disconnected) = users.read().await.get(&my_id).unwrap().send(Message::text(return_msg)) {
                         }
                     }
-                    Message::Binary(_) => {}
-                }
-                let responder = clients.get(&client_id).unwrap();
-                // echo the message back:
-                if !games.get(&client_id).unwrap().white_turn {
-                    let best_move = eval(games.get(&client_id).unwrap());
-                    match best_move {
-                        Some(mv) => {
-                            games.get_mut(&client_id).unwrap().make_move(&mv);
-                            responder.send(Message::Text(mv.to_string()));
-                        }
-                        None => {
-                            log::warn!("No available moves");
-                        }
+                    Err(_) => {
+                        log::warn!("could not parse move");
+                        users.read().await.get(&my_id).unwrap().send(Message::text("Invalid move")).expect("Could not send message");
                     }
                 }
-            },
+            }
+        }
+        Err(_) => {
+            log::warn!("Did not receive proper");
+            return;
         }
     }
 }
 
-fn parser(input: &str) -> Result<&str, &str> {
-    let messages: MessageList = parse(&input);
-
-    for m in messages {
-        log::info!("parsing m uci: {}", m);
-        match m {
-            UciMessage::Uci => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Position { startpos, fen, moves } => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Go { time_control, search_control } => {
-                if let Some(tc) = time_control {
-                    match tc {
-                        UciTimeControl::Ponder => {
-                            return Result::Err("Not implemented yet ");
-                        }
-                        UciTimeControl::TimeLeft { white_time, white_increment, black_time, black_increment, moves_to_go } => {
-                            return Result::Err("Not implemented yet ");
-                        }
-                        UciTimeControl::Infinite => {
-                            return Result::Err("Not implemented yet ");
-                        }
-                        UciTimeControl::MoveTime(duration) => {
-                            return Result::Err("Not implemented yet ");
-                        }
-                    }
-                }
-            }
-            UciMessage::IsReady => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::UciNewGame => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Stop => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::PonderHit => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Quit => {
-                return Result::Err("Not implemented yet ");
-            }
-
-            UciMessage::Debug(_) => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Register { .. } => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::SetOption { .. } => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Id { .. } => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::UciOk => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::ReadyOk => {
-                return Result::Err("Not implemented yet ");
-
-            }
-            UciMessage::BestMove { .. } => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::CopyProtection(_) => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Registration(_) => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Option(_) => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Info(_) => {
-                return Result::Err("Not implemented yet ");
-            }
-            UciMessage::Unknown(_, _) => {
-                return Result::Err("Not implemented yet ");
-            }
-        }
-    }
-    return Result::Err("No message");
+async fn user_disconnected(my_id: usize, users: &Users, games: &mut Games) {
+    log::info!("user logged off: {}", my_id);
+    // Stream closed up, so remove from the user list
+    users.write().await.remove(&my_id);
+    games.remove(&my_id);
 }
