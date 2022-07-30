@@ -3,7 +3,7 @@ use std::cmp::max;
 use std::fmt::format;
 use log::log;
 use num_format::Locale::be;
-use crate::{Board, Move};
+use crate::{Board, eval, Move, print_u64_bitboard};
 use crate::consts::board_consts::{B_INDEX, K_INDEX, N_INDEX, N_INF, P_INDEX, Q_INDEX, R_INDEX};
 use crate::move_gen::pieces;
 
@@ -17,7 +17,7 @@ const ROOK_VALUE: u32 = 500;
 pub fn search_moves(b: &Board, depth: u8, mut best_current_side: i16, best_opponent: i16) -> i16 {
     let moves = b.get_all_moves();
     if moves.len() == 0 {
-        if pieces::king::get_attackers(&b, b.white_turn) != 0 {
+        if pieces::king::get_attackers(b, b.white_turn) != 0 {
             return N_INF;
         }
         return 0;
@@ -27,8 +27,7 @@ pub fn search_moves(b: &Board, depth: u8, mut best_current_side: i16, best_oppon
             return quiescence_search(b, best_current_side, best_opponent);
         }
         for mv in moves {
-            //log::info!("inner eval: {}", t);
-            let mut evaluation = -search_moves(b.clone().make_move(&mv), depth - 1, -best_opponent, -best_current_side);
+            let evaluation = -search_moves(b.clone().make_move(&mv), depth - 1, -best_opponent, -best_current_side);
             // opponent has a better choice, can prune
             if evaluation >= best_opponent {
                 return best_opponent;
@@ -59,19 +58,17 @@ fn quiescence_search(b: &Board, mut best_current_side: i16, best_opponent: i16) 
         return best_opponent;
     }
     best_current_side = max(best_current_side, eval);
+    //log::info!("quiesence eval: {}", mv);
 
     let moves = b.get_all_moves();
-    if moves.len() != 0 {
-        for mv in moves {
-            if mv.is_capture() {
-                //log::info!("quiesence eval: {}", mv);
-                eval = -quiescence_search(b.clone().make_move(&mv), -best_opponent, -best_current_side);
-                // opponent has a better choice, can prune
-                if eval >= best_opponent {
-                    return best_opponent;
-                }
-                best_current_side = max(best_current_side, eval);
+    for mv in b.get_all_moves() {
+        if mv.is_capture() {
+            eval = -quiescence_search(b.clone().make_move(&mv), -best_opponent, -best_current_side);
+            // opponent has a better choice, can prune
+            if eval >= best_opponent {
+                return best_opponent;
             }
+            best_current_side = max(best_current_side, eval);
         }
     }
     return best_current_side;

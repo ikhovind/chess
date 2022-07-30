@@ -110,6 +110,7 @@ fn iso8601(st: &std::time::SystemTime) -> String {
 fn main() {
     let event_hub = simple_websockets::launch(3389)
         .expect("failed to listen on port 3389");
+
     // map between client ids and the client's `Responder`:
     let mut clients: HashMap<u64, Responder> = HashMap::new();
     let mut games: HashMap<u64, Board> = HashMap::new();
@@ -118,7 +119,7 @@ fn main() {
             Event::Connect(client_id, responder) => {
                 log::info!("A client connected with id #{}", client_id);
                 // add their Responder to our `clients` map:
-                games.insert(client_id, Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR")));
+                games.insert(client_id, Board::from_fen(String::from("    rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")));
                 clients.insert(client_id, responder);
             },
             Event::Disconnect(client_id) => {

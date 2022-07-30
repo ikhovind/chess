@@ -34,13 +34,13 @@ pub static BASIS: u8 = 0b00111111;
 impl Move {
     pub fn parse_move(notation: &str, b: &Board) -> Result<Move, String>{
         if notation.len() == 4 {
-                let from_column = notation.as_bytes()[0] - 97;
-            let from_row = (notation.as_bytes()[1] - 97) * 8;
-            let from_ix = from_column + from_row;
+            let from_column = notation.as_bytes()[0] - 97;
+            let from_row = (notation.as_bytes()[1] - 48);
+            let from_ix = from_column + from_row * 8;
 
             let to_column = notation.as_bytes()[2] - 97;
-            let to_row = (notation.as_bytes()[3] - 97) * 8;
-            let to_ix = to_column + to_row;
+            let to_row = (notation.as_bytes()[3] - 49);
+            let to_ix = to_column + to_row * 8;
 
             if (b.pieces[P_INDEX] | b.pieces[P_INDEX + 1]) & (1 << from_ix) != 0
                 && (1 << to_ix) & (RANK_MASKS[3] | RANK_MASKS[4]) != 0 {
@@ -124,7 +124,7 @@ impl Move {
         };
         return Move {
             from: (_from & BASIS) | (typ & FROM_MASK),
-            to: (_to & BASIS) | (typ << 2),
+            to: (_to & BASIS) | ((typ & TO_MASK) << 2),
         };
     }
 

@@ -117,20 +117,18 @@ impl Board {
     }
 
     pub fn make_move(&mut self, mv: &Move) -> &mut Board {
-        //print_u64_bitboard(self.pieces[K_INDEX + 1]);
         let mv_type = mv.from & TYPE_MASK | ((mv.to & TYPE_MASK) >> 2);
         let color: u8 = if self.white_turn { 1 } else { 0 };
         let from_sq = 1u64 << (mv.from & MOVE_MASK);
         let to_sq = 1u64 << (mv.to & MOVE_MASK);
-        if 5 == (mv.to & MOVE_MASK) {
-            println!("black pieces:");
-            print_u64_bitboard(self.get_black_pieces());
-        }
         match mv_type {
             NORMAL_MOVE => {
                 for i in (color as usize..self.pieces.len()).step_by(2) {
-                    let bit_mask = ((self.pieces[i] & from_sq) != 0) as u64 * u64::MAX;
-                    self.pieces[i] +=  bit_mask & (to_sq - from_sq);
+                    if self.pieces[i] & from_sq != 0 {
+                        self.pieces[i] += to_sq;
+                        self.pieces[i] -= from_sq;
+                        break;
+                    }
                 }
             }
             DOUBLE_PAWN => {
@@ -245,7 +243,6 @@ impl Board {
                 log::error!("illegal move??: {}", mv_type);
             }
         }
-        //print_u64_bitboard(self.pieces[K_INDEX + 1]);
         self.update_metadata(mv);
         return self;
     }
@@ -294,13 +291,6 @@ impl Board {
 
     pub fn get_all_moves(&self) -> Vec<Move> {
         let mut rook = rook::possible_r(self, self.white_turn);
-        for mv in rook.clone() {
-            if (1 << (mv.to & 0b00111111)) & self.pieces[K_INDEX + 1] != 0 {
-                //println!("taking king with rook from: {}", mv);
-                //println!("white? : {}", self.white_turn);
-                //print_u64_bitboard(self.pieces[R_INDEX]);
-            }
-        }
         rook.append(&mut knight::possible_n(self, self.white_turn));
         rook.append(&mut bishop::possible_b(self, self.white_turn));
         rook.append(&mut queen::possible_q(self, self.white_turn));
@@ -375,9 +365,6 @@ impl Board {
         let attacking_color = if white { self.get_black_pieces() } else { self.get_white_pieces() };
         let def_color = if white { self.get_white_pieces() } else { self.get_black_pieces() };
         let king_square  = self.pieces[K_INDEX + index].trailing_zeros() as u8;
-        if self.pieces[K_INDEX + index].count_ones() != 1 {
-            println!("more than one: {}", self.pieces[K_INDEX + index].count_ones());
-        }
         let opp_diags = self.pieces[B_INDEX + 1 - index] | self.pieces[Q_INDEX + 1 - index];
         let opp_line = self.pieces[R_INDEX + 1 - index] | self.pieces[Q_INDEX + 1 - index];
         let king_diag = DIAGONAL_MASKS[((king_square as usize) / 8) + ((king_square as usize) % 8)];

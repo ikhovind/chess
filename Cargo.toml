@@ -17,7 +17,6 @@ shellexpand = "2.1.0"
 
 [profile.dev]
 overflow-checks = false
-opt-level = 3
 
 [profile.release]
 lto = true
