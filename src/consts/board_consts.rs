@@ -98,6 +98,15 @@ pub const R_INDEX: usize = 6;
 pub const Q_INDEX: usize = 8;
 pub const K_INDEX: usize = 10;
 
+pub const P_VAL_INDEX: usize = 0;
+pub const N_VAL_INDEX: usize = 1;
+pub const B_VAL_INDEX: usize = 2;
+pub const R_VAL_INDEX: usize = 3;
+pub const Q_VAL_INDEX: usize = 4;
+pub const K_VAL_INDEX: usize = 5;
+
+// todo tweak king value
+pub const PIECE_VALUES: [i16; 6] = [100, 300, 300, 500, 900, 0];
 pub const P_INF: i16 = 10000;
 pub const N_INF: i16 = -10000;
 

@@ -296,7 +296,8 @@ impl Board {
         rook.append(&mut queen::possible_q(self, self.white_turn));
         rook.append(&mut king::possible_k(self, self.white_turn));
         rook.append(&mut pawn::possible_p(self, self.white_turn));
-        return rook.clone();
+        // todo sort here?
+        return rook;
     }
 
     pub fn get_num_moves(self, depth: u32) -> u64 {
