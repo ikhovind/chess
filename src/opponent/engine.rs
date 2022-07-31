@@ -2,14 +2,12 @@ use log::log;
 use crate::{Board, print_u64_bitboard};
 use crate::consts::board_consts::{N_INF, P_INF};
 use crate::mv::Move;
+use crate::opponent::move_ordering::order_moves;
 use crate::opponent::search::{count_material, search_moves};
 
 pub fn eval(b: &Board) -> Option<Move> {
     log::info!("thinking about move");
-    let mut moves = b.get_all_moves();
-    moves.sort_unstable_by(|a, c|
-        c.guess_score(&b).partial_cmp(&a.guess_score(&b)).unwrap()
-    );
+    let mut moves = order_moves(&b, &b.get_all_moves());
     if moves.len() > 0 {
         let mut best_score = i16::MIN;
         let mut best_yet = moves[0];

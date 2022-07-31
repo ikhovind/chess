@@ -10,7 +10,6 @@ use crate::move_gen::pieces;
 pub struct Move {
     pub from: u8,
     pub to: u8,
-    pub est: i16,
     /*
     pub const NORMAL_MOVE: u8 = 0;
     pub const DOUBLE_PAWN: u8 = 0b00010000;
@@ -62,33 +61,31 @@ impl Move {
             }
             if  (b.pieces[K_INDEX] | b.pieces[K_INDEX + 1]) & (1 << from_ix) & (WHITE_KING | BLACK_KING) != 0
                 && (1 << to_ix) & (WHITE_LONG_CASTLE_ROOK | WHITE_SHORT_CASTLE_KING | BLACK_LONG_CASTLE_KING | BLACK_SHORT_CASTLE_KING) != 0 {
-                return Ok(Move::new_castle(from_ix, to_ix, 0));
+                return Ok(Move::new_castle(from_ix, to_ix));
             }
-            return Ok(Move::new_move(from_ix, to_ix, (b.get_white_pieces() | b.get_black_pieces()) & (1 << to_ix) != 0, 0));
+            return Ok(Move::new_move(from_ix, to_ix, (b.get_white_pieces() | b.get_black_pieces()) & (1 << to_ix) != 0));
         }
         return Err("Not a legal move".to_string());
     }
 
-    pub fn new_move(_from: u8, _to: u8, is_capture: bool, _est: i16) -> Move {
+    pub fn new_move(_from: u8, _to: u8, is_capture: bool) -> Move {
         return Move {
             from: (_from & BASIS)
                 | (if is_capture { TAKES & FROM_MASK } else { 0 }),
             to: (_to & BASIS)
                 | (if is_capture { TAKES << 2 } else { 0 }),
-            est: _est
         };
     }
 
-    pub fn new_double_push(_from: u8, _to: u8, _est: i16) -> Move {
+    pub fn new_double_push(_from: u8, _to: u8) -> Move {
         let mv = Move {
             from: (_from & BASIS) | (DOUBLE_PAWN & FROM_MASK),
             to: (_to & BASIS) | ((DOUBLE_PAWN & TO_MASK) << 2),
-            est: _est
         };
         return mv;
     }
 
-    pub fn new_promotion(_from: u8, _to: u8, is_capture: bool, promote_to: u8, _est: i16) -> Move {
+    pub fn new_promotion(_from: u8, _to: u8, is_capture: bool, promote_to: u8) -> Move {
         let typ;
         if !is_capture {
             // todo error handling
@@ -112,15 +109,13 @@ impl Move {
         return Move {
             from: (_from & BASIS) | (typ & FROM_MASK),
             to: (_to & BASIS) | (typ << 2),
-            est: _est
         };
     }
 
-    pub fn new_ep(_from: u8, _to: u8, _est: i16) -> Move {
+    pub fn new_ep(_from: u8, _to: u8) -> Move {
         let m = Move {
             from: (_from & BASIS) | (EN_PASSANT & FROM_MASK),
             to: (_to & BASIS) | (EN_PASSANT << 2),
-            est: _est,
         };
         return m;
     }
@@ -196,17 +191,13 @@ impl Move {
         else { return 0 }
     }
 
-    pub fn guess_score(&self, b: &Board) -> i16 {
+    pub fn guess_score(&self, watched_by_p: u64, b: &Board) -> i16 {
         let mut guess = 0;
         let mut mv_piece_value = 0;
         let mut cap_piece_value = -1;
         for (ix, it) in b.pieces.iter().enumerate() {
-            if *it & (1u64 << self.get_from_sq()) != 0 {
-                mv_piece_value = PIECE_VALUES[ix / 2];
-            }
-            else if *it & (1u64 << self.get_to_sq()) != 0 {
-                cap_piece_value = PIECE_VALUES[ix / 2];
-            }
+            mv_piece_value = ((*it & (1u64 << self.get_from_sq())) as i16 * i16::MAX) & PIECE_VALUES[ix / 2];
+            cap_piece_value = ((*it & (1u64 << self.get_to_sq())) as i16 * i16::MAX) & PIECE_VALUES[ix / 2];
         }
         if cap_piece_value != -1 {
             guess = 10 * cap_piece_value - mv_piece_value;
@@ -215,7 +206,7 @@ impl Move {
         if self.is_promotion() {
             guess += self.get_promotion_value();
         }
-        if pieces::pawn::watched_by_p(&b, b.white_turn) & (1u64 << self.get_to_sq()) != 0 {
+        if watched_by_p & (1u64 << self.get_to_sq()) != 0 {
             guess -= mv_piece_value;
         }
         return guess;
