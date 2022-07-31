@@ -107,7 +107,8 @@ pub const K_VAL_INDEX: usize = 5;
 
 // todo tweak king value
 pub const PIECE_VALUES: [i16; 6] = [100, 300, 300, 500, 900, 0];
-pub const P_INF: i16 = 10000;
-pub const N_INF: i16 = -10000;
+pub const P_INF: i16 = 20000;
+pub const N_INF: i16 = -20000;
+pub const N_MATE: i16 = -10000;
+pub const P_MATE: i16 = 10000;
 
-pub const BASE_POS: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
