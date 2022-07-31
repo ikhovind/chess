@@ -1,6 +1,6 @@
 # chess (name tbd)
 
-It can be played live on http://ikhovind.no
+It can be played live on https://ikhovind.no
 
 ## TODO
  * bugfixing stack overflow for tokio runtime workers
