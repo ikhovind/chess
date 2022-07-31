@@ -30,7 +30,7 @@ use num_format::Locale::{es, my};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use warp::sse::keep_alive;
 use crate::consts::board_consts::{ANTI_DIAGONAL_MASKS, DIAGONAL_MASKS, ROOK};
-use crate::consts::position_consts::{DOUBLE_ROOK_ENDGAME, SINGLE_ROOK_ENDGAME};
+use crate::consts::position_consts::{BASE_POS, DOUBLE_ROOK_ENDGAME, SINGLE_ROOK_ENDGAME};
 use crate::engine::eval;
 use crate::mv::Move;
 
@@ -178,9 +178,9 @@ async fn main() {
 
 
     warp::serve(chat)
-        //.tls()
-        //.cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
-        //.key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
+        .tls()
+        .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
+        .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
         .run(([0, 0, 0, 0], 3389)).await;
 }
 
@@ -212,7 +212,7 @@ async fn user_connected(ws: WebSocket, users: Users, mut game: Games) {
 
     // Save the sender in our list of connected users.
     users.write().await.insert(my_id, tx);
-    game.insert(my_id, Board::from_fen(String::from(DOUBLE_ROOK_ENDGAME)));
+    game.insert(my_id, Board::from_fen(String::from(BASE_POS)));
 
     // Return a `Future` that is basically a state machine managing
     // this specific user's connection.

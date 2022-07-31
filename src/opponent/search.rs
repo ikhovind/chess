@@ -21,19 +21,13 @@ pub fn search_moves(b: &Board, depth: u8, mut alpha: i16, beta: i16) -> i16 {
     let mut moves = b.get_all_moves();
     if moves.len() == 0 {
         if pieces::king::get_attackers(&b, b.white_turn) != 0 {
-            if b.white_turn {
-                return N_MATE;
-            }
-            else {
-                return P_MATE;
-            }
+            return N_MATE - depth as i16;
         }
         return 0;
     }
 
     else if depth == 0 {
-        let p = if b.white_turn { 1 } else { -1 };
-        return p * quiescence_search(&b, alpha, beta);
+        return quiescence_search(&b, alpha, beta);
     }
     else {
         order_moves(&b, &mut moves);
@@ -43,7 +37,9 @@ pub fn search_moves(b: &Board, depth: u8, mut alpha: i16, beta: i16) -> i16 {
             if evaluation >= beta {
                 return beta;
             }
-            alpha = max(alpha, evaluation);
+            if evaluation > alpha {
+                alpha = evaluation;
+            }
         }
         return alpha;
     }

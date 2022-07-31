@@ -12,7 +12,6 @@ pub fn eval(b: &Board) -> Option<Move> {
     let mut moves = b.get_all_moves();
     order_moves(&b, &mut moves);
     if moves.len() > 0 {
-        println!("move: {}", weight_king_pos(&b.pieces, if b.white_turn { 1 } else { 0 }));
         let mut best_score = i16::MIN;
         let mut best_yet = moves[0];
         for mv in moves {

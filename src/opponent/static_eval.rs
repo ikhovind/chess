@@ -4,8 +4,7 @@ use crate::opponent::eval_consts::KING_ENDGAME_POS;
 
 pub fn eval_pos(b: &Board) -> i16 {
     let ix = if b.white_turn { 1 } else { 0 };
-    let p = if b.white_turn { 1 } else { -1 };
-    return p * count_pieces(&b.pieces, ix);// + */weight_king_pos(&b.pieces, ix);// - weight_king_pos(&b.pieces, ix);
+    return count_pieces(&b.pieces, ix) + weight_king_pos(&b.pieces, ix);
 }
 
 fn count_pieces(pieces: &[u64; 12], ix: usize) -> i16 {
@@ -38,15 +37,11 @@ pub fn weight_king_pos(pieces: &[u64; 12], ix: usize) -> i16 {
     let opp_row = opp_king_sq / 8;
     let opp_column = opp_king_sq % 8;
 
-    return 14 - (i16::abs(opp_row - our_row) + i16::abs(opp_column - our_column));
-    /*
+    let eval = 14 - (i16::abs(opp_row - our_row) + i16::abs(opp_column - our_column));
     if count_opp_pieces(pieces, ix) < 1000 {
-        return -dist;
-        //return KING_ENDGAME_POS[pieces[K_INDEX + 1 - ix].trailing_zeros() as usize] - dist;
+        return KING_ENDGAME_POS[pieces[K_INDEX + 1 - ix].trailing_zeros() as usize] + eval;
     }
     else {
-        return -dist;
-        //return KING_ENDGAME_POS[pieces[K_INDEX + 1 - ix].trailing_zeros() as usize] - dist;
+        return KING_ENDGAME_POS[pieces[K_INDEX + 1 - ix].trailing_zeros() as usize] + eval;
     }
-     */
 }
