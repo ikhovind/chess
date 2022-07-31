@@ -38,10 +38,11 @@ pub fn weight_king_pos(pieces: &[u64; 12], ix: usize) -> i16 {
     let opp_column = opp_king_sq % 8;
 
     let eval = 14 - (i16::abs(opp_row - our_row) + i16::abs(opp_column - our_column));
+    // todo tweak endgame;
     if count_opp_pieces(pieces, ix) < 1000 {
         return KING_ENDGAME_POS[pieces[K_INDEX + 1 - ix].trailing_zeros() as usize] + eval;
     }
     else {
-        return KING_ENDGAME_POS[pieces[K_INDEX + 1 - ix].trailing_zeros() as usize] + eval;
+        return eval;
     }
 }

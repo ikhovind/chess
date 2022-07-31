@@ -40,8 +40,6 @@ mod consts;
 mod move_gen;
 mod opponent;
 
-//static mut GAME: Board = Board::from_fen(String::from("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"));
-
 fn print_u64_bitboard(bitboard: u64) {
     println!();
     let mut c = 0;
