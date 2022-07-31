@@ -1,8 +1,9 @@
 use crate::Board;
 use crate::consts::board_consts::{B_INDEX, B_VAL_INDEX, K_INDEX, N_INDEX, N_VAL_INDEX, P_INDEX, P_VAL_INDEX, PIECE_VALUES, Q_INDEX, Q_VAL_INDEX, R_INDEX, R_VAL_INDEX};
 use crate::opponent::eval_consts::KING_ENDGAME_POS;
+use crate::opponent::game_stage::GameStage;
 
-pub fn eval_pos(b: &Board) -> i16 {
+pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
     let ix = if b.white_turn { 1 } else { 0 };
     return count_pieces(&b.pieces, ix) + weight_king_pos(&b.pieces, ix);
 }
