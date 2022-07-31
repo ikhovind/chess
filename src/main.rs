@@ -177,9 +177,9 @@ async fn main() {
 
 
     warp::serve(chat)
-        //.tls()
-        //.cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
-        //.key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
+        .tls()
+        .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
+        .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
         .run(([0, 0, 0, 0], 3389)).await;
 }
 
@@ -211,7 +211,7 @@ async fn user_connected(ws: WebSocket, users: Users, mut game: Games) {
 
     // Save the sender in our list of connected users.
     users.write().await.insert(my_id, tx);
-    game.insert(my_id, Board::from_fen(String::from("2kr3r/1b1p1pqp/4pN2/1Pb5/1p2P3/8/1PP1QPPP/R2R2K1 w - - 0 19")));
+    game.insert(my_id, Board::from_fen(String::from(BASE_POS)));
 
     // Return a `Future` that is basically a state machine managing
     // this specific user's connection.

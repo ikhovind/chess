@@ -196,8 +196,12 @@ impl Move {
         let mut mv_piece_value = 0;
         let mut cap_piece_value = -1;
         for (ix, it) in b.pieces.iter().enumerate() {
-            mv_piece_value = ((*it & (1u64 << self.get_from_sq())) as i16 * i16::MAX) & PIECE_VALUES[ix / 2];
-            cap_piece_value = ((*it & (1u64 << self.get_to_sq())) as i16 * i16::MAX) & PIECE_VALUES[ix / 2];
+            if *it & (1u64 << self.get_from_sq()) != 0 {
+                mv_piece_value = PIECE_VALUES[ix / 2];
+            }
+            if *it & (1u64 << self.get_to_sq()) != 0 {
+                cap_piece_value = PIECE_VALUES[ix / 2];
+            }
         }
         if cap_piece_value != -1 {
             guess = 10 * cap_piece_value - mv_piece_value;
@@ -288,18 +292,5 @@ impl PartialEq for Move {
     fn eq(&self, other: &Self) -> bool {
         self.from == other.from
             && self.to == other.to
-    }
-}
-impl Eq for Move {}
-
-impl PartialOrd<Self> for Move {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        return Some(Ordering::Less);
-    }
-}
-
-impl Ord for Move {
-    fn cmp(&self, other: &Self) -> Ordering {
-        return self.from.cmp(&other.from);
     }
 }

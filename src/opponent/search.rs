@@ -6,6 +6,8 @@ use num_format::Locale::be;
 use crate::{Board, eval, Move, print_u64_bitboard};
 use crate::consts::board_consts::{B_INDEX, K_INDEX, N_INDEX, N_INF, P_INDEX, Q_INDEX, R_INDEX};
 use crate::move_gen::pieces;
+use crate::move_gen::pieces::pawn;
+use crate::opponent::move_ordering::order_moves;
 
 const PAWN_VALUE: u32 = 100;
 const QUEEN_VALUE: u32 = 900;
@@ -15,7 +17,8 @@ const ROOK_VALUE: u32 = 500;
 
 
 pub fn search_moves(b: &Board, depth: u8, mut best_current_side: i16, best_opponent: i16) -> i16 {
-    let moves = b.get_all_moves();
+    let mut moves = b.get_all_moves();
+    order_moves(&b, &mut moves);
     if moves.len() == 0 {
         if pieces::king::get_attackers(b, b.white_turn) != 0 {
             return N_INF;
@@ -26,6 +29,7 @@ pub fn search_moves(b: &Board, depth: u8, mut best_current_side: i16, best_oppon
         if depth == 0 {
             return quiescence_search(&b, best_current_side, best_opponent);
         }
+
         for mv in moves {
             let evaluation = -search_moves(b.clone().make_move(&mv), depth - 1, -best_opponent, -best_current_side);
             // opponent has a better choice, can prune
@@ -60,15 +64,15 @@ fn quiescence_search(b: &Board, mut best_current_side: i16, best_opponent: i16) 
     best_current_side = max(best_current_side, eval);
     //log::info!("quiesence eval: {}", mv);
 
-    for mv in b.get_all_moves() {
-        if mv.is_capture() {
-            eval = -quiescence_search(b.clone().make_move(&mv), -best_opponent, -best_current_side);
-            // opponent has a better choice, can prune
-            if eval >= best_opponent {
-                return best_opponent;
-            }
-            best_current_side = max(best_current_side, eval);
+    let mut moves = b.get_all_captures();
+    order_moves(&b, &mut moves);
+    for mv in &b.get_all_captures() {
+        eval = -quiescence_search(b.clone().make_move(&mv), -best_opponent, -best_current_side);
+        // opponent has a better choice, can prune
+        if eval >= best_opponent {
+            return best_opponent;
         }
+        best_current_side = max(best_current_side, eval);
     }
     return best_current_side;
 }

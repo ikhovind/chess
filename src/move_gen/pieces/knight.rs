@@ -1,11 +1,13 @@
+use num_format::Locale::el;
 use crate::Board;
 use crate::consts::board_consts::*;
 use crate::move_gen::computed_moves;
 use crate::move_gen::computed_moves::lookup_consts::KNIGHT_MOVES;
 use crate::mv::Move;
 
-pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
+pub fn possible_n(b: &Board, white: bool, captures: bool) -> Vec<Move> {
     let opposing_pieces = if white { b.get_black_pieces() } else { b.get_white_pieces() };
+    let cap_mask = if captures { opposing_pieces } else { u64::MAX };
     let own_pieces = if !white { b.get_black_pieces() } else { b.get_white_pieces() };
     let index = if white { 1 } else { 0 };
 
@@ -21,7 +23,7 @@ pub fn possible_n(b: &Board, white: bool) -> Vec<Move> {
 
             let moves =
             computed_moves::lookup_consts::KNIGHT_MOVES[i as usize]
-                    & !own_pieces & b.push_mask & b.get_pinned_slide(i as u8);
+                    & !own_pieces & b.push_mask & b.get_pinned_slide(i as u8) & cap_mask;
 
             for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
                 if (1 << i2) & moves != 0 {

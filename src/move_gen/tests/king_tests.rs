@@ -39,6 +39,6 @@ fn does_not_detect_none_as_double_check() {
 fn evades_simple_check() {
     let mut b = Board::from_fen(String::from("N1R5/3k4/8/2R1R3/8/8/8/1K6"));
     b.white_turn = false;
-    assert_eq!(possible_k(&b, false).len(), 1);
-    assert_eq!(possible_k(&b, false)[0], Move::new_move(51, 43, false));
+    assert_eq!(possible_k(&b, false, false).len(), 1);
+    assert_eq!(possible_k(&b, false, false)[0], Move::new_move(51, 43, false));
 }
