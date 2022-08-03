@@ -210,7 +210,7 @@ async fn user_connected(ws: WebSocket, users: Users, mut game: Games) {
 
     // Save the sender in our list of connected users.
     users.write().await.insert(my_id, tx);
-    game.insert(my_id, Board::from_fen(String::from(SINGLE_ROOK_ENDGAME)));
+    game.insert(my_id, Board::from_fen(String::from(BASE_POS)));
 
     // Return a `Future` that is basically a state machine managing
     // this specific user's connection.

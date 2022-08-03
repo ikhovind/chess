@@ -92,25 +92,25 @@ fn blocks_check() {
 #[test]
 fn blocks_with_en_passant() {
     let mut b = Board::from_fen(String::from("8/8/8/2k5/4p3/8/3P4/3K4"));
-    b.make_move(&Move::new_move(11, 27, false));
+    b = b.make_move(&Move::new_move(11, 27, false));
     assert_eq!(b.get_num_moves(1), 8);
 }
 
 #[test]
 fn pinned_rook_can_slide() {
     let mut b = Board::from_fen(String::from("4k3/8/4r3/8/8/4Q3/8/1K6"));
-    b.make_move(&Move::new_move(20, 28, false));
+    b = b.make_move(&Move::new_move(20, 28, false));
     assert_eq!(b.get_num_moves(1), 8);
 
 
     let mut b = Board::from_fen(String::from("8/8/2k1r2Q/8/8/8/8/1K6"));
-    b.make_move(&Move::new_move(47, 46, false));
+    b = b.make_move(&Move::new_move(47, 46, false));
     assert_eq!(b.get_num_moves(1), 11);
 }
 
 #[test]
 fn en_passant_discovered_check() {
     let mut b = Board::from_fen(String::from("8/8/8/8/k2p3Q/8/2P5/2K5"));
-    b.make_move(&Move::new_move(10, 26, false));
+    b = b.make_move(&Move::new_move(10, 26, false));
     assert_eq!(b.get_num_moves(1), 5);
 }
