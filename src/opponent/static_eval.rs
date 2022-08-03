@@ -1,6 +1,6 @@
 use crate::Board;
 use crate::consts::board_consts::{B_INDEX, B_VAL_INDEX, K_INDEX, N_INDEX, N_VAL_INDEX, P_INDEX, P_VAL_INDEX, PIECE_VALUES, Q_INDEX, Q_VAL_INDEX, R_INDEX, R_VAL_INDEX};
-use crate::opponent::eval_consts::KING_ENDGAME_POS;
+use crate::opponent::eval_consts::{EG_KING_TABLE, KING_ENDGAME_POS};
 use crate::opponent::game_stage::GameStage;
 
 pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
@@ -38,12 +38,12 @@ pub fn weight_king_pos(pieces: &[u64; 12], ix: usize) -> i16 {
     let opp_row = opp_king_sq / 8;
     let opp_column = opp_king_sq % 8;
 
-    let eval = 14 - (i16::abs(opp_row - our_row) + i16::abs(opp_column - our_column));
+    let dist =  (i16::abs(opp_row - our_row) + i16::abs(opp_column - our_column));
     // todo tweak endgame;
     if count_opp_pieces(pieces, ix) < 1000 {
-        return KING_ENDGAME_POS[pieces[K_INDEX + 1 - ix].trailing_zeros() as usize] + eval;
+        return EG_KING_TABLE[pieces[K_INDEX + ix].trailing_zeros() as usize] + dist;
     }
     else {
-        return eval;
+        return -dist;
     }
 }
