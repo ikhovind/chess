@@ -176,12 +176,9 @@ async fn main() {
 
 
     warp::serve(chat)
-        /*
         .tls()
         .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
         .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
-
-         */
         .run(([0, 0, 0, 0], 3389)).await;
 }
 
