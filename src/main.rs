@@ -176,9 +176,12 @@ async fn main() {
 
 
     warp::serve(chat)
+        /*
         .tls()
         .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
         .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
+
+         */
         .run(([0, 0, 0, 0], 3389)).await;
 }
 
@@ -239,10 +242,9 @@ async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Boar
                 return;
             }
             else {
-                log::info!("Received message: {}", s);
                 match Move::parse_move(&s, &game) {
                     Ok(m) => {
-                        log::info!("Parsed move: {}", m);
+                        log::info!("Received move: {}", m);
                         *game = game.make_move(&m);
                         let return_msg = match eval(*game) {
                             Some(ai_m) => {

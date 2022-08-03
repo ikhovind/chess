@@ -1,11 +1,42 @@
-use crate::Board;
+use num_format::Locale::el;
+use warp::reply::with_header;
+use crate::{Board, eval};
 use crate::consts::board_consts::{B_INDEX, B_VAL_INDEX, K_INDEX, N_INDEX, N_VAL_INDEX, P_INDEX, P_VAL_INDEX, PIECE_VALUES, Q_INDEX, Q_VAL_INDEX, R_INDEX, R_VAL_INDEX};
-use crate::opponent::eval_consts::{EG_KING_TABLE, KING_ENDGAME_POS};
+use crate::opponent::eval_consts::{EG_KING_TABLE, eval_sq, KING_ENDGAME_POS};
 use crate::opponent::game_stage::GameStage;
 
 pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
     let ix = if b.white_turn { 1 } else { 0 };
-    return count_pieces(&b.pieces, ix) + weight_king_pos(&b.pieces, ix);
+    return match stage {
+        GameStage::EARLY => {
+            count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, true)
+        }
+        GameStage::MIDDLE => {
+            count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, false)
+        }
+        GameStage::LATE => {
+            count_pieces(&b.pieces, ix) + weight_king_pos(&b.pieces, ix)
+        }
+    }
+}
+
+fn eval_piece_positions(pieces: &[u64; 12], white_turn: bool, early_game: bool) -> i16 {
+    let mut white = 0;
+    let mut black = 0;
+    for square in 0..64 {
+        for piece in 0..12 {
+            if pieces[piece] & (1 << square) != 0 {
+                if piece % 2 == 0 {
+                    black += eval_sq(square, piece / 2, early_game);
+                }
+                else {
+                    white += eval_sq(square, piece / 2, early_game);
+                }
+            }
+        }
+    }
+    let perspective = if white_turn { 1  } else { -1 };
+    return (white - black) * perspective;
 }
 
 fn count_pieces(pieces: &[u64; 12], ix: usize) -> i16 {

@@ -18,7 +18,6 @@ The backend relies on a number of non-chess related dependencies, all of which c
 
 ## TODO
  * Opening book
- * Finish implementing piece square value tables
  * Various optimizations
     * Keep running sum of piece values
     * Sort checks earlier in the estimated move values

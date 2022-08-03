@@ -19,16 +19,15 @@ const ROOK_VALUE: u32 = 500;
 
 
 pub fn search_moves(mut b: Board, depth: u8, mut alpha: i16, beta: i16, stage: &GameStage) -> i16 {
+    if depth == 0 {
+        return quiescence_search(b, alpha, beta, stage);
+    }
     let mut moves = b.get_all_moves();
     if moves.len() == 0 {
         if pieces::king::get_attackers(&b, b.white_turn) != 0 {
             return N_MATE - depth as i16;
         }
         return 0;
-    }
-
-    else if depth == 0 {
-        return quiescence_search(b, alpha, beta, stage);
     }
     else {
         order_moves(&b, &mut moves);

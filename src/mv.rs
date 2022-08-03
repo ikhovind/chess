@@ -47,22 +47,28 @@ impl Move {
             let to_ix = to_column + to_row * 8;
 
             if (b.pieces[P_INDEX] | b.pieces[P_INDEX + 1]) & (1 << from_ix) != 0
-                && (1 << to_ix) & (RANK_MASKS[3] | RANK_MASKS[4]) != 0 {
+                && (1 << to_ix) & (RANK_MASKS[3] | RANK_MASKS[4]) != 0
+                && u8::abs_diff(to_ix, from_ix) == 2 {
+                log::info!("parsed double push");
                 return Ok(Move::new_double_push(from_ix, to_ix));
             }
             if  (b.pieces[P_INDEX] | b.pieces[P_INDEX + 1]) & (1 << from_ix) != 0
                 && (1 << to_ix) & (RANK_MASKS[0] | RANK_MASKS[7]) != 0 {
+                log::info!("parsed new promotion");
                 return Ok(Move::new_promotion(from_ix, to_ix, (b.get_white_pieces() | b.get_black_pieces()) & (1 << to_ix) != 0, QUEEN));
             }
             if  (b.pieces[P_INDEX] | b.pieces[P_INDEX + 1]) & (1 << from_ix) != 0
                 && b.get_empty() & (1 << to_ix) != 0
                 && to_column != from_column {
+                log::info!("parsed new ep");
                 return Ok(Move::new_ep(from_ix, to_ix));
             }
             if  (b.pieces[K_INDEX] | b.pieces[K_INDEX + 1]) & (1 << from_ix) & (WHITE_KING | BLACK_KING) != 0
                 && (1 << to_ix) & (WHITE_LONG_CASTLE_ROOK | WHITE_SHORT_CASTLE_KING | BLACK_LONG_CASTLE_KING | BLACK_SHORT_CASTLE_KING) != 0 {
+                log::info!("parsed new castle");
                 return Ok(Move::new_castle(from_ix, to_ix));
             }
+            log::info!("parsed normal move");
             return Ok(Move::new_move(from_ix, to_ix, (b.get_white_pieces() | b.get_black_pieces()) & (1 << to_ix) != 0));
         }
         return Err("Not a legal move".to_string());
