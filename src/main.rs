@@ -243,11 +243,11 @@ async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Boar
                 match Move::parse_move(&s, &game) {
                     Ok(m) => {
                         log::info!("Parsed move: {}", m);
-                        game.make_move(&m);
-                        let return_msg = match eval(&game) {
+                        *game = game.make_move(&m);
+                        let return_msg = match eval(*game) {
                             Some(ai_m) => {
                                 log::info!("Making move: {}", ai_m);
-                                game.make_move(&ai_m);
+                                *game = game.make_move(&ai_m);
                                 ai_m.to_string()
                             }
                             None => {

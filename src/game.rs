@@ -116,7 +116,7 @@ impl Board {
                 | pawn::watched_by_p(&self, white);
     }
 
-    pub fn make_move(&mut self, mv: &Move) -> &mut Board {
+    pub fn make_move(mut self, mv: &Move) -> Board {
         let mv_type = mv.from & TYPE_MASK | ((mv.to & TYPE_MASK) >> 2);
         let color: u8 = if self.white_turn { 1 } else { 0 };
         let from_sq = 1u64 << (mv.from & MOVE_MASK);
