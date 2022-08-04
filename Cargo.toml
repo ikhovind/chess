@@ -1,12 +1,18 @@
 [package]
-name = "chess"
+name = "shellfish"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "shellfishbin"
+path = "src/main.rs"
+
+[lib]
+name = "shellfishlib"
+path = "src/lib/lib.rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-num-format = "0.4.0"
 chrono = "0.4"
 log = "0.4.17"
 fern = "0.6.1"
@@ -25,3 +31,10 @@ lto = true
 codegen-units = 1
 opt-level = 3
 panic = "abort"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "ai_bench"
+harness = false

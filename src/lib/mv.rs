@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 use std::fmt;
-use num_format::Locale::gu;
 use crate::Board;
 
 use crate::consts::board_consts::*;

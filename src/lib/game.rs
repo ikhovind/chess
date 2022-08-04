@@ -6,7 +6,6 @@ use crate::mv::Move;
 use crate::move_gen::pieces::*;
 use crate::move_gen::pieces::bishop;
 use crate::move_gen::pieces::common_moves::{d_and_anti_d_moves, h_and_vmoves};
-use crate::print_u64_bitboard;
 
 //[black, white]
 //[black short, black long, white short, white long]

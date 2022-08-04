@@ -1,6 +1,5 @@
 use log::log;
-use num_format::Locale::el;
-use crate::{Board, print_u64_bitboard};
+use crate::{Board};
 use crate::consts::board_consts::{N_INF, P_INF};
 use crate::mv::Move;
 use crate::opponent::game_stage::GameStage::EARLY;
@@ -9,7 +8,7 @@ use crate::opponent::search::search_moves;
 use crate::opponent::static_eval::{eval_pos, weight_king_pos};
 
 
-pub fn eval(mut b: Board) -> Option<Move> {
+pub fn eval(mut b: Board, depth: u8) -> Option<Move> {
     log::info!("thinking about move");
     let mut moves = b.get_all_moves();
     order_moves(&b, &mut moves);
@@ -18,7 +17,7 @@ pub fn eval(mut b: Board) -> Option<Move> {
         let mut best_yet = moves[0];
         for mv in moves {
             log::info!("Evaluating: {}", mv);
-            let curr = -search_moves(b.make_move(&mv), 4, N_INF, P_INF, &EARLY);
+            let curr = -search_moves(b.make_move(&mv), depth, N_INF, P_INF, &EARLY);
             if curr > best_score {
                 log::info!("new best move found");
                 best_yet = mv;

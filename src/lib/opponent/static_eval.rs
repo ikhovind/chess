@@ -1,12 +1,11 @@
-use num_format::Locale::el;
-use warp::reply::with_header;
-use crate::{Board, eval};
+use crate::Board;
 use crate::consts::board_consts::{B_INDEX, B_VAL_INDEX, K_INDEX, N_INDEX, N_VAL_INDEX, P_INDEX, P_VAL_INDEX, PIECE_VALUES, Q_INDEX, Q_VAL_INDEX, R_INDEX, R_VAL_INDEX};
-use crate::opponent::eval_consts::{EG_KING_TABLE, eval_sq, KING_ENDGAME_POS};
+use crate::opponent::eval_consts::{EG_KING_TABLE, eval_sq};
 use crate::opponent::game_stage::GameStage;
 
 pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
     let ix = if b.white_turn { 1 } else { 0 };
+    // todo perspektiv her ikke inne i funksjonene
     return match stage {
         GameStage::EARLY => {
             count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, true)
@@ -23,11 +22,11 @@ pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
 fn eval_piece_positions(pieces: &[u64; 12], white_turn: bool, early_game: bool) -> i16 {
     let mut white = 0;
     let mut black = 0;
-    for square in 0..64 {
-        for piece in 0..12 {
+    for piece in 0..12 {
+        for square in (pieces[piece].trailing_zeros() as usize)..(64usize - pieces[piece].leading_zeros() as usize) {
             if pieces[piece] & (1 << square) != 0 {
                 if piece % 2 == 0 {
-                    black += eval_sq(square, piece / 2, early_game);
+                    black -= eval_sq(square, piece / 2, early_game);
                 }
                 else {
                     white += eval_sq(square, piece / 2, early_game);

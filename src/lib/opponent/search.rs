@@ -1,12 +1,7 @@
 use std::clone;
-use std::cmp::max;
-use std::fmt::format;
-use log::log;
-use num_format::Locale::{be, el};
-use crate::{Board, eval, Move, print_u64_bitboard};
-use crate::consts::board_consts::{B_INDEX, K_INDEX, N_INDEX, N_INF, N_MATE, P_INDEX, P_INF, P_MATE, Q_INDEX, R_INDEX};
+use crate::Board;
+use crate::consts::board_consts::N_MATE;
 use crate::move_gen::pieces;
-use crate::move_gen::pieces::pawn;
 use crate::opponent::game_stage::GameStage;
 use crate::opponent::move_ordering::order_moves;
 use crate::opponent::static_eval::eval_pos;

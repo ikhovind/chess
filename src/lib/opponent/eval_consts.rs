@@ -1,4 +1,3 @@
-use num_format::Locale::sq;
 
 pub const KING_ENDGAME_POS: [i16; 64] =
  [
