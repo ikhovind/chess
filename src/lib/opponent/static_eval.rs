@@ -8,10 +8,10 @@ pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
     // todo perspektiv her ikke inne i funksjonene
     return match stage {
         GameStage::EARLY => {
-            count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, true)
+             eval_piece_positions(&b.pieces, b.white_turn, true)
         }
         GameStage::MIDDLE => {
-            count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, false)
+             eval_piece_positions(&b.pieces, b.white_turn, false)
         }
         GameStage::LATE => {
             count_pieces(&b.pieces, ix) + weight_king_pos(&b.pieces, ix)
@@ -26,7 +26,7 @@ fn eval_piece_positions(pieces: &[u64; 12], white_turn: bool, early_game: bool) 
         for square in (pieces[piece].trailing_zeros() as usize)..(64usize - pieces[piece].leading_zeros() as usize) {
             if pieces[piece] & (1 << square) != 0 {
                 if piece % 2 == 0 {
-                    black -= eval_sq(square, piece / 2, early_game);
+                    black += eval_sq(square, piece / 2, early_game);
                 }
                 else {
                     white += eval_sq(square, piece / 2, early_game);
