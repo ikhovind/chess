@@ -178,17 +178,20 @@ const fn calculate_board(early_game: bool) -> [[i16; 64]; 12] {
     while i < 12 {
         let mut j = 0;
         while j < 64 {
-            ans[i][j] = value[i / 2] + table[i / 2][j];
+            if i % 2 == 0 {
+                ans[i][j] = table[i / 2][j ^ 56];
+            }
+            else {
+                ans[i][j] = table[i / 2][j];
+            }
             j += 1;
         }
         i += 1;
     }
-
-
     return ans;
 }
 
-pub const fn eval_sq(square: usize, piece_type: usize, early_game: bool) -> i16{
+pub fn eval_sq(square: usize, piece_type: usize, early_game: bool) -> i16{
     let tables = if early_game { eg_table } else { mg_table };
     return tables[piece_type][square];
 }

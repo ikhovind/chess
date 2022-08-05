@@ -8,10 +8,10 @@ pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
     // todo perspektiv her ikke inne i funksjonene
     return match stage {
         GameStage::EARLY => {
-             eval_piece_positions(&b.pieces, b.white_turn, true)
+             count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, true)
         }
         GameStage::MIDDLE => {
-             eval_piece_positions(&b.pieces, b.white_turn, false)
+            count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, false)
         }
         GameStage::LATE => {
             count_pieces(&b.pieces, ix) + weight_king_pos(&b.pieces, ix)
@@ -20,22 +20,21 @@ pub fn eval_pos(b: &Board, stage: &GameStage) -> i16 {
 }
 
 fn eval_piece_positions(pieces: &[u64; 12], white_turn: bool, early_game: bool) -> i16 {
-    let mut white = 0;
-    let mut black = 0;
+    let mut eval = 0;
     for piece in 0..12 {
         for square in (pieces[piece].trailing_zeros() as usize)..(64usize - pieces[piece].leading_zeros() as usize) {
             if pieces[piece] & (1 << square) != 0 {
                 if piece % 2 == 0 {
-                    black += eval_sq(square, piece / 2, early_game);
+                    eval -= eval_sq(square, piece / 2, early_game);
                 }
                 else {
-                    white += eval_sq(square, piece / 2, early_game);
+                    eval += eval_sq(square, piece / 2, early_game);
                 }
             }
         }
     }
     let perspective = if white_turn { 1  } else { -1 };
-    return (white - black) * perspective;
+    return eval * perspective;
 }
 
 fn count_pieces(pieces: &[u64; 12], ix: usize) -> i16 {
