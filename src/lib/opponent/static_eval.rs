@@ -1,6 +1,6 @@
 use crate::Board;
 use crate::consts::board_consts::{B_INDEX, B_VAL_INDEX, K_INDEX, N_INDEX, N_VAL_INDEX, P_INDEX, P_VAL_INDEX, PIECE_VALUES, Q_INDEX, Q_VAL_INDEX, R_INDEX, R_VAL_INDEX};
-use crate::opponent::eval_consts::{EG_KING_TABLE, eval_sq};
+use crate::opponent::eval_consts::eval_sq;
 use crate::opponent::game_stage::GameStage;
 
 pub fn eval_pos(b: &Board, stage: GameStage) -> i16 {

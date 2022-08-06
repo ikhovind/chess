@@ -1,16 +1,13 @@
 use std::cmp::min;
-use std::env::var;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::sync::{Arc, mpsc, RwLock};
+use std::sync::{Arc};
 use std::thread;
 use rand::Rng;
-use log::log;
 use crate::{Board};
 use crate::consts::board_consts::{N_INF, P_INF};
 use crate::mv::Move;
 use crate::opponent::game::Game;
-use crate::opponent::game_stage::GameStage;
 use crate::opponent::game_stage::GameStage::{EARLY, MIDDLE};
 use crate::opponent::move_ordering::order_moves;
 use crate::opponent::search::search_moves;
@@ -37,7 +34,7 @@ pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
     g.set_stage();
     log::info!("Game stage is: {:?}", g.stage);
     order_moves(&g.board, &mut moves);
-    let mut moves = Arc::new(moves);
+    let moves = Arc::new(moves);
     let len = moves.len();
     if len > 0 {
         let chunk_size = (len + NUM_THREADS - 1) / NUM_THREADS; // divide by threads rounded up.
@@ -80,7 +77,7 @@ pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
 
 fn search_for_move(opening: String, b: &Board) -> Option<Move>{
     log::info!("searching for opening with move: {}", opening);
-    let file = File::open("/home/ing_hovind/chess/resources/book.pgn").unwrap();
+    let file = File::open("resources/book.pgn").unwrap();
     let reader = BufReader::new(file);
     let mut possible: Vec<String> = vec![];
     if opening.len() == 0 {

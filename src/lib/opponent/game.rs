@@ -1,5 +1,5 @@
 use crate::Board;
-use crate::consts::board_consts::{B_INDEX, B_VAL_INDEX, N_INDEX, N_VAL_INDEX, P_INDEX, P_VAL_INDEX, PIECE_VALUES, Q_INDEX, Q_VAL_INDEX, R_INDEX, R_VAL_INDEX};
+use crate::consts::board_consts::{B_INDEX, N_INDEX, P_INDEX, Q_INDEX, R_INDEX};
 use crate::opponent::game_stage::GameStage;
 use crate::opponent::game_stage::GameStage::{EARLY, LATE, MIDDLE};
 
@@ -33,7 +33,7 @@ impl Game {
     }
 
     fn count_pieces(&self) -> u8 {
-        return (self.board.pieces[P_INDEX].count_ones() +
+        (self.board.pieces[P_INDEX].count_ones() +
             self.board.pieces[P_INDEX + 1].count_ones() +
             self.board.pieces[Q_INDEX].count_ones()     +
             self.board.pieces[Q_INDEX + 1].count_ones() +

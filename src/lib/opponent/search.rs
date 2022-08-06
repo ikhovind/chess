@@ -1,4 +1,4 @@
-use std::clone;
+use std::cmp::max;
 use crate::Board;
 use crate::consts::board_consts::N_MATE;
 use crate::move_gen::pieces;
@@ -6,14 +6,7 @@ use crate::opponent::game_stage::GameStage;
 use crate::opponent::move_ordering::order_moves;
 use crate::opponent::static_eval::eval_pos;
 
-const PAWN_VALUE: u32 = 100;
-const QUEEN_VALUE: u32 = 900;
-const KNIGHT_VALUE: u32 = 300;
-const BISHOP_VALUE: u32 = 300;
-const ROOK_VALUE: u32 = 500;
-
-
-pub fn search_moves(mut b: Board, depth: u8, mut alpha: i16, beta: i16, stage: GameStage) -> i16 {
+pub fn search_moves(b: Board, depth: u8, mut alpha: i16, beta: i16, stage: GameStage) -> i16 {
     if depth == 0 {
         return quiescence_search(b, alpha, beta, stage);
     }
@@ -32,9 +25,7 @@ pub fn search_moves(mut b: Board, depth: u8, mut alpha: i16, beta: i16, stage: G
             if evaluation >= beta {
                 return beta;
             }
-            if evaluation > alpha {
-                alpha = evaluation;
-            }
+            alpha = max(alpha, evaluation)
         }
         return alpha;
     }
@@ -58,9 +49,8 @@ fn quiescence_search(b: Board, mut alpha: i16, beta: i16, stage: GameStage) -> i
         if eval >= beta {
             return beta;
         }
-        if eval > alpha {
-            alpha = eval;
-        }
+
+        alpha = max(alpha, eval);
     }
     return alpha;
 }

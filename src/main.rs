@@ -1,10 +1,8 @@
 use std::collections::HashMap;
-use std::env::var;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::sync::{mpsc, RwLock};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use warp::Filter;
@@ -15,7 +13,6 @@ use shellfishlib::consts::position_consts::BASE_POS;
 use shellfishlib::mv::Move;
 use shellfishlib::opponent::engine::eval;
 use shellfishlib::opponent::game::Game;
-use shellfishlib::opponent::game_stage::GameStage;
 use shellfishlib::opponent::game_stage::GameStage::EARLY;
 
 /// Our global unique user id counter.
@@ -77,9 +74,12 @@ async fn main() {
 
 
     warp::serve(chat)
+        /*
         .tls()
         .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
         .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
+
+         */
         .run(([0, 0, 0, 0], 3389)).await;
 }
 

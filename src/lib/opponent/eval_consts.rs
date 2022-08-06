@@ -91,7 +91,7 @@ pub const EG_KING_TABLE: [i16; 64] = [
     20, 30, 10,  0,  0, 10, 30, 20
 ];
 
-const eg_tables: [[i16; 64]; 6] = [
+const EG_TABLES: [[i16; 64]; 6] = [
     EG_PAWN_TABLE,
     EG_KNIGHT_TABLE,
     MG_BISHOP_TABLE,
@@ -100,7 +100,7 @@ const eg_tables: [[i16; 64]; 6] = [
     EG_KING_TABLE
 ];
 
-const mg_tables: [[i16; 64]; 6] = [
+const MG_TABLES: [[i16; 64]; 6] = [
     EG_PAWN_TABLE,
     MG_KNIGHT_TABLE,
     MG_BISHOP_TABLE,
@@ -109,7 +109,7 @@ const mg_tables: [[i16; 64]; 6] = [
     EG_KING_TABLE
 ];
 
-const lg_tables: [[i16; 64]; 6] = [
+const LG_TABLES: [[i16; 64]; 6] = [
     EG_PAWN_TABLE,
     MG_KNIGHT_TABLE,
     MG_BISHOP_TABLE,
@@ -118,22 +118,22 @@ const lg_tables: [[i16; 64]; 6] = [
     MG_KING_TABLE
 ];
 
-pub const eg_table: [[i16; 64]; 12] = calculate_board(EARLY);
+pub const EG_TABLE: [[i16; 64]; 12] = calculate_board(EARLY);
 
-pub const mg_table: [[i16; 64]; 12] = calculate_board(MIDDLE);
+pub const MG_TABLE: [[i16; 64]; 12] = calculate_board(MIDDLE);
 
-pub const lg_table: [[i16; 64]; 12] = calculate_board(LATE);
+pub const LG_TABLE: [[i16; 64]; 12] = calculate_board(LATE);
 
 const fn calculate_board(stage: GameStage) -> [[i16; 64]; 12] {
     let table = match stage {
         GameStage::EARLY => {
-            eg_tables
+            EG_TABLES
         }
         GameStage::MIDDLE => {
-            mg_tables
+            MG_TABLES
         }
         GameStage::LATE => {
-            lg_tables
+            LG_TABLES
         }
     };
     let mut ans: [[i16; 64]; 12] = [[0; 64]; 12];
@@ -158,13 +158,13 @@ const fn calculate_board(stage: GameStage) -> [[i16; 64]; 12] {
 pub fn eval_sq(square: usize, piece_type: usize, stage: GameStage) -> i16{
     return match stage {
         EARLY => {
-            eg_tables[piece_type][square]
+            EG_TABLES[piece_type][square]
         }
         MIDDLE => {
-            mg_tables[piece_type][square]
+            MG_TABLES[piece_type][square]
         }
         LATE => {
-            lg_tables[piece_type][square]
+            LG_TABLES[piece_type][square]
         }
     };
 }

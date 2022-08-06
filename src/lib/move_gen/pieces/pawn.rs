@@ -9,9 +9,8 @@ pub fn possible_p(b: &Board, white: bool, captures: bool) -> Vec<Move> {
 
     let opposing_pieces = if white { b.get_black_pieces() } else { b.get_white_pieces() };
     if white {
-        let mut pawn_moves = 0;
+        let mut pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.get_empty() & !RANK_MASKS[7]);//move 1 forward
         if !captures {
-            pawn_moves = b.push_mask & ((b.pieces[(P_INDEX + index) as usize] << 8) & b.get_empty() & !RANK_MASKS[7]);//move 1 forward
             for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
                 if pawn_moves & b.get_pinned_slide(i - 8) & (1u64 << i) != 0 {
                     list.push(Move::new_move(i - 8, i, false));
@@ -88,9 +87,8 @@ pub fn possible_p(b: &Board, white: bool, captures: bool) -> Vec<Move> {
             }
         }
     } else {
-        let mut pawn_moves = 0;
+        let mut pawn_moves = b.push_mask & (b.pieces[(P_INDEX + index) as usize] >> 8) & b.get_empty() & !RANK_MASKS[0];//move 1 forward
         if !captures {
-            pawn_moves = b.push_mask & (b.pieces[(P_INDEX + index) as usize] >> 8) & b.get_empty() & !RANK_MASKS[0];//move 1 forward
             for i in (pawn_moves.trailing_zeros() as u8)..(64u8 - pawn_moves.leading_zeros() as u8) {
                 if pawn_moves & b.get_pinned_slide(i + 8) & (1u64 << i) != 0 {
                     list.push(Move::new_move(i + 8, i, false));

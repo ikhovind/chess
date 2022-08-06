@@ -1,9 +1,7 @@
-use std::cmp::Ordering;
 use std::fmt;
 use crate::Board;
 
 use crate::consts::board_consts::*;
-use crate::move_gen::pieces;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Move {
@@ -39,11 +37,11 @@ impl Move {
         if notation.len() == 4 {
 
             let from_column = notation.as_bytes()[0] - 97;
-            let from_row = (notation.as_bytes()[1] - 49);
+            let from_row = notation.as_bytes()[1] - 49;
             let from_ix = from_column + from_row * 8;
 
             let to_column = notation.as_bytes()[2] - 97;
-            let to_row = (notation.as_bytes()[3] - 49);
+            let to_row = notation.as_bytes()[3] - 49;
             let to_ix = to_column + to_row * 8;
 
             if (b.pieces[P_INDEX] | b.pieces[P_INDEX + 1]) & (1 << from_ix) != 0
@@ -143,7 +141,7 @@ impl Move {
     }
 
     pub fn is_capture(&self) -> bool {
-        let m_type =  (((self.to & !MOVE_MASK) >> 2) | (self.from & !MOVE_MASK));
+        let m_type =  self.get_mv_type();
         return m_type == TAKES ||
             m_type == EN_PASSANT ||
             m_type == TAKE_PROM_B ||
