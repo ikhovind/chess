@@ -43,6 +43,7 @@ fn quiescence_search(b: &Board, mut alpha: i16, beta: i16, stage: GameStage) -> 
     }
 
     let mut moves = b.get_all_captures();
+
     order_moves(&b, &mut moves);
     for mv in moves {
         eval = -quiescence_search(&b.make_move(&mv), -beta, -alpha, stage);

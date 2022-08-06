@@ -16,7 +16,6 @@ use crate::opponent::search::search_moves;
 pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
     log::info!("thinking about move");
     const NUM_THREADS: usize = 4;
-    let mut moves = g.board.get_all_moves();
     let mut handles = vec![];
     if g.stage == EARLY {
         match search_for_book(g.clone().history, &g.board) {
@@ -31,6 +30,7 @@ pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
         }
     }
 
+    let mut moves = g.board.get_all_moves();
     g.set_stage();
     log::info!("Game stage is: {:?}", g.stage);
     order_moves(&g.board, &mut moves);
