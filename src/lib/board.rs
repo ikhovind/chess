@@ -288,22 +288,22 @@ impl Board {
     }
 
     pub fn get_all_moves(&self) -> Vec<Move> {
-        let mut rook = rook::possible_r(self, self.white_turn, false);
-        rook.append(&mut knight::possible_n(self, self.white_turn, false));
-        rook.append(&mut bishop::possible_b(self, self.white_turn, false));
-        rook.append(&mut queen::possible_q(self, self.white_turn, false));
-        rook.append(&mut king::possible_k(self, self.white_turn, false));
-        rook.append(&mut pawn::possible_p(self, self.white_turn, false));
+        let mut rook = rook::possible_r(self, false);
+        rook.append(&mut knight::possible_n(self, false));
+        rook.append(&mut bishop::possible_b(self, false));
+        rook.append(&mut queen::possible_q(self, false));
+        rook.append(&mut king::possible_k(self, false));
+        rook.append(&mut pawn::possible_p(self, false));
         rook
     }
 
     pub fn get_all_captures(&self) -> Vec<Move> {
-        let mut rook = rook::possible_r(self, self.white_turn, false);
-        rook.append(&mut knight::possible_n(self, self.white_turn, true));
-        rook.append(&mut bishop::possible_b(self, self.white_turn, true));
-        rook.append(&mut queen::possible_q(self, self.white_turn, true));
-        rook.append(&mut king::possible_k(self, self.white_turn, true));
-        rook.append(&mut pawn::possible_p(self, self.white_turn, true));
+        let mut rook = rook::possible_r(self, false);
+        rook.append(&mut knight::possible_n(self, true));
+        rook.append(&mut bishop::possible_b(self, true));
+        rook.append(&mut queen::possible_q(self, true));
+        rook.append(&mut king::possible_k(self, true));
+        rook.append(&mut pawn::possible_p(self, true));
         rook
     }
 

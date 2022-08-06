@@ -2,20 +2,21 @@ use crate::Board;
 use crate::consts::board_consts::*;
 use crate::move_gen::computed_moves;
 use crate::move_gen::computed_moves::lookup_consts::KNIGHT_MOVES;
+use crate::move_gen::pieces::common_moves::add_moves_to_list;
 use crate::mv::Move;
 
-pub fn possible_n(b: &Board, white: bool, captures: bool) -> Vec<Move> {
-    let opposing_pieces = if white { b.get_black_pieces() } else { b.get_white_pieces() };
+pub fn possible_n(b: &Board, captures: bool) -> Vec<Move> {
+    let opposing_pieces = if b.white_turn { b.get_black_pieces() } else { b.get_white_pieces() };
     let cap_mask = if captures { opposing_pieces } else { u64::MAX };
-    let own_pieces = if !white { b.get_black_pieces() } else { b.get_white_pieces() };
-    let index = if white { 1 } else { 0 };
+    let own_pieces = if !b.white_turn { b.get_black_pieces() } else { b.get_white_pieces() };
+    let index = if b.white_turn { 1 } else { 0 };
 
-    let mut list: Vec<Move> = Vec::new();
 
 
     let knights = b.pieces[(N_INDEX + index) as usize];
 
 
+    let mut list: Vec<Move> = Vec::with_capacity((knights.count_ones() * 6) as usize);
 
     for i in (knights.trailing_zeros())..(64 - knights.leading_zeros()) {
         if (1 << i) & knights != 0 {
@@ -24,17 +25,7 @@ pub fn possible_n(b: &Board, white: bool, captures: bool) -> Vec<Move> {
             computed_moves::lookup_consts::KNIGHT_MOVES[i as usize]
                     & !own_pieces & b.push_mask & b.get_pinned_slide(i as u8) & cap_mask;
 
-            for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
-                if (1 << i2) & moves != 0 {
-                    list.push(
-                        Move::new_move(
-                            i as u8,
-                            i2 as u8,
-                            opposing_pieces & (1 << i2) != 0,
-                        )
-                    );
-                }
-            }
+            add_moves_to_list(opposing_pieces, &mut list, i, moves);
         }
     }
 

@@ -2,6 +2,7 @@ use crate::{Board};
 use crate::consts::board_consts::*;
 use crate::mv::Move;
 use crate::move_gen::pieces::common_moves;
+use crate::move_gen::pieces::common_moves::add_moves_to_list;
 
 pub fn watched_by_b(b: &Board, white: bool) -> u64 {
     let index = if white { 1 } else { 0 };
@@ -18,24 +19,18 @@ pub fn watched_by_b(b: &Board, white: bool) -> u64 {
     moves
 }
 
-pub fn possible_b(b: &Board, white: bool, captures: bool) -> Vec<Move> {
-    let index = if white { 1 } else { 0 };
-    let own = if white { b.get_white_pieces() } else { b.get_black_pieces() };
-    let opp = if white { b.get_black_pieces() - b.pieces[K_INDEX as usize] } else { b.get_white_pieces() - b.pieces[(K_INDEX + 1) as usize] };
+pub fn possible_b(b: &Board, captures: bool) -> Vec<Move> {
+    let index = if b.white_turn { 1 } else { 0 };
+    let own = if b.white_turn { b.get_white_pieces() } else { b.get_black_pieces() };
+    let opp = if b.white_turn { b.get_black_pieces() - b.pieces[K_INDEX as usize] } else { b.get_white_pieces() - b.pieces[(K_INDEX + 1) as usize] };
     let cap_mask = if captures { opp } else { u64::MAX };
 
-    let mut list: Vec<Move> = Vec::new();
     let bishops = b.pieces[(B_INDEX + index) as usize];
+    let mut list: Vec<Move> = Vec::with_capacity((bishops.count_ones() * 8) as usize);
     for i in (bishops.trailing_zeros())..(64 - bishops.leading_zeros()) {
         if (1 << i) & bishops != 0 {
             let moves = cap_mask & b.get_pinned_slide(i as u8) & b.push_mask & !own & common_moves::d_and_anti_d_moves(i as u8, opp, own);
-            for i2 in (moves.trailing_zeros())..(64 - moves.leading_zeros()) {
-                if (1 << i2) & moves != 0 {
-                    list.push(
-                        Move::new_move(i as u8, i2 as u8, opp & (1 << i2) != 0)
-                    );
-                }
-            }
+            add_moves_to_list(opp, &mut list, i, moves);
         }
     }
     list
