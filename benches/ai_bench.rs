@@ -1,12 +1,12 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use shellfishlib::board::Board;
+use criterion::{criterion_group, criterion_main, Criterion};
+
 use shellfishlib::opponent::engine::eval;
 
-use criterion::BenchmarkId;
+
 use shellfishlib::consts::position_consts::BASE_POS;
 use shellfishlib::mv::Move;
 use shellfishlib::opponent::game::Game;
-use shellfishlib::opponent::game_stage::GameStage::{EARLY, MIDDLE};
+use shellfishlib::opponent::game_stage::GameStage::{MIDDLE};
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let mut board = Game::from_fen("rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10");

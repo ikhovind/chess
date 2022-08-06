@@ -34,7 +34,7 @@ possible moves of the knight in certain files. */
         ans[i as usize] = moves;
         i += 1;
     }
-    return ans;
+    ans
 }
 
 const fn calculate_king_moves() -> [u64; 64] {
@@ -60,5 +60,5 @@ const fn calculate_king_moves() -> [u64; 64] {
         ans[i] = spot_1 | spot_2 | spot_3 | spot_4 | spot_5 | spot_6 | spot_7 | spot_8;
         i += 1;
     }
-    return ans;
+    ans
 }

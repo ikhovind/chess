@@ -63,7 +63,7 @@ pub fn possible_k(b: &Board, white: bool, captures: bool) -> Vec<Move> {
             }
         }
     }
-    return list;
+    list
 }
 
 pub fn watched_by_k(b: &Board, white: bool) -> u64 {
@@ -78,7 +78,7 @@ pub fn watched_by_k(b: &Board, white: bool) -> u64 {
             return KING_MOVES[i as usize];
         }
     }
-    return 0;
+    0
 }
 
 pub fn get_attackers(b: &Board, white: bool) -> u64 {
@@ -90,15 +90,14 @@ pub fn get_attackers(b: &Board, white: bool) -> u64 {
 
     let d_moves = common_moves::d_and_anti_d_moves(king_square, opp, own);
     let line_moves = common_moves::h_and_vmoves(king_square, opp, own);
-    let attackers =
-        d_moves & b.pieces[(B_INDEX + 1 - index) as usize]
+    
+    d_moves & b.pieces[(B_INDEX + 1 - index) as usize]
             | (d_moves | line_moves) & b.pieces[(Q_INDEX + 1 - index) as usize]
             | line_moves & b.pieces[(R_INDEX + 1 - index) as usize]
             | pieces::pawn::attacked_from_square(king_square, !white) & b.pieces[(P_INDEX + 1 - index) as usize]
-            | pieces::knight::attacked_from(king_square) & b.pieces[(N_INDEX + 1 - index) as usize];
-    return attackers;
+            | pieces::knight::attacked_from(king_square) & b.pieces[(N_INDEX + 1 - index) as usize]
 }
 
 pub fn is_double_check(attackers: u64) -> bool {
-    return attackers.leading_zeros() + attackers.trailing_zeros() + 1 < 63;
+    attackers.leading_zeros() + attackers.trailing_zeros() + 1 < 63
 }

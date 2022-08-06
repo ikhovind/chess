@@ -89,30 +89,29 @@ impl Board {
             pinned_pieces: 0,
         };
         b.update_metadata(&Move::new_move(0, 0, false));
-        return b;
+        b
     }
 
 
     pub fn get_white_pieces(&self) -> u64 {
-        return self.pieces[P_INDEX + 1] | self.pieces[N_INDEX + 1] | self.pieces[B_INDEX + 1] | self.pieces[R_INDEX + 1] | self.pieces[Q_INDEX + 1] | self.pieces[K_INDEX + 1];
+        self.pieces[P_INDEX + 1] | self.pieces[N_INDEX + 1] | self.pieces[B_INDEX + 1] | self.pieces[R_INDEX + 1] | self.pieces[Q_INDEX + 1] | self.pieces[K_INDEX + 1]
     }
 
     pub fn get_black_pieces(&self) -> u64 {
-        return self.pieces[P_INDEX] | self.pieces[N_INDEX] | self.pieces[B_INDEX] | self.pieces[R_INDEX] | self.pieces[Q_INDEX] | self.pieces[K_INDEX];
+        self.pieces[P_INDEX] | self.pieces[N_INDEX] | self.pieces[B_INDEX] | self.pieces[R_INDEX] | self.pieces[Q_INDEX] | self.pieces[K_INDEX]
     }
 
     pub fn get_empty(&self) -> u64 {
-        return !(self.get_white_pieces() | self.get_black_pieces());
+        !(self.get_white_pieces() | self.get_black_pieces())
     }
 
     pub fn watched(&self, white: bool) -> u64 {
-        return
-            bishop::watched_by_b(&self, white)
-                | king::watched_by_k(&self, white)
-                | knight::watched_by_n(&self, white)
-                | queen::watched_by_q(&self, white)
-                | rook::watched_by_r(&self, white)
-                | pawn::watched_by_p(&self, white);
+        bishop::watched_by_b(self, white)
+                | king::watched_by_k(self, white)
+                | knight::watched_by_n(self, white)
+                | queen::watched_by_q(self, white)
+                | rook::watched_by_r(self, white)
+                | pawn::watched_by_p(self, white)
     }
 
     pub fn make_move(mut self, mv: &Move) -> Board {
@@ -243,7 +242,7 @@ impl Board {
             }
         }
         self.update_metadata(mv);
-        return self;
+        self
     }
 
     fn update_castling_rights(&mut self, white: bool) {
@@ -295,7 +294,7 @@ impl Board {
         rook.append(&mut queen::possible_q(self, self.white_turn, false));
         rook.append(&mut king::possible_k(self, self.white_turn, false));
         rook.append(&mut pawn::possible_p(self, self.white_turn, false));
-        return rook;
+        rook
     }
 
     pub fn get_all_captures(&self) -> Vec<Move> {
@@ -305,11 +304,11 @@ impl Board {
         rook.append(&mut queen::possible_q(self, self.white_turn, true));
         rook.append(&mut king::possible_k(self, self.white_turn, true));
         rook.append(&mut pawn::possible_p(self, self.white_turn, true));
-        return rook;
+        rook
     }
 
     pub fn get_num_moves(self, depth: u32) -> u64 {
-        return self.get_num_moves_inner(depth, depth);
+        self.get_num_moves_inner(depth, depth)
     }
 
     fn get_num_moves_inner(&self, depth: u32, initial: u32) -> u64 {
@@ -318,13 +317,13 @@ impl Board {
             return self.get_all_moves().len() as u64;
         }
         for nw in self.get_all_moves() {
-            let res = self.clone().make_move(&nw).get_num_moves_inner(depth - 1, initial);
+            let res = (*self).make_move(&nw).get_num_moves_inner(depth - 1, initial);
             sum += res;
             if depth == initial {
-                println!("{}: {}", nw.to_string(), res);
+                println!("{}: {}", nw, res);
             }
         }
-        return sum;
+        sum
     }
 
     pub fn ray_between(&self, attacker: u8, piece_square: u8) -> u64 {
@@ -366,7 +365,7 @@ impl Board {
                 }
             }
         }
-        return ray | (1 << attacker);
+        ray | (1 << attacker)
     }
 
     pub fn get_pinned_pieces(&self, white: bool) -> u64 {
@@ -396,7 +395,7 @@ impl Board {
                 }
             }
         }
-        return pinned_pieces & def_color;
+        pinned_pieces & def_color
     }
 
     pub fn get_pinning_ray(self, king_square: u8, piece_square: u8) -> u64 {
@@ -414,7 +413,7 @@ impl Board {
             return ANTI_DIAGONAL_MASKS[((7 - king_square % 8) + king_square / 8) as usize];
         }
         // to the right
-        return if u8::abs_diff(piece_square, king_square) % 7 == 0 {
+        if u8::abs_diff(piece_square, king_square) % 7 == 0 {
             DIAGONAL_MASKS[(king_square % 8 + king_square / 8) as usize]
         } else {
             0
@@ -423,11 +422,11 @@ impl Board {
 
     pub fn get_pinned_slide(&self, i: u8) -> u64 {
         let index = if self.white_turn { 1 } else { 0 };
-        return if self.pinned_pieces & (1 << i) != 0 {
+        if self.pinned_pieces & (1 << i) != 0 {
             self.get_pinning_ray(self.pieces[K_INDEX + index].trailing_zeros() as u8, i)
         } else {
             u64::MAX
-        };
+        }
     }
 }
 

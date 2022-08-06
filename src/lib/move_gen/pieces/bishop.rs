@@ -15,7 +15,7 @@ pub fn watched_by_b(b: &Board, white: bool) -> u64 {
             moves |= common_moves::d_and_anti_d_moves(i, opp, own);
         }
     }
-    return moves;
+    moves
 }
 
 pub fn possible_b(b: &Board, white: bool, captures: bool) -> Vec<Move> {
@@ -38,6 +38,6 @@ pub fn possible_b(b: &Board, white: bool, captures: bool) -> Vec<Move> {
             }
         }
     }
-    return list;
+    list
 }
 

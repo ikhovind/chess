@@ -1,6 +1,7 @@
 #[cfg(test)]
 use crate::{Board};
-use crate::mv::Move;
+use crate::Move;
+
 
 #[test]
 fn simple_pawn_move() {

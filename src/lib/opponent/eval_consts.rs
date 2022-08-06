@@ -152,11 +152,12 @@ const fn calculate_board(stage: GameStage) -> [[i16; 64]; 12] {
         }
         i += 1;
     }
-    return ans;
+    ans
 }
 
+#[inline(always)]
 pub fn eval_sq(square: usize, piece_type: usize, stage: GameStage) -> i16{
-    return match stage {
+    match stage {
         EARLY => {
             EG_TABLES[piece_type][square]
         }
@@ -166,5 +167,5 @@ pub fn eval_sq(square: usize, piece_type: usize, stage: GameStage) -> i16{
         LATE => {
             LG_TABLES[piece_type][square]
         }
-    };
+    }
 }

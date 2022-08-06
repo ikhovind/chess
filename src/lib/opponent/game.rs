@@ -13,7 +13,7 @@ pub struct Game {
 impl Game {
     pub fn from_fen(fen: &str) -> Game {
         let b = Board::from_fen(String::from(fen));
-        return Game {
+        Game {
             board: b,
             history: String::new(),
             stage: EARLY,

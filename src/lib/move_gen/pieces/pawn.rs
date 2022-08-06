@@ -162,7 +162,7 @@ pub fn possible_p(b: &Board, white: bool, captures: bool) -> Vec<Move> {
             }
         }
     }
-    return list;
+    list
 }
 
 pub fn watched_by_p(b: &Board, white: bool) -> u64 {
@@ -174,10 +174,10 @@ pub fn watched_by_p(b: &Board, white: bool) -> u64 {
         pawn_moves |= (b.pieces[(P_INDEX + index) as usize] << 7) & (!FILE_MASKS[7]); // capture left
     } else {
         pawn_moves = (b.pieces[(P_INDEX + index) as usize] >> 9) & (!FILE_MASKS[7]); // capture right
-        pawn_moves = pawn_moves | ((b.pieces[(P_INDEX + index) as usize] >> 7) & (!FILE_MASKS[0])); // capture left
+        pawn_moves |= (b.pieces[(P_INDEX + index) as usize] >> 7) & (!FILE_MASKS[0]); // capture left
     }
 
-    return pawn_moves;
+    pawn_moves
 }
 
 pub fn attacked_from_square(square: u8, white: bool) -> u64 {
@@ -185,14 +185,14 @@ pub fn attacked_from_square(square: u8, white: bool) -> u64 {
     let mut pawn_moves;
     if white {
         pawn_moves = (s >> 9) & (!FILE_MASKS[7]); // capture right
-        pawn_moves = pawn_moves | ((s >> 7) & (!FILE_MASKS[0])); // capture left
+        pawn_moves |= (s >> 7) & (!FILE_MASKS[0]); // capture left
     } else {
         pawn_moves = (s << 9) & (!FILE_MASKS[0]); // capture right
-        pawn_moves = pawn_moves | ((s << 7) & (!FILE_MASKS[7])); // capture left
+        pawn_moves |= (s << 7) & (!FILE_MASKS[7]); // capture left
     }
 
 
-    return pawn_moves;
+    pawn_moves
 }
 
 fn check_ep_legal(b: &Board, move_piece: u64, taken_piece: u64, white: bool) -> bool {
@@ -208,7 +208,7 @@ fn check_ep_legal(b: &Board, move_piece: u64, taken_piece: u64, white: bool) -> 
         d_moves & b.pieces[(B_INDEX + 1 - index) as usize]
             | (d_moves | line_moves) & b.pieces[(Q_INDEX + 1 - index) as usize]
             | line_moves & b.pieces[(R_INDEX + 1 - index) as usize];
-    return attackers == 0;
+    attackers == 0
 }
 
 

@@ -40,7 +40,7 @@ pub fn possible_n(b: &Board, white: bool, captures: bool) -> Vec<Move> {
 
     /* compute only the places where the knight can move and attack. The
         caller will determine if this is a white or black night. */
-    return list;
+    list
 }
 
 
@@ -56,9 +56,9 @@ pub fn watched_by_n(b: &Board, white: bool) -> u64 {
             moves |= KNIGHT_MOVES[i as usize];
         }
     }
-    return moves;
+    moves
 }
 
 pub fn attacked_from(square: u8) -> u64 {
-    return KNIGHT_MOVES[square as usize];
+    KNIGHT_MOVES[square as usize]
 }

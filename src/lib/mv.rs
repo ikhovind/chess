@@ -69,24 +69,24 @@ impl Move {
             log::info!("parsed normal move");
             return Ok(Move::new_move(from_ix, to_ix, (b.get_white_pieces() | b.get_black_pieces()) & (1 << to_ix) != 0));
         }
-        return Err("Not a legal move".to_string());
+        Err("Not a legal move".to_string())
     }
 
     pub fn new_move(_from: u8, _to: u8, is_capture: bool) -> Move {
-        return Move {
+        Move {
             from: (_from & BASIS)
                 | (if is_capture { TAKES & FROM_MASK } else { 0 }),
             to: (_to & BASIS)
                 | (if is_capture { TAKES << 2 } else { 0 }),
-        };
+        }
     }
 
     pub fn new_double_push(_from: u8, _to: u8) -> Move {
-        let mv = Move {
+        
+        Move {
             from: (_from & BASIS) | (DOUBLE_PAWN & FROM_MASK),
             to: (_to & BASIS) | ((DOUBLE_PAWN & TO_MASK) << 2),
-        };
-        return mv;
+        }
     }
 
     pub fn new_promotion(_from: u8, _to: u8, is_capture: bool, promote_to: u8) -> Move {
@@ -110,18 +110,18 @@ impl Move {
                 _ => typ = TAKE_PROM_Q
             }
         }
-        return Move {
+        Move {
             from: (_from & BASIS) | (typ & FROM_MASK),
             to: (_to & BASIS) | (typ << 2),
-        };
+        }
     }
 
     pub fn new_ep(_from: u8, _to: u8) -> Move {
-        let m = Move {
+        
+        Move {
             from: (_from & BASIS) | (EN_PASSANT & FROM_MASK),
             to: (_to & BASIS) | (EN_PASSANT << 2),
-        };
-        return m;
+        }
     }
 
     pub fn new_castle(_from: u8, _to: u8) -> Move {
@@ -130,49 +130,48 @@ impl Move {
         } else {
             LONG_CASTLE
         };
-        return Move {
+        Move {
             from: (_from & BASIS) | (typ & FROM_MASK),
             to: (_to & BASIS) | ((typ & TO_MASK) << 2),
-        };
+        }
     }
 
     pub fn last_move_was_double_push(m: Move) -> bool {
-        return (((m.to & !MOVE_MASK) >> 2) | (m.from & !MOVE_MASK)) == DOUBLE_PAWN;
+        (((m.to & !MOVE_MASK) >> 2) | (m.from & !MOVE_MASK)) == DOUBLE_PAWN
     }
 
     pub fn is_capture(&self) -> bool {
         let m_type =  self.get_mv_type();
-        return m_type == TAKES ||
+        m_type == TAKES ||
             m_type == EN_PASSANT ||
             m_type == TAKE_PROM_B ||
             m_type == TAKE_PROM_Q ||
             m_type == TAKE_PROM_N ||
-            m_type == TAKE_PROM_R;
+            m_type == TAKE_PROM_R
     }
 
     pub fn is_promotion(&self) -> bool {
         let m_type = self.get_mv_type();
-        return
-            m_type == PROM_B ||
+        m_type == PROM_B ||
             m_type == PROM_Q ||
             m_type == PROM_N ||
             m_type == PROM_R ||
             m_type == TAKE_PROM_B ||
             m_type == TAKE_PROM_Q ||
             m_type == TAKE_PROM_N ||
-            m_type == TAKE_PROM_R;
+            m_type == TAKE_PROM_R
     }
 
     pub fn get_from_sq(&self) -> u8 {
-        return self.from & MOVE_MASK;
+        self.from & MOVE_MASK
     }
 
     pub fn get_to_sq(&self) -> u8 {
-        return self.to & MOVE_MASK;
+        self.to & MOVE_MASK
     }
 
     pub fn get_mv_type(&self) -> u8 {
-        return ((self.to & !MOVE_MASK) >> 2) | (self.from & !MOVE_MASK);
+        ((self.to & !MOVE_MASK) >> 2) | (self.from & !MOVE_MASK)
     }
 
     pub fn get_promotion_value(&self) -> i16 {
@@ -181,18 +180,18 @@ impl Move {
         }
         let mv_type = self.get_mv_type();
         if mv_type == PROM_Q || mv_type == TAKE_PROM_Q {
-            return PIECE_VALUES[Q_VAL_INDEX];
+            PIECE_VALUES[Q_VAL_INDEX]
         }
         else if mv_type == PROM_N || mv_type == TAKE_PROM_N {
-            return PIECE_VALUES[N_VAL_INDEX];
+            PIECE_VALUES[N_VAL_INDEX]
         }
         else if mv_type == PROM_R || mv_type == TAKE_PROM_R {
-            return PIECE_VALUES[R_VAL_INDEX];
+            PIECE_VALUES[R_VAL_INDEX]
         }
         else if mv_type == PROM_B || mv_type == TAKE_PROM_B {
-            return PIECE_VALUES[B_VAL_INDEX];
+            PIECE_VALUES[B_VAL_INDEX]
         }
-        else { return 0 }
+        else { 0 }
     }
 
     pub fn guess_score(&self, watched_by_p: u64, b: &Board) -> i16 {
@@ -217,7 +216,7 @@ impl Move {
         if watched_by_p & (1u64 << self.get_to_sq()) != 0 {
             guess -= mv_piece_value;
         }
-        return guess;
+        guess
     }
 }
 

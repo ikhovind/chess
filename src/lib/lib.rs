@@ -23,7 +23,7 @@ fn print_u64_bitboard(bitboard: u64) {
             c += 1;
             if c == 8 {
                 print!("{}", str.chars().rev().collect::<String>());
-                print!("\n");
+                println!();
                 str = String::from("");
                 c = 0;
             }

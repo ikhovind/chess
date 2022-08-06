@@ -3,10 +3,11 @@ use crate::consts::board_consts::{B_INDEX, B_VAL_INDEX, K_INDEX, N_INDEX, N_VAL_
 use crate::opponent::eval_consts::eval_sq;
 use crate::opponent::game_stage::GameStage;
 
+#[inline(always)]
 pub fn eval_pos(b: &Board, stage: GameStage) -> i16 {
     let ix = if b.white_turn { 1 } else { 0 };
     // todo perspektiv her ikke inne i funksjonene
-    return match stage {
+    match stage {
         GameStage::EARLY => {
              count_pieces(&b.pieces, ix) + eval_piece_positions(&b.pieces, b.white_turn, stage)
         }
@@ -19,6 +20,7 @@ pub fn eval_pos(b: &Board, stage: GameStage) -> i16 {
     }
 }
 
+#[inline(always)]
 fn eval_piece_positions(pieces: &[u64; 12], white_turn: bool, stage: GameStage) -> i16 {
     let mut eval = 0;
     for piece in 0..12 {
@@ -34,11 +36,12 @@ fn eval_piece_positions(pieces: &[u64; 12], white_turn: bool, stage: GameStage) 
         }
     }
     let perspective = if white_turn { 1  } else { -1 };
-    return eval * perspective;
+    eval * perspective
 }
 
+#[inline(always)]
 fn count_pieces(pieces: &[u64; 12], ix: usize) -> i16 {
-    return (pieces[P_INDEX + ix].count_ones() as i16 * PIECE_VALUES[P_VAL_INDEX]
+    (pieces[P_INDEX + ix].count_ones() as i16 * PIECE_VALUES[P_VAL_INDEX]
         - pieces[P_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[P_VAL_INDEX]  +
         pieces[Q_INDEX + ix].count_ones() as i16 * PIECE_VALUES[Q_VAL_INDEX]
         - pieces[Q_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[Q_VAL_INDEX]  +
@@ -47,15 +50,7 @@ fn count_pieces(pieces: &[u64; 12], ix: usize) -> i16 {
         pieces[B_INDEX + ix].count_ones() as i16 * PIECE_VALUES[B_VAL_INDEX]
         - pieces[B_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[B_VAL_INDEX]  +
         pieces[R_INDEX + ix].count_ones() as i16 * PIECE_VALUES[R_VAL_INDEX]
-        - pieces[R_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[R_VAL_INDEX]) as i16;
-}
-
-fn count_opp_pieces(pieces: &[u64; 12], ix: usize) -> i16 {
-    return (pieces[P_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[P_VAL_INDEX]
-        + pieces[Q_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[Q_VAL_INDEX]
-        + pieces[N_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[N_VAL_INDEX]
-        + pieces[B_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[B_VAL_INDEX]
-        + pieces[R_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[R_VAL_INDEX]) as i16;
+        - pieces[R_INDEX + 1 - ix].count_ones() as i16 * PIECE_VALUES[R_VAL_INDEX]) as i16
 }
 
 pub fn weight_king_dist(pieces: &[u64; 12], ix: usize) -> i16 {
@@ -66,5 +61,5 @@ pub fn weight_king_dist(pieces: &[u64; 12], ix: usize) -> i16 {
 
     let opp_row = opp_king_sq / 8;
     let opp_column = opp_king_sq % 8;
-    return i16::abs(opp_row - our_row) + i16::abs(opp_column - our_column);
+    i16::abs(opp_row - our_row) + i16::abs(opp_column - our_column)
 }

@@ -74,12 +74,9 @@ async fn main() {
 
 
     warp::serve(chat)
-        /*
         .tls()
         .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
         .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
-
-         */
         .run(([0, 0, 0, 0], 3389)).await;
 }
 
@@ -137,10 +134,10 @@ async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Game
         Ok(s) => {
             if s.len() > 5 {
                 log::info!("received ping");
-                return;
+                
             }
             else {
-                match Move::parse_move(&s, &game.board) {
+                match Move::parse_move(s, &game.board) {
                     Ok(m) => {
                         log::info!("Received move: {}", m);
                         game.board = game.board.make_move(&m);
@@ -173,7 +170,7 @@ async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Game
         }
         Err(_) => {
             log::warn!("Did not receive proper");
-            return;
+            
         }
     }
 }

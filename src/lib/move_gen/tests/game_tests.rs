@@ -1,8 +1,9 @@
 #[cfg(test)]
 use crate::{Board};
 use crate::consts::board_consts::{FILE_MASKS, RANK_MASKS};
-use crate::mv::Move;
+use crate::Move;
 use crate::move_gen::pieces::common_moves;
+
 
 #[test]
 fn sliding_moves() {

@@ -1,24 +1,28 @@
 #[cfg(test)]
 use crate::{Board};
 use crate::consts::board_consts::K_INDEX;
+use crate::Move;
+
+
 #[cfg(test)]
 use crate::move_gen::pieces;
 use crate::move_gen::pieces::king;
-use crate::mv::Move;
 use crate::move_gen::pieces::king::possible_k;
+
+
 // Note this useful idiom: importing names from outer (for mod tests) scope.
 
 #[test]
 fn detects_actual_double_check() {
     let b = Board::from_fen(String::from("2p5/3K4/8/4n3/8/8/8/k7"));
-    assert_eq!(pieces::king::is_double_check(pieces::king::get_attackers(&b, true)), true);
+    assert_eq!(king::is_double_check(pieces::king::get_attackers(&b, true)), true);
 }
 
 
 #[test]
 fn does_not_detect_single_as_double_check() {
     let b = Board::from_fen(String::from("8/3K4/8/4n3/8/8/8/8"));
-    assert_eq!(pieces::king::is_double_check(pieces::king::get_attackers(&b, true)), false);
+    assert_eq!(king::is_double_check(pieces::king::get_attackers(&b, true)), false);
 }
 
 #[test]
@@ -32,7 +36,7 @@ fn simple_king_check() {
 #[test]
 fn does_not_detect_none_as_double_check() {
     let b = Board::from_fen(String::from("8/3K4/8/8/8/8/8/8"));
-    assert_eq!(pieces::king::is_double_check(pieces::king::get_attackers(&b, true)), false);
+    assert_eq!(king::is_double_check(king::get_attackers(&b, true)), false);
 }
 
 #[test]

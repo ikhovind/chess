@@ -19,7 +19,7 @@ pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
     let mut moves = g.board.get_all_moves();
     let mut handles = vec![];
     if g.stage == EARLY {
-        match search_for_move(String::from(g.clone().history), &g.board) {
+        match search_for_book(g.clone().history, &g.board) {
             None => {
                 log::info!("found no matching move");
                 g.stage = MIDDLE;
@@ -49,14 +49,14 @@ pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
                 for k in start..end {
                     let mv = conn.get(k).unwrap();
                     log::info!("Evaluating: {}", mv);
-                    let curr = -search_moves(local_game.board.make_move(&mv), depth, N_INF, P_INF, local_game.stage);
+                    let curr = -search_moves(&local_game.board.make_move(mv), depth, N_INF, P_INF, local_game.stage);
                     if curr > best_score {
                         log::info!("new best move found");
                         best_score = curr;
                         best_yet = *mv;
                     }
                 }
-                return (best_score, best_yet);
+                (best_score, best_yet)
             });
             handles.push(t);
         }
@@ -72,15 +72,15 @@ pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
         log::info!("Returning best move with score: {}", best_score);
         return Some(best_yet);
     }
-    return None;
+    None
 }
 
-fn search_for_move(opening: String, b: &Board) -> Option<Move>{
+fn search_for_book(opening: String, b: &Board) -> Option<Move>{
     log::info!("searching for opening with move: {}", opening);
-    let file = File::open("resources/book.pgn").unwrap();
+    let file = File::open("/home/ing_hovind/chess/resources/book.pgn").unwrap();
     let reader = BufReader::new(file);
     let mut possible: Vec<String> = vec![];
-    if opening.len() == 0 {
+    if opening.is_empty() {
         for line in reader.lines() {
             possible.push(line.unwrap());
         }
@@ -92,7 +92,7 @@ fn search_for_move(opening: String, b: &Board) -> Option<Move>{
             }
         }
     }
-    return if possible.is_empty() {
+    if possible.is_empty() {
         None
     } else {
         let mut rng = rand::thread_rng();
