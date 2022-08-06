@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::env::var;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -14,6 +15,8 @@ use shellfishlib::consts::position_consts::BASE_POS;
 use shellfishlib::mv::Move;
 use shellfishlib::opponent::engine::eval;
 use shellfishlib::opponent::game::Game;
+use shellfishlib::opponent::game_stage::GameStage;
+use shellfishlib::opponent::game_stage::GameStage::EARLY;
 
 /// Our global unique user id counter.
 static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
@@ -74,11 +77,9 @@ async fn main() {
 
 
     warp::serve(chat)
-        /*
         .tls()
         .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
         .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
-         */
         .run(([0, 0, 0, 0], 3389)).await;
 }
 
@@ -143,12 +144,16 @@ async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Game
                     Ok(m) => {
                         log::info!("Received move: {}", m);
                         game.board = game.board.make_move(&m);
-                        game.history.push_str(&m.to_string());
+                        if game.stage == EARLY {
+                            game.history.push_str(&m.to_string());
+                        }
                         let return_msg = match eval(game, 4) {
                             Some(ai_m) => {
                                 log::info!("Making move: {}", ai_m);
                                 game.board = game.board.make_move(&ai_m);
-                                game.history.push_str(&ai_m.to_string());
+                                if game.stage == EARLY {
+                                    game.history.push_str(&ai_m.to_string());
+                                }
                                 game.set_stage();
                                 ai_m.to_string()
                             }

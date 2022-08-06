@@ -16,7 +16,7 @@ with open("out.pgn") as w, open("oneline.pgn", "w") as nw:
     output, error = process.communicate()
 
 
-with open("oneline.pgn", "r") as infile, open("book.pgn", 'w') as outfile:
+with open("oneline.pgn", "r") as infile, open("../../../resources/book.pgn", 'w') as outfile:
     for line in infile:
         if line.strip():
             outfile.write(line)
