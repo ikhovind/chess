@@ -35,6 +35,7 @@ pub static BASIS: u8 = 0b00111111;
 
 impl Move {
     pub fn parse_move(notation: &str, b: &Board) -> Result<Move, String>{
+        log::info!("parsing notation: {}", notation);
         if notation.len() == 4 {
 
             let from_column = notation.as_bytes()[0] - 97;
@@ -63,7 +64,7 @@ impl Move {
                 return Ok(Move::new_ep(from_ix, to_ix));
             }
             if  (b.pieces[K_INDEX] | b.pieces[K_INDEX + 1]) & (1 << from_ix) & (WHITE_KING | BLACK_KING) != 0
-                && (1 << to_ix) & (WHITE_LONG_CASTLE_ROOK | WHITE_SHORT_CASTLE_KING | BLACK_LONG_CASTLE_KING | BLACK_SHORT_CASTLE_KING) != 0 {
+                && (1 << to_ix) & (WHITE_LONG_CASTLE_KING | WHITE_SHORT_CASTLE_KING | BLACK_LONG_CASTLE_KING | BLACK_SHORT_CASTLE_KING) != 0 {
                 log::info!("parsed new castle");
                 return Ok(Move::new_castle(from_ix, to_ix));
             }
