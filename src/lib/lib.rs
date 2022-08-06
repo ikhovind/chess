@@ -5,10 +5,10 @@ use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use warp::Filter;
 
-use crate::game::Board;
+use crate::board::Board;
 use crate::mv::Move;
 
-pub mod game;
+pub mod board;
 pub mod mv;
 pub mod consts;
 pub mod move_gen;

@@ -13,7 +13,7 @@ const BISHOP_VALUE: u32 = 300;
 const ROOK_VALUE: u32 = 500;
 
 
-pub fn search_moves(mut b: Board, depth: u8, mut alpha: i16, beta: i16, stage: &GameStage) -> i16 {
+pub fn search_moves(mut b: Board, depth: u8, mut alpha: i16, beta: i16, stage: GameStage) -> i16 {
     if depth == 0 {
         return quiescence_search(b, alpha, beta, stage);
     }
@@ -41,7 +41,7 @@ pub fn search_moves(mut b: Board, depth: u8, mut alpha: i16, beta: i16, stage: &
 }
 
 
-fn quiescence_search(b: Board, mut alpha: i16, beta: i16, stage: &GameStage) -> i16 {
+fn quiescence_search(b: Board, mut alpha: i16, beta: i16, stage: GameStage) -> i16 {
     let mut eval = eval_pos(&b, &stage);
     if eval >= beta {
         return beta;

@@ -1,27 +1,41 @@
 use std::cmp::min;
-use std::sync::atomic::AtomicI16;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::sync::{Arc, mpsc, RwLock};
-use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
+use rand::Rng;
 use log::log;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tokio::task::JoinHandle;
-use warp::path::end;
 use crate::{Board};
 use crate::consts::board_consts::{N_INF, P_INF};
 use crate::mv::Move;
-use crate::opponent::game_stage::GameStage::EARLY;
+use crate::opponent::game::Game;
+use crate::opponent::game_stage::GameStage;
+use crate::opponent::game_stage::GameStage::{EARLY, MIDDLE};
 use crate::opponent::move_ordering::order_moves;
 use crate::opponent::search::search_moves;
-use crate::opponent::static_eval::{eval_pos, weight_king_pos};
 
 
-pub fn eval(mut b: Board, depth: u8) -> Option<Move> {
+pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
     log::info!("thinking about move");
     const NUM_THREADS: usize = 4;
-    let mut moves = b.get_all_moves();
+    let mut moves = g.board.get_all_moves();
     let mut handles = vec![];
-    order_moves(&b, &mut moves);
+    if g.stage == EARLY {
+        match search_for_move(String::from(g.clone().history), &g.board) {
+            None => {
+                log::info!("found no matching move");
+                g.stage = MIDDLE;
+            }
+            Some(m) => {
+                log::info!("Found move from book: {}", m);
+                return Some(m);
+            }
+        }
+    }
+
+    g.set_stage();
+    log::info!("Game stage is: {:?}", g.stage);
+    order_moves(&g.board, &mut moves);
     let mut moves = Arc::new(moves);
     let len = moves.len();
     if len > 0 {
@@ -30,13 +44,14 @@ pub fn eval(mut b: Board, depth: u8) -> Option<Move> {
             let start = j * chunk_size;
             let end = min(start + chunk_size, len);
             let conn = moves.clone();
+            let local_game = g.clone();
             let t =  thread::spawn(move || {
                 let mut best_score = i16::MIN;
                 let mut best_yet = Move::new_move(0,0,false);
                 for k in start..end {
                     let mv = conn.get(k).unwrap();
                     log::info!("Evaluating: {}", mv);
-                    let curr = -search_moves(b.make_move(&mv), depth, N_INF, P_INF, &EARLY);
+                    let curr = -search_moves(local_game.board.make_move(&mv), depth, N_INF, P_INF, local_game.stage);
                     if curr > best_score {
                         log::info!("new best move found");
                         best_score = curr;
@@ -60,4 +75,30 @@ pub fn eval(mut b: Board, depth: u8) -> Option<Move> {
         return Some(best_yet);
     }
     return None;
+}
+
+fn search_for_move(opening: String, b: &Board) -> Option<Move>{
+    log::info!("searching for opening with move: {}", opening);
+    let file = File::open("../opening_book/book.pgn").unwrap();
+    let reader = BufReader::new(file);
+    let mut possible: Vec<String> = vec![];
+    if opening.len() == 0 {
+        for line in reader.lines() {
+            possible.push(line.unwrap());
+        }
+    }
+    else {
+        for line in reader.lines() {
+            if line.as_ref().unwrap().starts_with(&opening) {
+                possible.push(line.unwrap());
+            }
+        }
+    }
+    return if possible.is_empty() {
+        None
+    } else {
+        let mut rng = rand::thread_rng();
+        let line = &possible[rng.gen_range(0..possible.len())][opening.len()..opening.len() + 4];
+        Some(Move::parse_move(line, b).unwrap())
+    }
 }

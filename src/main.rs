@@ -11,9 +11,9 @@ use warp::sse::keep_alive;
 use warp::ws::{Message, WebSocket};
 
 use shellfishlib::consts::position_consts::BASE_POS;
-use shellfishlib::game::Board;
 use shellfishlib::mv::Move;
 use shellfishlib::opponent::engine::eval;
+use shellfishlib::opponent::game::Game;
 
 /// Our global unique user id counter.
 static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
@@ -23,7 +23,7 @@ static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
 /// - Key is their id
 /// - Value is a sender of `warp::ws::Message`
 type Users = Arc<RwLock<HashMap<usize, mpsc::UnboundedSender<Message>>>>;
-type Games = HashMap<usize, Board>;
+type Games = HashMap<usize, Game>;
 
 #[tokio::main]
 async fn main() {
@@ -74,9 +74,11 @@ async fn main() {
 
 
     warp::serve(chat)
+        /*
         .tls()
         .cert_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/cert.pem")
         .key_path("home/ing_hovind/certs/sjakkmotor.ikhovind.no/privkey.pem")
+         */
         .run(([0, 0, 0, 0], 3389)).await;
 }
 
@@ -108,7 +110,7 @@ async fn user_connected(ws: WebSocket, users: Users, mut game: Games) {
 
     // Save the sender in our list of connected users.
     users.write().await.insert(my_id, tx);
-    game.insert(my_id, Board::from_fen(String::from(BASE_POS)));
+    game.insert(my_id, Game::from_fen(BASE_POS));
 
     // Return a `Future` that is basically a state machine managing
     // this specific user's connection.
@@ -128,7 +130,7 @@ async fn user_connected(ws: WebSocket, users: Users, mut game: Games) {
     user_disconnected(my_id, &users, &mut game).await;
 }
 
-async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Board) {
+async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Game) {
     // Skip any non-Text messages...
     match msg.to_str() {
         Ok(s) => {
@@ -137,14 +139,17 @@ async fn user_message(my_id: usize, msg: Message, users: &Users, game: &mut Boar
                 return;
             }
             else {
-                match Move::parse_move(&s, &game) {
+                match Move::parse_move(&s, &game.board) {
                     Ok(m) => {
                         log::info!("Received move: {}", m);
-                        *game = game.make_move(&m);
-                        let return_msg = match eval(*game, 4) {
+                        game.board = game.board.make_move(&m);
+                        game.history.push_str(&m.to_string());
+                        let return_msg = match eval(game, 4) {
                             Some(ai_m) => {
                                 log::info!("Making move: {}", ai_m);
-                                *game = game.make_move(&ai_m);
+                                game.board = game.board.make_move(&ai_m);
+                                game.history.push_str(&ai_m.to_string());
+                                game.set_stage();
                                 ai_m.to_string()
                             }
                             None => {
