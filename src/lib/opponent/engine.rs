@@ -77,7 +77,7 @@ pub fn eval(g: &mut Game, depth: u8) -> Option<Move> {
 
 fn search_for_book(opening: String, b: &Board) -> Option<Move>{
     log::info!("searching for opening with move: {}", opening);
-    let file = File::open("/home/ing_hovind/chess/resources/book.pgn").unwrap();
+    let file = File::open("/home/ing_hovind/nostars.pgn").unwrap();
     let reader = BufReader::new(file);
     let mut possible: Vec<String> = vec![];
     if opening.is_empty() {
@@ -86,9 +86,15 @@ fn search_for_book(opening: String, b: &Board) -> Option<Move>{
         }
     }
     else {
+        let mut started = false;
         for line in reader.lines() {
             if line.as_ref().unwrap().starts_with(&opening) {
                 possible.push(line.unwrap());
+                started = true;
+            }
+                // book is sorted, all subsequent openings will have different beginning
+            else if started {
+                break;
             }
         }
     }
