@@ -2,7 +2,7 @@
 
 This is a multi-threaded bitboard chess engine using a minmax algorithm with alpha beta pruning written entirely in Rust. 
 
-The engine and a simple JavaScript front-end are deployed on Google Cloud, hosted on https://ikhovind.no
+The engine and a simple JavaScript front-end are deployed on AWS, hosted on https://www.ikhovind.no
 
 ## Resources
 
