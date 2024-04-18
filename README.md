@@ -20,7 +20,7 @@ Showing the user which moves are available is done through [Chess.js](https://gi
 The back-end relies on a number of non-chess related dependencies, all of which can be seen in the Cargo.toml
 
 ## Improvements
-There engine has many areas of improvements, here broken down into three main categories:
+There engine has many areas of improvements, here broken down into four main categories:
 
 ### Features
 
@@ -45,3 +45,10 @@ The minmax algorithm itself could also be optimized further, primarily through t
 ### Front-end
 
 The front-end has not been a priority of this project, but the primary weakness there is that the user is unable to under-promote. The loading graphics are also not centered, and are unreliable if the back-end crashes.
+
+### REST and state
+The engine was originally designed to be stateful, but was later transitioned to using REST with FEN-strings, no longer using the built in state. 
+Some features have not yet been transitioned into being stateless, which means that they do not work, for example en passant.
+
+All features previously relying on state should be overhauled, basing all calculations on the information available in the incoming FEN-string. 
+

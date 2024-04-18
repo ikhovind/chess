@@ -32,7 +32,9 @@ impl Board {
         let mut row = 7;
         let mut res = 0;
         let mut white;
-        for i in fen.chars() {
+        let fen_parts = fen.split(" ").collect::<Vec<_>>();
+        let fen_castle = fen_parts[2];
+        for i in fen_parts[0].chars() {
             if i.is_alphabetic() {
                 res = 2_u64.pow((column + row * 8) as u32);
                 //print_u64_bitboard(res);
@@ -82,8 +84,8 @@ impl Board {
         }
         let mut b = Board {
             pieces: [_pawns[0], _pawns[1], _knights[0], _knights[1], _bishops[0], _bishops[1], _rooks[0], _rooks[1], _queens[0], _queens[1], _kings[0], _kings[1]],
-            castle_rights: [true, true, true, true],
-            white_turn: false,
+            castle_rights: [fen_castle.contains("k"), fen_castle.contains("q"), fen_castle.contains("K"), fen_castle.contains("Q")],
+            white_turn: fen_parts[1] == "b",
             last_move: Move::new_move(0, 0, false),
             push_mask: u64::MAX,
             pinned_pieces: 0,
