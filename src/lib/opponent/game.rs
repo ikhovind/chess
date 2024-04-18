@@ -13,15 +13,20 @@ pub struct Game {
 impl Game {
     pub fn from_fen(fen: &str) -> Game {
         let b = Board::from_fen(String::from(fen));
-        Game {
+        let mut res = Game {
             board: b,
             history: String::new(),
             stage: EARLY,
-        }
+        };
+        res.set_stage();
+        return res
     }
     pub fn set_stage(&mut self) {
         match self.stage {
             EARLY => {
+                if self.count_pieces() < 25 {
+                    self.stage = MIDDLE;
+                }
             }
             MIDDLE => {
                 if self.count_pieces() < 10 {
